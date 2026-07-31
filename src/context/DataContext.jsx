@@ -509,6 +509,11 @@ export const DataProvider = ({ children }) => {
                   console.warn('Restored CLIENTS from localStorage');
               }
           }
+          if (cData.length === 0) {
+              cData = initialClients;
+              setDoc(clientsRef, { clients: cData, chatMergedV1: true }).catch(console.error);
+              console.warn('EMERGENCY: Restored CLIENTS from JSON backup');
+          }
           setClients(cData);
         } else {
           const lsClients = localStorage.getItem('crm_clients');
@@ -529,6 +534,11 @@ export const DataProvider = ({ children }) => {
                   setDoc(productsRef, { products: pData }).catch(console.error);
                   console.warn('Restored PRODUCTS from localStorage');
               }
+          }
+          if (pData.length === 0) {
+              pData = initialProducts;
+              setDoc(productsRef, { products: pData }).catch(console.error);
+              console.warn('EMERGENCY: Restored PRODUCTS from JSON backup');
           }
           setProducts(pData);
         } else {
