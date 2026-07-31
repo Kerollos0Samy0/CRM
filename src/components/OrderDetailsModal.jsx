@@ -278,17 +278,17 @@ const OrderDetailsModal = ({ order, isDelivered, onClose }) => {
             </div>
           </div>
 
-          {/* Details Main Area (Now flex: 1) */}
-          <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+          {/* Details Main Area */}
+          <div style={{ flex: 1, padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '24px', backgroundColor: '#f8fafc' }}>
             
             {/* Missing Items Banner */}
             <div style={{ 
-              marginBottom: '32px', 
-              background: order.hasMissingItems ? 'rgba(248, 113, 113, 0.1)' : 'var(--bg-secondary)', 
-              padding: '20px', 
+              background: order.hasMissingItems ? '#fef2f2' : 'white', 
+              padding: '16px 20px', 
               borderRadius: '12px', 
-              border: `2px dashed ${order.hasMissingItems ? 'var(--color-marina)' : 'var(--border-color)'}`,
-              transition: 'all 0.3s ease'
+              border: `2px dashed ${order.hasMissingItems ? '#ef4444' : 'var(--border-color)'}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <input 
@@ -296,100 +296,145 @@ const OrderDetailsModal = ({ order, isDelivered, onClose }) => {
                   checked={order.hasMissingItems || false} 
                   onChange={handleToggleMissing} 
                   id="missingItems" 
-                  style={{ width: '24px', height: '24px', cursor: 'pointer' }} 
+                  style={{ width: '22px', height: '22px', cursor: 'pointer', accentColor: '#ef4444' }} 
                 />
-                <label htmlFor="missingItems" style={{ fontSize: '1.1rem', fontWeight: 'bold', color: order.hasMissingItems ? 'var(--color-marina)' : 'var(--text-primary)', cursor: 'pointer' }}>
+                <label htmlFor="missingItems" style={{ fontSize: '1.1rem', fontWeight: 'bold', color: order.hasMissingItems ? '#ef4444' : 'var(--text-primary)', cursor: 'pointer' }}>
                   يوجد نواقص في الأوردر ⚠️
                 </label>
               </div>
               {order.hasMissingItems && (
-                <div style={{ marginTop: '16px' }}>
+                <div style={{ flex: 1, marginRight: '24px' }}>
                   <input 
                     type="text" 
                     value={order.missingNotes || ''} 
                     onChange={handleMissingNotesChange} 
                     className="input-field" 
                     placeholder="ما هي النواقص؟ (مثال: كارت حضور في التصميم)" 
-                    style={{ borderColor: 'var(--color-marina)', backgroundColor: 'white' }} 
+                    style={{ borderColor: '#fca5a5', backgroundColor: 'white', width: '100%', padding: '10px 16px' }} 
                   />
                 </div>
               )}
             </div>
 
-            <h3 className="heading-md" style={{ marginBottom: '24px', fontSize: '1.3rem' }}>تجهيز الأوردر</h3>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
-              <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                <span className="text-small" style={{ display: 'block', marginBottom: '8px' }}>المنتجات المطلوبة</span>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {order.items?.map((item, index) => (
-                    <div key={index} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'white', borderRadius: '8px', border: '1px solid var(--border-color)', flexDirection: 'column' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ fontWeight: 600, fontSize: '1.1rem' }}>{item.workshop}</span>
-                        <select 
-                          value={item.status || 'new'}
-                          onChange={(e) => handleItemStatusChange(index, e.target.value)}
-                          className="input-field"
-                          style={{ padding: '4px 8px', fontSize: '0.85rem', width: 'auto', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
-                        >
-                          <option value="new">🆕 جديد</option>
-                          <option value="design">🎨 في التصميم</option>
-                          <option value="printing">🖨️ في المطبعة</option>
-                          <option value="ready">✅ جاهز (كنيسة)</option>
-                        </select>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-                        <span>{item.unitPrice || 0} ج.م × {item.quantity} قطع</span>
-                        <span style={{ color: 'var(--color-marina)', fontWeight: 'bold' }}>{(item.unitPrice || 0) * (item.quantity || 0)} ج.م</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            {/* Products Section (Full Width, Prominent) */}
+            <div style={{ background: 'white', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                 <h3 style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                   <Package size={22} color="var(--color-marina)" />
+                   المنتجات المطلوبة
+                 </h3>
+                 <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: 'var(--color-marina)', padding: '6px 16px', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                   {order.items?.length || 0} منتجات
+                 </span>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                  <span className="text-small" style={{ display: 'block', marginBottom: '12px' }}>الحسابيات</span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'white', borderRadius: '6px' }}>
-                      <span>الإجمالي</span>
-                      <span style={{ fontWeight: 'bold' }}>{order.totalAmount || 0} ج.م</span>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                {order.items?.map((item, index) => (
+                  <div key={index} style={{ 
+                    background: '#f8fafc', 
+                    borderRadius: '12px', 
+                    border: '1px solid #e2e8f0', 
+                    padding: '16px',
+                    display: 'flex', flexDirection: 'column', gap: '12px',
+                    transition: 'transform 0.2s, box-shadow 0.2s'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.06)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <span style={{ fontWeight: 700, fontSize: '1.15rem', color: '#1e293b', flex: 1, paddingLeft: '12px' }}>{item.workshop}</span>
+                      <select 
+                        value={item.status || 'new'}
+                        onChange={(e) => handleItemStatusChange(index, e.target.value)}
+                        style={{ 
+                          padding: '6px 12px', fontSize: '0.9rem', borderRadius: '8px', 
+                          border: '1px solid #cbd5e1', background: 'white', fontWeight: 600,
+                          cursor: 'pointer', outline: 'none'
+                        }}
+                      >
+                        <option value="new">🆕 جديد</option>
+                        <option value="design">🎨 في التصميم</option>
+                        <option value="printing">🖨️ في المطبعة</option>
+                        <option value="ready">✅ جاهز (كنيسة)</option>
+                      </select>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'white', borderRadius: '6px' }}>
-                      <span>الخصم</span>
-                      <span style={{ fontWeight: 'bold' }}>{order.discount || 0} ج.م</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'white', borderRadius: '6px' }}>
-                      <span>تم دفع</span>
-                      <span style={{ fontWeight: 'bold' }}>{order.paidAmount || 0} ج.م</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', background: 'var(--bg-primary)', borderRadius: '8px', border: '2px solid var(--border-color)', marginTop: '8px' }}>
-                      <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>الباقي</span>
-                      <span style={{ fontWeight: 'bold', fontSize: '1.3rem', color: (order.remainingAmount || 0) > 0 ? 'var(--color-marina)' : 'var(--state-delivered)' }}>
-                        {order.remainingAmount || 0} ج.م
+                    
+                    <div style={{ height: '1px', background: '#e2e8f0', width: '100%' }}></div>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '0.95rem', fontWeight: 500 }}>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '2px 8px', borderRadius: '6px' }}>{item.quantity} قطع</span>
+                        <span>×</span>
+                        <span>{item.unitPrice || item.price || 0} ج.م</span>
+                      </div>
+                      <span style={{ color: 'var(--color-marina)', fontWeight: 800, fontSize: '1.1rem' }}>
+                        {(item.unitPrice || item.price || 0) * (item.quantity || 0)} ج.م
                       </span>
                     </div>
                   </div>
-                </div>
+                ))}
+              </div>
+            </div>
 
-                <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                  <span className="text-small" style={{ display: 'block', marginBottom: '12px' }}>معلومات التوصيل</span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'white', padding: '12px', borderRadius: '8px' }}>
-                      <Phone size={18} color="var(--text-secondary)" />
-                      <span dir="ltr" style={{ fontWeight: 600 }}>{order.mobile}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'white', padding: '12px', borderRadius: '8px' }}>
-                      <MapPin size={18} color="var(--text-secondary)" />
-                      <span style={{ fontWeight: 600 }}>{order.governorate} - {order.address}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'white', padding: '12px', borderRadius: '8px', color: 'var(--color-marina)' }}>
-                      <Calendar size={18} />
-                      <span style={{ fontWeight: 600 }}>الديد لاين: {order.deadline}</span>
-                    </div>
+            {/* Financials & Delivery Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+              
+              {/* Delivery Info */}
+              <div style={{ background: 'white', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <MapPin size={20} color="#64748b" />
+                  معلومات التوصيل
+                </h3>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', padding: '14px', borderRadius: '10px' }}>
+                  <div style={{ background: '#e0e7ff', padding: '8px', borderRadius: '8px' }}>
+                    <Phone size={18} color="#4f46e5" />
                   </div>
+                  <span dir="ltr" style={{ fontWeight: 700, color: '#1e293b', fontSize: '1.05rem' }}>{order.mobile}</span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', padding: '14px', borderRadius: '10px' }}>
+                  <div style={{ background: '#dcfce7', padding: '8px', borderRadius: '8px' }}>
+                    <MapPin size={18} color="#16a34a" />
+                  </div>
+                  <span style={{ fontWeight: 600, color: '#1e293b' }}>{order.governorate} {order.address ? `- ${order.address}` : ''}</span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', padding: '14px', borderRadius: '10px' }}>
+                  <div style={{ background: '#fee2e2', padding: '8px', borderRadius: '8px' }}>
+                    <Calendar size={18} color="#dc2626" />
+                  </div>
+                  <span style={{ fontWeight: 600, color: '#dc2626' }}>الديد لاين: {order.deadline || 'غير محدد'}</span>
                 </div>
               </div>
+
+              {/* Financials */}
+              <div style={{ background: 'white', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <Hash size={20} color="#64748b" />
+                  الحسابيات
+                </h3>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>الإجمالي</span>
+                  <span style={{ fontWeight: 800, color: '#1e293b' }}>{order.totalAmount || order.total || 0} ج.م</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>الخصم</span>
+                  <span style={{ fontWeight: 800, color: '#1e293b' }}>{order.discount || 0} ج.م</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>تم دفع</span>
+                  <span style={{ fontWeight: 800, color: '#16a34a' }}>{order.paidAmount || order.deposit || 0} ج.م</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', background: '#eff6ff', borderRadius: '10px', border: '2px solid #bfdbfe', marginTop: 'auto' }}>
+                  <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1e3a8a' }}>الباقي</span>
+                  <span style={{ fontWeight: 900, fontSize: '1.3rem', color: (order.remainingAmount || order.rest || 0) > 0 ? '#dc2626' : '#16a34a' }}>
+                    {order.remainingAmount !== undefined ? order.remainingAmount : (order.rest || 0)} ج.م
+                  </span>
+                </div>
+              </div>
+              
             </div>
           </div>
           </div>
