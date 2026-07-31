@@ -166,29 +166,39 @@ export const DataProvider = ({ children }) => {
 
   // ── helper: load everything from localStorage ─────────────────────────────
   function loadFromLocalStorage() {
-    const lsOrders   = localStorage.getItem('crm_orders');
-    const lsCols     = localStorage.getItem('crm_columns');
-    const lsArchived = localStorage.getItem('crm_archived_orders');
-    const lsTasks    = localStorage.getItem('crm_tasks');
-    const lsClients  = localStorage.getItem('crm_clients');
-    const lsProducts = localStorage.getItem('crm_products');
-    const lsTx       = localStorage.getItem('crm_transactions');
-    const raw = {
-      orders:         lsOrders   ? JSON.parse(lsOrders)   : {},
-      columns:        lsCols     ? JSON.parse(lsCols)      : { ...initialColumns },
-      archivedOrders: lsArchived ? JSON.parse(lsArchived)  : [],
-    };
-    const migrated = applyMigrations(raw);
-    setOrders(migrated.orders);
-    setColumns(migrated.columns);
-    setArchivedOrders(migrated.archivedOrders);
-    setTasks(lsTasks    ? JSON.parse(lsTasks)    : {});
-    setClients(lsClients  ? JSON.parse(lsClients)  : initialClients);
-    setProducts(lsProducts ? JSON.parse(lsProducts) : initialProducts);
-    setTransactions(lsTx ? JSON.parse(lsTx) : []);
-    initialised.current = true;
-    setLoading(false);
-    console.warn('⚠️ Using localStorage (Firestore unavailable)');
+    try {
+      const lsOrders   = localStorage.getItem('crm_orders');
+      const lsCols     = localStorage.getItem('crm_columns');
+      const lsArchived = localStorage.getItem('crm_archived_orders');
+      const lsTasks    = localStorage.getItem('crm_tasks');
+      const lsClients  = localStorage.getItem('crm_clients');
+      const lsProducts = localStorage.getItem('crm_products');
+      const lsTx       = localStorage.getItem('crm_transactions');
+      const raw = {
+        orders:         lsOrders   ? JSON.parse(lsOrders)   : {},
+        columns:        lsCols     ? JSON.parse(lsCols)      : { ...initialColumns },
+        archivedOrders: lsArchived ? JSON.parse(lsArchived)  : [],
+      };
+      const migrated = applyMigrations(raw);
+      setOrders(migrated.orders);
+      setColumns(migrated.columns);
+      setArchivedOrders(migrated.archivedOrders);
+      setTasks(lsTasks    ? JSON.parse(lsTasks)    : {});
+      setClients(lsClients  ? JSON.parse(lsClients)  : initialClients);
+      setProducts(lsProducts ? JSON.parse(lsProducts) : initialProducts);
+      setTransactions(lsTx ? JSON.parse(lsTx) : []);
+      console.warn('⚠️ Using localStorage (Firestore unavailable)');
+    } catch (e) {
+      console.error('Failed to load from localStorage:', e);
+      // Fallback to empty/initial state
+      setOrders({});
+      setColumns(initialColumns);
+      setArchivedOrders([]);
+      setTasks({});
+      setClients(initialClients);
+      setProducts(initialProducts);
+      setTransactions([]);
+    }
   }
 
   // ── LOAD FROM FIRESTORE (once on mount) ──────────────────────────────────
@@ -275,8 +285,6 @@ export const DataProvider = ({ children }) => {
           setTransactions(tx);
         }
 
-        initialised.current = true;
-        setLoading(false);
         console.log('✅ Loaded from Firestore');
 
         // ── REAL-TIME LISTENERS ──────────────────────────────────────────
@@ -295,6 +303,9 @@ export const DataProvider = ({ children }) => {
       } catch (err) {
         console.error('Firestore unavailable, using localStorage:', err.message);
         if (!initialised.current) loadFromLocalStorage();
+      } finally {
+        initialised.current = true;
+        setLoading(false);
       }
     }
 
