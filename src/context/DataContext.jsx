@@ -551,6 +551,7 @@ export const DataProvider = ({ children }) => {
   const initialised = useRef(false);
   // debounce timer refs
   const saveTimer = useRef(null);
+  const lastSavedState = useRef('');
 
   // ── FIRESTORE DOCUMENT REFS ───────────────────────────────────────────────
   const mainRef     = doc(db, 'crm', 'main');       // orders + columns + archived
