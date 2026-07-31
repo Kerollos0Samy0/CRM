@@ -1,0 +1,2420 @@
+{
+  "Hana_العبور": {
+    "name": "Hana",
+    "church": "العبور",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "جوزيف_عزبة النخل": {
+    "name": "جوزيف",
+    "church": "عزبة النخل",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم مجدي عبد الملك_طنطا": {
+    "name": "مريم مجدي عبد الملك",
+    "church": "طنطا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "Mr. Ramy_اول الهرم": {
+    "name": "Mr. Ramy",
+    "church": "اول الهرم",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "Tirvina_مصر القديمة": {
+    "name": "Tirvina",
+    "church": "مصر القديمة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "Youstina adel_عين شمس": {
+    "name": "Youstina adel",
+    "church": "عين شمس",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ابراهيم ميلاد_": {
+    "name": "ابراهيم ميلاد",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "اسحب نبيل_": {
+    "name": "اسحب نبيل",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "دميانة ابراهيم_امبابة": {
+    "name": "دميانة ابراهيم",
+    "church": "امبابة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ايمان صبحي_وراق": {
+    "name": "ايمان صبحي",
+    "church": "وراق",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بيشوي رمزي_": {
+    "name": "بيشوي رمزي",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "حنان فرج_١٥ مايو": {
+    "name": "حنان فرج",
+    "church": "١٥ مايو",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم لمعي_التجمع": {
+    "name": "مريم لمعي",
+    "church": "التجمع",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا سمير_مصر والسودان": {
+    "name": "مينا سمير",
+    "church": "مصر والسودان",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نرمين عاطف_": {
+    "name": "نرمين عاطف",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "هناء جرجس سوريال_حلوان": {
+    "name": "هناء جرجس سوريال",
+    "church": "حلوان",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "آن نبيل_شبرا": {
+    "name": "آن نبيل",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "القس تداؤس_": {
+    "name": "القس تداؤس",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ايريني عادل_مدينة نصر": {
+    "name": "ايريني عادل",
+    "church": "مدينة نصر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بيتر ملك_حدايق القبة": {
+    "name": "بيتر ملك",
+    "church": "حدايق القبة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ثروت عاطف_6 اكتوبر": {
+    "name": "ثروت عاطف",
+    "church": "6 اكتوبر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "رانيا عبده_": {
+    "name": "رانيا عبده",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سامح سعد_شبرا": {
+    "name": "سامح سعد",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "شيري امجد_حلوان": {
+    "name": "شيري امجد",
+    "church": "حلوان",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "صموئيل اشرف_حدايق القبة": {
+    "name": "صموئيل اشرف",
+    "church": "حدايق القبة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "كيرلس_": {
+    "name": "كيرلس",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ليليان_المعادي": {
+    "name": "ليليان",
+    "church": "المعادي",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم سعد_شبرا": {
+    "name": "مريم سعد",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "منى رمزي_": {
+    "name": "منى رمزي",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نادر_حدايق الاهرام": {
+    "name": "نادر",
+    "church": "حدايق الاهرام",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نرمين ابراهيم_": {
+    "name": "نرمين ابراهيم",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ابونا_": {
+    "name": "ابونا",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "الفريد كمال_": {
+    "name": "الفريد كمال",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ايريني صابر_": {
+    "name": "ايريني صابر",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بيتر ملك_حدايق": {
+    "name": "بيتر ملك",
+    "church": "حدايق",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "رامي رفعت_": {
+    "name": "رامي رفعت",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ريهام كرم_مسطرد": {
+    "name": "ريهام كرم",
+    "church": "مسطرد",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سامي رضا_": {
+    "name": "سامي رضا",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سيفين_كنيسة خاتم المرسلين": {
+    "name": "سيفين",
+    "church": "كنيسة خاتم المرسلين",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "عادل شفيق_": {
+    "name": "عادل شفيق",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ليديا سيف_العبور": {
+    "name": "ليديا سيف",
+    "church": "العبور",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماري صابر موسى_": {
+    "name": "ماري صابر موسى",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مارينا رمزي_": {
+    "name": "مارينا رمزي",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماهر سامي_قليوب": {
+    "name": "ماهر سامي",
+    "church": "قليوب",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مايكل فايز_شبرا": {
+    "name": "مايكل فايز",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مرثا_": {
+    "name": "مرثا",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مرمر_الزاوية": {
+    "name": "مرمر",
+    "church": "الزاوية",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم ملاك_غمرة السكاكيني": {
+    "name": "مريم ملاك",
+    "church": "غمرة السكاكيني",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مونيكا_": {
+    "name": "مونيكا",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميخائيل نبيل_شبرا": {
+    "name": "ميخائيل نبيل",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميشيل يوسف_": {
+    "name": "ميشيل يوسف",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا نبيل_الوراق": {
+    "name": "مينا نبيل",
+    "church": "الوراق",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا يسري_الضاهر": {
+    "name": "مينا يسري",
+    "church": "الضاهر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نبيل كمال_شبرا": {
+    "name": "نبيل كمال",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نيرمين سمير_": {
+    "name": "نيرمين سمير",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "يوستينا ميخائيل_": {
+    "name": "يوستينا ميخائيل",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ابرام عماد_": {
+    "name": "ابرام عماد",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "امل_مدينة نصر": {
+    "name": "امل",
+    "church": "مدينة نصر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بيمن القس سيداورس_شبرا": {
+    "name": "بيمن القس سيداورس",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "راعوث_": {
+    "name": "راعوث",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "فادي هاني_": {
+    "name": "فادي هاني",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "لارينا هشام_": {
+    "name": "لارينا هشام",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مارينا جمال_": {
+    "name": "مارينا جمال",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مارينا رؤوف_حلوان الجديدة": {
+    "name": "مارينا رؤوف",
+    "church": "حلوان الجديدة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا محسن عياد_": {
+    "name": "مينا محسن عياد",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "وائل مرزوق_مترو كوتسيكا": {
+    "name": "وائل مرزوق",
+    "church": "مترو كوتسيكا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميرنا عياد_شبرا": {
+    "name": "ميرنا عياد",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "دليفري فارس_": {
+    "name": "دليفري فارس",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "شيري عادل_الاميرية": {
+    "name": "شيري عادل",
+    "church": "الاميرية",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا فايز_مسطرد": {
+    "name": "مينا فايز",
+    "church": "مسطرد",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "Martha adeeb_الكوربة": {
+    "name": "Martha adeeb",
+    "church": "الكوربة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "اميرة كمال سعد_المهندسين": {
+    "name": "اميرة كمال سعد",
+    "church": "المهندسين",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "چون_شبرا": {
+    "name": "چون",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "حنان حلمي_الضاهر": {
+    "name": "حنان حلمي",
+    "church": "الضاهر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سلوى فوزي_عين شمس": {
+    "name": "سلوى فوزي",
+    "church": "عين شمس",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "عزت محفوظ_شبرا": {
+    "name": "عزت محفوظ",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "كلارا عزيز_شبرا": {
+    "name": "كلارا عزيز",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مارتينا اكرم_شبرا": {
+    "name": "مارتينا اكرم",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماري مكرم_العبور": {
+    "name": "ماري مكرم",
+    "church": "العبور",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميرا كامل_الغردقة": {
+    "name": "ميرا كامل",
+    "church": "الغردقة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميرنا رأفت_الهرم": {
+    "name": "ميرنا رأفت",
+    "church": "الهرم",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميرنا مسعود_شبرا": {
+    "name": "ميرنا مسعود",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا صبري_شبرا": {
+    "name": "مينا صبري",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا عاطف فايز_شبرا": {
+    "name": "مينا عاطف فايز",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ابرام محسن_": {
+    "name": "ابرام محسن",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مروة_المهندسين": {
+    "name": "مروة",
+    "church": "المهندسين",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "چورچ ثروت_شبرا": {
+    "name": "چورچ ثروت",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مارينا_شبرا": {
+    "name": "مارينا",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "اوليڤيا_الهرم": {
+    "name": "اوليڤيا",
+    "church": "الهرم",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "صامويل صادق_شبرا": {
+    "name": "صامويل صادق",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "فرج ملاك_شبرا": {
+    "name": "فرج ملاك",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماريز سامح_مصر الجديدة": {
+    "name": "ماريز سامح",
+    "church": "مصر الجديدة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بيتر تقاوي_الخصوص": {
+    "name": "بيتر تقاوي",
+    "church": "الخصوص",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماريان يوسف_": {
+    "name": "ماريان يوسف",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مرفت مرقص_شبرا": {
+    "name": "مرفت مرقص",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا شوقي_اوبر": {
+    "name": "مينا شوقي",
+    "church": "اوبر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "اديب بخيت_شبرا": {
+    "name": "اديب بخيت",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "FFBF9000"
+  },
+  "سمير يوسف معوض_": {
+    "name": "سمير يوسف معوض",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "كاراس امير_العباسية": {
+    "name": "كاراس امير",
+    "church": "العباسية",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مادلين جميل_": {
+    "name": "مادلين جميل",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماري مرقس_باب اللوق": {
+    "name": "ماري مرقس",
+    "church": "باب اللوق",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مايكل سعد_قليوب": {
+    "name": "مايكل سعد",
+    "church": "قليوب",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميرنا مسعود_كنيسة العذراء شبين": {
+    "name": "ميرنا مسعود",
+    "church": "كنيسة العذراء شبين",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مينا چورچ_المعادي": {
+    "name": "مينا چورچ",
+    "church": "المعادي",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا عزيز_": {
+    "name": "مينا عزيز",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "بولا ناثان_شبرا": {
+    "name": "بولا ناثان",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "داليا مينا_كومباوند وادي دجلة": {
+    "name": "داليا مينا",
+    "church": "كومباوند وادي دجلة",
+    "status": "ready",
+    "rawColor": "FFFFFF00"
+  },
+  "سارة جريس_الخصوص": {
+    "name": "سارة جريس",
+    "church": "الخصوص",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "سماح رامز_": {
+    "name": "سماح رامز",
+    "church": "",
+    "status": "ready",
+    "rawColor": "FFFFFF00"
+  },
+  "سوزان صبحي_حلوان": {
+    "name": "سوزان صبحي",
+    "church": "حلوان",
+    "status": "ready",
+    "rawColor": "FFFFFF00"
+  },
+  "فيولا عادل_حلوان": {
+    "name": "فيولا عادل",
+    "church": "حلوان",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم بخيت_المعادي": {
+    "name": "مريم بخيت",
+    "church": "المعادي",
+    "status": "ready",
+    "rawColor": "FFFFFF00"
+  },
+  "مريم ممدوح_الخصوص": {
+    "name": "مريم ممدوح",
+    "church": "الخصوص",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ميرا يوحنا_": {
+    "name": "ميرا يوحنا",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نسرين فايز_": {
+    "name": "نسرين فايز",
+    "church": "",
+    "status": "ready",
+    "rawColor": "FFFFFF00"
+  },
+  "جورج عزيز_شبرا": {
+    "name": "جورج عزيز",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "روماني حسيب  عادي_بلبيس": {
+    "name": "روماني حسيب  عادي",
+    "church": "بلبيس",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سامي فتح الله_": {
+    "name": "سامي فتح الله",
+    "church": "",
+    "status": "ready",
+    "rawColor": "FFFFFF00"
+  },
+  "ليليان عماد_من الكنيسة": {
+    "name": "ليليان عماد",
+    "church": "من الكنيسة",
+    "status": "ready",
+    "rawColor": "FFFFFF00"
+  },
+  "ماري سمير_عين شمس": {
+    "name": "ماري سمير",
+    "church": "عين شمس",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماري سمير_": {
+    "name": "ماري سمير",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماريان عادل_": {
+    "name": "ماريان عادل",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماريان عادل بريد سريع_طنطا": {
+    "name": "ماريان عادل بريد سريع",
+    "church": "طنطا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مارينا فرج_عين شمس": {
+    "name": "مارينا فرج",
+    "church": "عين شمس",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مكاريوس سريع_": {
+    "name": "مكاريوس سريع",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميراي وجيه_روكسي": {
+    "name": "ميراي وجيه",
+    "church": "روكسي",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "يوسف وجيه_ارض اللواء": {
+    "name": "يوسف وجيه",
+    "church": "ارض اللواء",
+    "status": "ready",
+    "rawColor": "FFFFFF00"
+  },
+  "اديب بخيت_مدينة الامل": {
+    "name": "اديب بخيت",
+    "church": "مدينة الامل",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "اسحق نبيل_": {
+    "name": "اسحق نبيل",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بولا يونان_": {
+    "name": "بولا يونان",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بيشوي صفوت_المرج": {
+    "name": "بيشوي صفوت",
+    "church": "المرج",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "رامي رفعت  سريع_الطريق الدائري": {
+    "name": "رامي رفعت  سريع",
+    "church": "الطريق الدائري",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم مجدي عادي_طنطا": {
+    "name": "مريم مجدي عادي",
+    "church": "طنطا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميرنا عادل_": {
+    "name": "ميرنا عادل",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "مينا شكري_": {
+    "name": "مينا شكري",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نانسي سريع_مصر القديمة": {
+    "name": "نانسي سريع",
+    "church": "مصر القديمة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نيفين ادور_": {
+    "name": "نيفين ادور",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "يوستينا يوسف_شبرا": {
+    "name": "يوستينا يوسف",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "عزيز مكرم  عادي_": {
+    "name": "عزيز مكرم  عادي",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماريان فرج_حدايق القبة": {
+    "name": "ماريان فرج",
+    "church": "حدايق القبة",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "ابرام رضا ثابت_": {
+    "name": "ابرام رضا ثابت",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "الفريد كميل_": {
+    "name": "الفريد كميل",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "القس ابراهيم القمص_بني مزار": {
+    "name": "القس ابراهيم القمص",
+    "church": "بني مزار",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "ان نبيل_": {
+    "name": "ان نبيل",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "انجي سعد_الضاهر": {
+    "name": "انجي سعد",
+    "church": "الضاهر",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "جوي مختار_": {
+    "name": "جوي مختار",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "شادي منير_": {
+    "name": "شادي منير",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "فايزة شنودة_النزهة الجديدة": {
+    "name": "فايزة شنودة",
+    "church": "النزهة الجديدة",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "كاترين امير_": {
+    "name": "كاترين امير",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مجدي ابراهيم_مصر الجديدة": {
+    "name": "مجدي ابراهيم",
+    "church": "مصر الجديدة",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "مريم فايق_": {
+    "name": "مريم فايق",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "مريم وهيب_القاهرة الجديدة": {
+    "name": "مريم وهيب",
+    "church": "القاهرة الجديدة",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "مهرائيل جعفر_": {
+    "name": "مهرائيل جعفر",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "مينا ميشيل_طنطا": {
+    "name": "مينا ميشيل",
+    "church": "طنطا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا ميشيل الياس_حلوان": {
+    "name": "مينا ميشيل الياس",
+    "church": "حلوان",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "نانيس فتحي_": {
+    "name": "نانيس فتحي",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "اماني جورج_": {
+    "name": "اماني جورج",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "اميرة نبيل_المرج": {
+    "name": "اميرة نبيل",
+    "church": "المرج",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "انطونيوس نبيل_": {
+    "name": "انطونيوس نبيل",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ايريني سعيد_الوراق": {
+    "name": "ايريني سعيد",
+    "church": "الوراق",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "باسم خليل_شرم الشيخ": {
+    "name": "باسم خليل",
+    "church": "شرم الشيخ",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "جيرمين فوزي_": {
+    "name": "جيرمين فوزي",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "رانيا اشرف_مغاغة": {
+    "name": "رانيا اشرف",
+    "church": "مغاغة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سماح عياد_حدايق القبة": {
+    "name": "سماح عياد",
+    "church": "حدايق القبة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "عماد لطيف_الغردقة": {
+    "name": "عماد لطيف",
+    "church": "الغردقة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "غالي فايز_٦ اكتوبر": {
+    "name": "غالي فايز",
+    "church": "٦ اكتوبر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "منى معوض_شبرا": {
+    "name": "منى معوض",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "نجوى منير_": {
+    "name": "نجوى منير",
+    "church": "",
+    "status": "received",
+    "rawColor": "FFFF00FF"
+  },
+  "انجي سمير_شبرا": {
+    "name": "انجي سمير",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بافلي بخيت_": {
+    "name": "بافلي بخيت",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بولين فيكتور_١٥ مايو": {
+    "name": "بولين فيكتور",
+    "church": "١٥ مايو",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سامح نصيف_": {
+    "name": "سامح نصيف",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "كيرلس صفوت_": {
+    "name": "كيرلس صفوت",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماجد بباوي_الجونة": {
+    "name": "ماجد بباوي",
+    "church": "الجونة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماريا ابراهيم_شبرا": {
+    "name": "ماريا ابراهيم",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم وصفي_الزيتون": {
+    "name": "مريم وصفي",
+    "church": "الزيتون",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا جورج_الشرابية": {
+    "name": "مينا جورج",
+    "church": "الشرابية",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نانسي عزت اسحق_الهرم": {
+    "name": "نانسي عزت اسحق",
+    "church": "الهرم",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نيفين مجدي_بهتيم": {
+    "name": "نيفين مجدي",
+    "church": "بهتيم",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "بيشوي جورج_شبرا": {
+    "name": "بيشوي جورج",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "فرج ميلاد_اكتوبر الجديدة": {
+    "name": "فرج ميلاد",
+    "church": "اكتوبر الجديدة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماريان سامح_مدينة نصر": {
+    "name": "ماريان سامح",
+    "church": "مدينة نصر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم زخاري_": {
+    "name": "مريم زخاري",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا كمال يوسف_": {
+    "name": "مينا كمال يوسف",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا وحيد_مدينتي": {
+    "name": "مينا وحيد",
+    "church": "مدينتي",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ابانوب ظريف_": {
+    "name": "ابانوب ظريف",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "عزيز ناصر_حلوان": {
+    "name": "عزيز ناصر",
+    "church": "حلوان",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "عوض توماس_الجونة": {
+    "name": "عوض توماس",
+    "church": "الجونة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميلاد ميخائيل حنا_": {
+    "name": "ميلاد ميخائيل حنا",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نادر رفعت_حدايق الاهرام": {
+    "name": "نادر رفعت",
+    "church": "حدايق الاهرام",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نادي مفيد_حدايق اكتوبر": {
+    "name": "نادي مفيد",
+    "church": "حدايق اكتوبر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "هدرا نجاح_الكوربة": {
+    "name": "هدرا نجاح",
+    "church": "الكوربة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "هيلانة اشرف_": {
+    "name": "هيلانة اشرف",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "كيرلس مرقس_مدينة السلام": {
+    "name": "كيرلس مرقس",
+    "church": "مدينة السلام",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "يوستينا باسم_هليوبليس": {
+    "name": "يوستينا باسم",
+    "church": "هليوبليس",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "اماني عدلي_من الكنيسة": {
+    "name": "اماني عدلي",
+    "church": "من الكنيسة",
+    "status": "arrived",
+    "rawColor": "FF93C47D"
+  },
+  "مرقس رمسيس_من الكنيسة": {
+    "name": "مرقس رمسيس",
+    "church": "من الكنيسة",
+    "status": "arrived",
+    "rawColor": "FF93C47D"
+  },
+  "منال لحظي_من الكنيسة": {
+    "name": "منال لحظي",
+    "church": "من الكنيسة",
+    "status": "arrived",
+    "rawColor": "FF93C47D"
+  },
+  "هاني صبحي_بنها": {
+    "name": "هاني صبحي",
+    "church": "بنها",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "امير جورج نصر_المنيل": {
+    "name": "امير جورج نصر",
+    "church": "المنيل",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سامح فيكتور_جسر السويس": {
+    "name": "سامح فيكتور",
+    "church": "جسر السويس",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مادونا ثروت_": {
+    "name": "مادونا ثروت",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم مراد_حلوان": {
+    "name": "مريم مراد",
+    "church": "حلوان",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سامح سعد_الزاوية": {
+    "name": "سامح سعد",
+    "church": "الزاوية",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "توماس جودت_الزيتون": {
+    "name": "توماس جودت",
+    "church": "الزيتون",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ثروت عاطف_اكتوبر الجديدة": {
+    "name": "ثروت عاطف",
+    "church": "اكتوبر الجديدة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "غالي فايز_الشيخ زايد": {
+    "name": "غالي فايز",
+    "church": "الشيخ زايد",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "كيرلس ماكين_٦ اكتوبر": {
+    "name": "كيرلس ماكين",
+    "church": "٦ اكتوبر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "كيرلس ماكين_": {
+    "name": "كيرلس ماكين",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماريو فوزي_كلوت بك": {
+    "name": "ماريو فوزي",
+    "church": "كلوت بك",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميرنا اكرام_شبرا": {
+    "name": "ميرنا اكرام",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميرنا اكرام_": {
+    "name": "ميرنا اكرام",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مينا محسن عياد_سمالوط": {
+    "name": "مينا محسن عياد",
+    "church": "سمالوط",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نانسي جاد_امبابة": {
+    "name": "نانسي جاد",
+    "church": "امبابة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم مكرم_": {
+    "name": "مريم مكرم",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "هناء يوسف_العبور": {
+    "name": "هناء يوسف",
+    "church": "العبور",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارك_": {
+    "name": "مارك",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فيلوباتير هاني_شبرا": {
+    "name": "فيلوباتير هاني",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "تادرس عادل_مدينة نصر": {
+    "name": "تادرس عادل",
+    "church": "مدينة نصر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "دلال سامي_": {
+    "name": "دلال سامي",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ليديا اميل_دمنهور": {
+    "name": "ليديا اميل",
+    "church": "دمنهور",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ليديا اميل_": {
+    "name": "ليديا اميل",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فادي ثروت_مدينة العبور": {
+    "name": "فادي ثروت",
+    "church": "مدينة العبور",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مارينا عماد_من الكنيسة": {
+    "name": "مارينا عماد",
+    "church": "من الكنيسة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ميرنا مجدي_شبرا": {
+    "name": "ميرنا مجدي",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "هناء يوسف_": {
+    "name": "هناء يوسف",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "اجتماع الشباب_من الكنيسة": {
+    "name": "اجتماع الشباب",
+    "church": "من الكنيسة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ايفا وهيب_شبرا": {
+    "name": "ايفا وهيب",
+    "church": "شبرا",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سارة ميلاد_": {
+    "name": "سارة ميلاد",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "كنيسة_اكتوبر": {
+    "name": "كنيسة",
+    "church": "اكتوبر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نواقص_": {
+    "name": "نواقص",
+    "church": "",
+    "status": "ready",
+    "rawColor": "FFFF9900"
+  },
+  "ايمن كامل_": {
+    "name": "ايمن كامل",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "د صوئيل فايز_": {
+    "name": "د صوئيل فايز",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سالي فوزي_شبين القناطر": {
+    "name": "سالي فوزي",
+    "church": "شبين القناطر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مريم رمسيس_امبابة": {
+    "name": "مريم رمسيس",
+    "church": "امبابة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مونيكا_رمسيس": {
+    "name": "مونيكا",
+    "church": "رمسيس",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "كريستين زكريا_شبرا الخيمة": {
+    "name": "كريستين زكريا",
+    "church": "شبرا الخيمة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نرمين رأفت_السلام": {
+    "name": "نرمين رأفت",
+    "church": "السلام",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ابونا دانييل_": {
+    "name": "ابونا دانييل",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ماجد كمال_": {
+    "name": "ماجد كمال",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سيلفيا جوزيف_٦ اكتوبر": {
+    "name": "سيلفيا جوزيف",
+    "church": "٦ اكتوبر",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "كيرلس ميلاد_": {
+    "name": "كيرلس ميلاد",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "مارسيل مكرم_": {
+    "name": "مارسيل مكرم",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "نجوى_الحوامدية": {
+    "name": "نجوى",
+    "church": "الحوامدية",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ابراهيم ميلاد فيهم_": {
+    "name": "ابراهيم ميلاد فيهم",
+    "church": "",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "امير وجيه_التجمع": {
+    "name": "امير وجيه",
+    "church": "التجمع",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "چاكلين سمعان_مدينة نصر": {
+    "name": "چاكلين سمعان",
+    "church": "مدينة نصر",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "چاكلين فؤاد_جسر السويس": {
+    "name": "چاكلين فؤاد",
+    "church": "جسر السويس",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "روز مدحت_": {
+    "name": "روز مدحت",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "طلعت حسني_": {
+    "name": "طلعت حسني",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ليليان شاكر_المعادي": {
+    "name": "ليليان شاكر",
+    "church": "المعادي",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماري ابراهيم_": {
+    "name": "ماري ابراهيم",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماريان جورج_": {
+    "name": "ماريان جورج",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مس فيبي_من الكنيسة": {
+    "name": "مس فيبي",
+    "church": "من الكنيسة",
+    "status": "arrived",
+    "rawColor": "FF93C47D"
+  },
+  "ميرنا مسعود_شبين القناطر": {
+    "name": "ميرنا مسعود",
+    "church": "شبين القناطر",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "نجوى_فيصل": {
+    "name": "نجوى",
+    "church": "فيصل",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "انچي سمير_شبرا": {
+    "name": "انچي سمير",
+    "church": "شبرا",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "سامية زاهر_بيجام": {
+    "name": "سامية زاهر",
+    "church": "بيجام",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "ناردين هاني_الرحاب": {
+    "name": "ناردين هاني",
+    "church": "الرحاب",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ايڤان اديب_": {
+    "name": "ايڤان اديب",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "بيشوي صدقي_": {
+    "name": "بيشوي صدقي",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "داني عبدالمسيح_من الكنيسة": {
+    "name": "داني عبدالمسيح",
+    "church": "من الكنيسة",
+    "status": "received",
+    "rawColor": "none"
+  },
+  "سلوى عجيب_كومباوند البروج": {
+    "name": "سلوى عجيب",
+    "church": "كومباوند البروج",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "شيري القمص_": {
+    "name": "شيري القمص",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "عماد چورچ_شبرا": {
+    "name": "عماد چورچ",
+    "church": "شبرا",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فادي مكرم_الضاهر": {
+    "name": "فادي مكرم",
+    "church": "الضاهر",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فايزة جمال_شبرا": {
+    "name": "فايزة جمال",
+    "church": "شبرا",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "كرستينا نادي_حدايق المعادي": {
+    "name": "كرستينا نادي",
+    "church": "حدايق المعادي",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماريان وليم_": {
+    "name": "ماريان وليم",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مايكل فهمي_حدايق القبة": {
+    "name": "مايكل فهمي",
+    "church": "حدايق القبة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مديحة حمدي_": {
+    "name": "مديحة حمدي",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "منال سامي_حدايق الاهرام": {
+    "name": "منال سامي",
+    "church": "حدايق الاهرام",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "هيلين هاني_": {
+    "name": "هيلين هاني",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "وائل جرجس_": {
+    "name": "وائل جرجس",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "يوسف كامل_": {
+    "name": "يوسف كامل",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "امجد سمير_": {
+    "name": "امجد سمير",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماريان فوزي_مدينة نصر": {
+    "name": "ماريان فوزي",
+    "church": "مدينة نصر",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ابونا داوود اباكير_مصر القديمة": {
+    "name": "ابونا داوود اباكير",
+    "church": "مصر القديمة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ارين نبيل_": {
+    "name": "ارين نبيل",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "انجي عادل_النزهة": {
+    "name": "انجي عادل",
+    "church": "النزهة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ثناء موسى_مصر الجديدة": {
+    "name": "ثناء موسى",
+    "church": "مصر الجديدة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "جينا جان_من الكنيسة": {
+    "name": "جينا جان",
+    "church": "من الكنيسة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "جينا جان_كنيستنا": {
+    "name": "جينا جان",
+    "church": "كنيستنا",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "د. مينا حنا_": {
+    "name": "د. مينا حنا",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "عصمت عدلي_": {
+    "name": "عصمت عدلي",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "كارول فكري_ارض الجولف": {
+    "name": "كارول فكري",
+    "church": "ارض الجولف",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماركو انور_": {
+    "name": "ماركو انور",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماريام ناجي_": {
+    "name": "ماريام ناجي",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم عبد الملاك_": {
+    "name": "مريم عبد الملاك",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ميرنا عادل_شبرا الخيمة": {
+    "name": "ميرنا عادل",
+    "church": "شبرا الخيمة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارتينا برزي_شبرا الخيمة": {
+    "name": "مارتينا برزي",
+    "church": "شبرا الخيمة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ابانوب نادر_": {
+    "name": "ابانوب نادر",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "عاطف صبري_": {
+    "name": "عاطف صبري",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فيبي حبيب_٦ اكتوبر": {
+    "name": "فيبي حبيب",
+    "church": "٦ اكتوبر",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فيرينا ماجد_": {
+    "name": "فيرينا ماجد",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فيوليت مجدي_العجوزة": {
+    "name": "فيوليت مجدي",
+    "church": "العجوزة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "كيرلس كرم_حدايق حلوان": {
+    "name": "كيرلس كرم",
+    "church": "حدايق حلوان",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارينا سعيد_المنيا الجديدة": {
+    "name": "مارينا سعيد",
+    "church": "المنيا الجديدة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مونيكا لطيف_مصر الجديدة": {
+    "name": "مونيكا لطيف",
+    "church": "مصر الجديدة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ميرنا نصحي_مدينة نصر": {
+    "name": "ميرنا نصحي",
+    "church": "مدينة نصر",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "نورا ميلاد_": {
+    "name": "نورا ميلاد",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "الورشة_الكرنفال": {
+    "name": "الورشة",
+    "church": "الكرنفال",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ايناس ناصر_عزبة النخل": {
+    "name": "ايناس ناصر",
+    "church": "عزبة النخل",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم عماد_حدائق اكتوبر": {
+    "name": "مريم عماد",
+    "church": "حدائق اكتوبر",
+    "status": "received",
+    "rawColor": "FFFF0000"
+  },
+  "دميانة صلاح_المقطم": {
+    "name": "دميانة صلاح",
+    "church": "المقطم",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ابانوب مجدي ابراهيم_": {
+    "name": "ابانوب مجدي ابراهيم",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم ميخائيل_": {
+    "name": "مريم ميخائيل",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "عوض عزيز_": {
+    "name": "عوض عزيز",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارينا كرم_المعادي": {
+    "name": "مارينا كرم",
+    "church": "المعادي",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "تاسوني بوتامينا_": {
+    "name": "تاسوني بوتامينا",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "بافلي_المطرية": {
+    "name": "بافلي",
+    "church": "المطرية",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "رنا رفيق_المطرية": {
+    "name": "رنا رفيق",
+    "church": "المطرية",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "نيفين مينا عريان_ابو زعبل": {
+    "name": "نيفين مينا عريان",
+    "church": "ابو زعبل",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارينا سامي عزيز_": {
+    "name": "مارينا سامي عزيز",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ميلينا ماجد_شبرا الخيمة": {
+    "name": "ميلينا ماجد",
+    "church": "شبرا الخيمة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مينا محسن_": {
+    "name": "مينا محسن",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماجدة يسري_": {
+    "name": "ماجدة يسري",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "شيرين نيروز_": {
+    "name": "شيرين نيروز",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فادي ناجي_دمنهور": {
+    "name": "فادي ناجي",
+    "church": "دمنهور",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماري جرحس_عبود": {
+    "name": "ماري جرحس",
+    "church": "عبود",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فيليب فوزي_مدينة نصر": {
+    "name": "فيليب فوزي",
+    "church": "مدينة نصر",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم اشرف_مصر الجديدة": {
+    "name": "مريم اشرف",
+    "church": "مصر الجديدة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "انجي_": {
+    "name": "انجي",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "يوستينا عدلي_شبرا": {
+    "name": "يوستينا عدلي",
+    "church": "شبرا",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "عماد انور_": {
+    "name": "عماد انور",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "رامي نعيم_ابو تشت ": {
+    "name": "رامي نعيم",
+    "church": "ابو تشت ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارينا لورانسً_مصر الجديدة": {
+    "name": "مارينا لورانسً",
+    "church": "مصر الجديدة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "بولا جرجس_": {
+    "name": "بولا جرجس",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "بيشوي عادل_رمسيس": {
+    "name": "بيشوي عادل",
+    "church": "رمسيس",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم اسحق_": {
+    "name": "مريم اسحق",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فيفيان محسن_التجمع": {
+    "name": "فيفيان محسن",
+    "church": "التجمع",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم ابراهيم_": {
+    "name": "مريم ابراهيم",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماريان ماهر_": {
+    "name": "ماريان ماهر",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "روڤلا ابراهيم_الوراق": {
+    "name": "روڤلا ابراهيم",
+    "church": "الوراق",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "توني ضاحي_النزهة": {
+    "name": "توني ضاحي",
+    "church": "النزهة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ممدوح شوقي ارنست_": {
+    "name": "ممدوح شوقي ارنست",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "حنان راضي_شبرا": {
+    "name": "حنان راضي",
+    "church": "شبرا",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارسيل طلعت_المقطم": {
+    "name": "مارسيل طلعت",
+    "church": "المقطم",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارثا جرجس_من الكنيسة": {
+    "name": "مارثا جرجس",
+    "church": "من الكنيسة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ديانا عماد_٦ اكتوبر": {
+    "name": "ديانا عماد",
+    "church": "٦ اكتوبر",
+    "status": "received",
+    "rawColor": "FFFF0000"
+  },
+  "جينا حاتم_": {
+    "name": "جينا حاتم",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "نيفين مجدي_شبرا الخيمة": {
+    "name": "نيفين مجدي",
+    "church": "شبرا الخيمة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "القمص يوسف_": {
+    "name": "القمص يوسف",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "جورج يوسف_حدايق الاهرام": {
+    "name": "جورج يوسف",
+    "church": "حدايق الاهرام",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "جوزيف زكري_الزيتون": {
+    "name": "جوزيف زكري",
+    "church": "الزيتون",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماري اكرم_شبرا": {
+    "name": "ماري اكرم",
+    "church": "شبرا",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماري جرجس_": {
+    "name": "ماري جرجس",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "نيفين سمير_": {
+    "name": "نيفين سمير",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "كيرلس سامي_القناطر الخيرية": {
+    "name": "كيرلس سامي",
+    "church": "القناطر الخيرية",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "محسن مجدي_شبرا": {
+    "name": "محسن مجدي",
+    "church": "شبرا",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "يوسف نادي_": {
+    "name": "يوسف نادي",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "علاء ثروت_طما": {
+    "name": "علاء ثروت",
+    "church": "طما",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "چونير جوزيف_شبرا": {
+    "name": "چونير جوزيف",
+    "church": "شبرا",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "نيلي صلاح_النزهة": {
+    "name": "نيلي صلاح",
+    "church": "النزهة",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارلين حلمي_الهرم": {
+    "name": "مارلين حلمي",
+    "church": "الهرم",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "منال هارون_حلوان": {
+    "name": "منال هارون",
+    "church": "حلوان",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فيبي القس ميخائيل_الضاهر": {
+    "name": "فيبي القس ميخائيل",
+    "church": "الضاهر",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "بولا رأفت_جسر السويس": {
+    "name": "بولا رأفت",
+    "church": "جسر السويس",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ريمون مجدي_": {
+    "name": "ريمون مجدي",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مينا اسحق_": {
+    "name": "مينا اسحق",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "باسم خيري_": {
+    "name": "باسم خيري",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "بولا نبيل_": {
+    "name": "بولا نبيل",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "شيري الفي_": {
+    "name": "شيري الفي",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "سلفيا جوزيف_": {
+    "name": "سلفيا جوزيف",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "رامي طلعت_الطالبية": {
+    "name": "رامي طلعت",
+    "church": "الطالبية",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم سامي_قليوب": {
+    "name": "مريم سامي",
+    "church": "قليوب",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ماجد بشرى_الف مسكن": {
+    "name": "ماجد بشرى",
+    "church": "الف مسكن",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارينا سرجيوس_العباسية": {
+    "name": "مارينا سرجيوس",
+    "church": "العباسية",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "راندا فكري_العمرانية ": {
+    "name": "راندا فكري",
+    "church": "العمرانية ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ايريني فهمي_المتحف المصري ": {
+    "name": "ايريني فهمي",
+    "church": "المتحف المصري ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "راندا رفعت_": {
+    "name": "راندا رفعت",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "رأفت سمير_حدايق اكتوبر ": {
+    "name": "رأفت سمير",
+    "church": "حدايق اكتوبر ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مينا حلمي_دير مواس ": {
+    "name": "مينا حلمي",
+    "church": "دير مواس ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "اشرف كميل_": {
+    "name": "اشرف كميل",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "اميرة ورد_الوراق ": {
+    "name": "اميرة ورد",
+    "church": "الوراق ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "سالي منير_": {
+    "name": "سالي منير",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "جورج عاطف_الدقي ": {
+    "name": "جورج عاطف",
+    "church": "الدقي ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ايريني فهمي_": {
+    "name": "ايريني فهمي",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ميرنا خليل_جسر السويس ": {
+    "name": "ميرنا خليل",
+    "church": "جسر السويس ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "دينا فكري_دريم لاند ": {
+    "name": "دينا فكري",
+    "church": "دريم لاند ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "بيتر ناجي_سمالوط ": {
+    "name": "بيتر ناجي",
+    "church": "سمالوط ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "جاكلين كرمي_حلوان ": {
+    "name": "جاكلين كرمي",
+    "church": "حلوان ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "سامح سمير_شبرا ": {
+    "name": "سامح سمير",
+    "church": "شبرا ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "منى نسيم_طنطا ": {
+    "name": "منى نسيم",
+    "church": "طنطا ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "كيرلس انيس_": {
+    "name": "كيرلس انيس",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "يوستينا مدحت_هرم ": {
+    "name": "يوستينا مدحت",
+    "church": "هرم ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم شكري_السلام ": {
+    "name": "مريم شكري",
+    "church": "السلام ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ميخائيل نوح_المعمورة ": {
+    "name": "ميخائيل نوح",
+    "church": "المعمورة ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "بيشوي_بهتيم ": {
+    "name": "بيشوي",
+    "church": "بهتيم ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "عاطف رياض_شبرا ": {
+    "name": "عاطف رياض",
+    "church": "شبرا ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "نيفين ميلاد_شبرا ": {
+    "name": "نيفين ميلاد",
+    "church": "شبرا ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "عادل وديع_الزقازيق ": {
+    "name": "عادل وديع",
+    "church": "الزقازيق ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "فادي اشرف_الوراق ": {
+    "name": "فادي اشرف",
+    "church": "الوراق ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مينا شاكر_": {
+    "name": "مينا شاكر",
+    "church": "",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "د/ميشيل_مصر الجديدة ": {
+    "name": "د/ميشيل",
+    "church": "مصر الجديدة ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ريهام ناصر_الخصوص ": {
+    "name": "ريهام ناصر",
+    "church": "الخصوص ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مجدي عطية_حلوان ": {
+    "name": "مجدي عطية",
+    "church": "حلوان ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "كريستين نجيب_بنها ": {
+    "name": "كريستين نجيب",
+    "church": "بنها ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "نرمين نبيل_الليبيني هرم ": {
+    "name": "نرمين نبيل",
+    "church": "الليبيني هرم ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم عماد_العاشر من رمضان ": {
+    "name": "مريم عماد",
+    "church": "العاشر من رمضان ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "ميري مرشد_السلام ": {
+    "name": "ميري مرشد",
+    "church": "السلام ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مارك شريف_ملوي ": {
+    "name": "مارك شريف",
+    "church": "ملوي ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  },
+  "مريم رامي_٦ اكتوبر ": {
+    "name": "مريم رامي",
+    "church": "٦ اكتوبر ",
+    "status": "shipped",
+    "rawColor": "FF00FFFF"
+  }
+}
