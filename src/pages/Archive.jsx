@@ -84,6 +84,7 @@ const Archive = () => {
             <thead>
               <tr style={{ background: 'var(--bg-secondary)', borderBottom: '2px solid var(--border-color)' }}>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>تاريخ الطلب</th>
+                <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>تاريخ الأرشفة</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>العميل / الكنيسة</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>بيانات التواصل</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المنتجات</th>
@@ -105,6 +106,12 @@ const Archive = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Calendar size={14} />
                       {new Date(order.createdAt).toLocaleDateString('ar-EG')}
+                    </div>
+                  </td>
+                  <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Calendar size={14} />
+                      {new Date(order.archivedAt || order.updatedAt || order.createdAt).toLocaleDateString('ar-EG')}
                     </div>
                   </td>
                   <td style={{ padding: '16px' }}>
