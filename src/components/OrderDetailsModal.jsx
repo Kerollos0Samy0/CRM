@@ -45,9 +45,9 @@ const OrderDetailsModal = ({ order, isDelivered, onClose }) => {
   const creatorName = users.find(u => u.id === order.createdBy)?.name || 'مجهول';
 
   // Formatting for whatsapp link
-  const cleanMobile = order.mobile.replace(/[^0-9]/g, '');
+  const cleanMobile = (order.mobile || order.phone || '').replace(/[^0-9]/g, '');
   const waNumber = cleanMobile.startsWith('0') ? `2${cleanMobile}` : cleanMobile;
-  const waLink = `https://wa.me/${waNumber}?text=مرحباً، بخصوص أوردر الحكاية (كنيسة ${order.church})...`;
+  const waLink = `https://wa.me/${waNumber}?text=مرحباً، بخصوص أوردر الحكاية (كنيسة ${order.church || ''})...`;
 
   const handleDelete = () => {
     if(window.confirm('هل أنت متأكد من حذف هذا الأوردر؟')) {

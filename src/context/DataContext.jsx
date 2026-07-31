@@ -72,7 +72,7 @@ export const DataProvider = ({ children }) => {
     let parsedColumns = savedColumns ? JSON.parse(savedColumns) : { ...initialColumns };
     let parsedArchived = savedArchived ? JSON.parse(savedArchived) : [];
     
-    // Migration for old single-item orders
+    // Migration for old single-item orders and fixing field names from Google Sheets
     for (const id in parsedOrders) {
       if (!parsedOrders[id].items) {
         if (parsedOrders[id].workshop) {
@@ -81,6 +81,39 @@ export const DataProvider = ({ children }) => {
           parsedOrders[id].items = [];
         }
       }
+      
+      // Normalize field names
+      if (parsedOrders[id].clientName && !parsedOrders[id].name) {
+        parsedOrders[id].name = parsedOrders[id].clientName;
+      }
+      if (parsedOrders[id].phone !== undefined && !parsedOrders[id].mobile) {
+        parsedOrders[id].mobile = String(parsedOrders[id].phone);
+      }
+      if (parsedOrders[id].government && !parsedOrders[id].governorate) {
+        parsedOrders[id].governorate = parsedOrders[id].government;
+      }
+      
+      // Fix string notes from migration
+      if (typeof parsedOrders[id].notes === 'string') {
+        parsedOrders[id].orderNotes = parsedOrders[id].notes; // Move string to orderNotes
+        parsedOrders[id].notes = []; // Set notes to array as expected by addNote
+      }
+      if (!Array.isArray(parsedOrders[id].notes)) {
+        parsedOrders[id].notes = [];
+      }
+    }
+    
+    // Normalize archived orders too
+    for (let i = 0; i < parsedArchived.length; i++) {
+      let archOrder = parsedArchived[i];
+      if (archOrder.clientName && !archOrder.name) archOrder.name = archOrder.clientName;
+      if (archOrder.phone !== undefined && !archOrder.mobile) archOrder.mobile = String(archOrder.phone);
+      if (archOrder.government && !archOrder.governorate) archOrder.governorate = archOrder.government;
+      if (typeof archOrder.notes === 'string') {
+        archOrder.orderNotes = archOrder.notes;
+        archOrder.notes = [];
+      }
+      if (!Array.isArray(archOrder.notes)) archOrder.notes = [];
     }
     
     if (!parsedColumns.new_order) {
