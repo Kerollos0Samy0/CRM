@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import { Search, Plus, MapPin, Phone, User, ShoppingBag, DollarSign, Edit, Trash2, X } from 'lucide-react';
+import { Search, Plus, MapPin, Phone, User, ShoppingBag, DollarSign, Edit, Trash2, X, Filter, ArrowDownAZ } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Clients = () => {
@@ -8,6 +8,9 @@ const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
+  
+  const [filterGov, setFilterGov] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -37,15 +40,39 @@ const Clients = () => {
     return stats;
   }, [orders, archivedOrders]);
 
-  const filteredClients = clients.filter(client => {
-    const search = searchTerm.toLowerCase();
-    return (
-      client.name?.toLowerCase().includes(search) ||
-      client.phone?.includes(search) ||
-      client.governorate?.toLowerCase().includes(search) ||
-      client.church?.toLowerCase().includes(search)
-    );
-  });
+  const uniqueGovs = useMemo(() => {
+    const govs = clients.map(c => c.governorate).filter(Boolean);
+    return [...new Set(govs)].sort();
+  }, [clients]);
+
+  const filteredAndSortedClients = useMemo(() => {
+    let result = clients.filter(client => {
+      const search = searchTerm.toLowerCase();
+      const matchesSearch = client.name?.toLowerCase().includes(search) ||
+                            client.phone?.includes(search) ||
+                            client.governorate?.toLowerCase().includes(search) ||
+                            client.church?.toLowerCase().includes(search);
+      
+      const matchesGov = filterGov === 'all' || client.governorate === filterGov;
+      
+      return matchesSearch && matchesGov;
+    });
+
+    result.sort((a, b) => {
+      const statsA = clientStats[a.name?.trim()] || { orderCount: 0, totalSpent: 0 };
+      const statsB = clientStats[b.name?.trim()] || { orderCount: 0, totalSpent: 0 };
+
+      if (sortBy === 'orders') return statsB.orderCount - statsA.orderCount;
+      if (sortBy === 'spent') return statsB.totalSpent - statsA.totalSpent;
+      if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
+      return 0;
+    });
+    
+    if (sortBy === 'newest') {
+      return [...result].reverse();
+    }
+    return result;
+  }, [clients, searchTerm, filterGov, sortBy, clientStats]);
 
   const handleOpenModal = (client = null) => {
     if (client) {
@@ -113,9 +140,43 @@ const Clients = () => {
         </div>
       </div>
 
+      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Filter size={18} color="var(--text-secondary)" />
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>المحافظة:</span>
+          <select 
+            className="input-field" 
+            style={{ width: '180px', padding: '6px 12px' }}
+            value={filterGov} 
+            onChange={e => setFilterGov(e.target.value)}
+          >
+            <option value="all">كل المحافظات</option>
+            {uniqueGovs.map(gov => (
+              <option key={gov} value={gov}>{gov}</option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <ArrowDownAZ size={18} color="var(--text-secondary)" />
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>ترتيب حسب:</span>
+          <select 
+            className="input-field" 
+            style={{ width: '180px', padding: '6px 12px' }}
+            value={sortBy} 
+            onChange={e => setSortBy(e.target.value)}
+          >
+            <option value="newest">أحدث إضافة</option>
+            <option value="orders">الأكثر طلباً (عدد الأوردرات)</option>
+            <option value="spent">الأكثر شراءً (إجمالي المبالغ)</option>
+            <option value="name">أبجدياً</option>
+          </select>
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
         <AnimatePresence>
-          {filteredClients.map(client => {
+          {filteredAndSortedClients.map(client => {
             const stats = clientStats[client.name?.trim()] || { orderCount: 0, totalSpent: 0 };
             return (
               <motion.div 
@@ -187,7 +248,7 @@ const Clients = () => {
           })}
         </AnimatePresence>
         
-        {filteredClients.length === 0 && (
+        {filteredAndSortedClients.length === 0 && (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '64px 20px', color: 'var(--text-muted)' }}>
             <User size={48} style={{ opacity: 0.2, margin: '0 auto 16px' }} />
             <p>لا يوجد عملاء يطابقون بحثك</p>
