@@ -373,14 +373,6 @@ export const DataProvider = ({ children }) => {
   const ledgerRef   = doc(db, 'crm', 'ledger');
   const suppliesRef = doc(db, 'crm', 'supplies');
 
-  // ── helper: wrap any promise with a timeout ──────────────────────────────
-  function withTimeout(promise, ms = 5000) {
-    return Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('firestore_timeout')), ms))
-    ]);
-  }
-
   // ── helper: load everything from localStorage ─────────────────────────────
   function loadFromLocalStorage() {
     try {
@@ -392,27 +384,31 @@ export const DataProvider = ({ children }) => {
       const lsProducts = localStorage.getItem('crm_products');
       const lsTx       = localStorage.getItem('crm_transactions');
       const lsSupplies = localStorage.getItem('crm_supplies');
+
       const raw = {
         orders:         lsOrders   ? JSON.parse(lsOrders)   : {},
         columns:        lsCols     ? JSON.parse(lsCols)      : { ...initialColumns },
-        archivedOrders: lsArchived ? JSON.parse(lsArchived)  : [],
+        archivedOrders: lsArchived ? JSON.parse(lsArchived)  : []
       };
+      
       const migrated = applyMigrations(raw);
       setOrders(migrated.orders);
       setColumns(migrated.columns);
       setArchivedOrders(migrated.archivedOrders);
+
       setTasks(lsTasks    ? JSON.parse(lsTasks)    : {});
       setClients(lsClients  ? JSON.parse(lsClients)  : initialClients);
       setProducts(lsProducts ? JSON.parse(lsProducts) : initialProducts);
       setTransactions(lsTx ? JSON.parse(lsTx) : []);
       setSupplies(lsSupplies ? JSON.parse(lsSupplies) : []);
-      console.warn('⚠️ Using localStorage (Firestore unavailable)');
+      console.warn('⚠️ Using localStorage (Firestore unavailable) with migrations applied');
     } catch (e) {
       console.error('Failed to load from localStorage:', e);
-      // Fallback to empty/initial state
-      setOrders({});
-      setColumns(initialColumns);
-      setArchivedOrders([]);
+      // Fallback to empty/initial state + migrations
+      const migrated = applyMigrations({ orders: {}, columns: { ...initialColumns }, archivedOrders: [] });
+      setOrders(migrated.orders);
+      setColumns(migrated.columns);
+      setArchivedOrders(migrated.archivedOrders);
       setTasks({});
       setClients(initialClients);
       setProducts(initialProducts);
@@ -427,18 +423,15 @@ export const DataProvider = ({ children }) => {
 
     async function bootstrap() {
       try {
-        // Each getDoc has a 5-second timeout — if it hangs, throws 'firestore_timeout'
-        const [mainSnap, tasksSnap, clientsSnap, productsSnap, ledgerSnap, suppliesSnap] = await withTimeout(
-          Promise.all([
+        // Fetch all documents from Firestore
+        const [mainSnap, tasksSnap, clientsSnap, productsSnap, ledgerSnap, suppliesSnap] = await Promise.all([
             getDoc(mainRef),
             getDoc(tasksRef),
             getDoc(clientsRef),
             getDoc(productsRef),
             getDoc(ledgerRef),
             getDoc(suppliesRef),
-          ]),
-          5000
-        );
+        ]);
 
         // --- MAIN ---
         if (mainSnap.exists()) {
