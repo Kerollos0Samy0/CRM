@@ -86,8 +86,8 @@ function applyMigrations(rawData) {
   if (!migratedV2) {
     orders = { ...orders, ...migratedData.orders };
     Object.keys(migratedData.columns).forEach(colId => {
-      if (!columns[colId]) columns[colId] = { ...initialColumns[colId] };
-      columns[colId].orderIds = [...new Set([...columns[colId].orderIds, ...migratedData.columns[colId].orderIds])];
+      if (!columns[colId]) columns[colId] = initialColumns[colId] ? { ...initialColumns[colId] } : { id: colId, title: colId, orderIds: [], color: '#ccc' };
+      columns[colId].orderIds = [...new Set([...(columns[colId].orderIds || []), ...(migratedData.columns[colId].orderIds || [])])];
     });
     archivedOrders = [...archivedOrders, ...migratedData.archivedOrders];
     migratedV2 = true;
@@ -425,6 +425,7 @@ function applyMigrations(rawData) {
          }
       }
     });
+    migratedV16 = true;
     // Setting migratedV16 true is done outside this function (or returned)
   }
 
