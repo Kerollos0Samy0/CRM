@@ -105,6 +105,22 @@ export const DataProvider = ({ children }) => {
       if (!Array.isArray(parsedOrders[id].notes)) {
         parsedOrders[id].notes = [];
       }
+      
+      // Normalize items and money
+      if (parsedOrders[id].items) {
+        let total = 0;
+        parsedOrders[id].items.forEach(item => {
+          if (item.name && !item.workshop) item.workshop = item.name;
+          if (item.sellPrice !== undefined && item.unitPrice === undefined) item.unitPrice = item.sellPrice;
+          total += (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0);
+        });
+        if (parsedOrders[id].totalAmount === undefined) {
+          parsedOrders[id].totalAmount = total;
+        }
+      }
+      if (parsedOrders[id].remainingAmount === undefined) {
+        parsedOrders[id].remainingAmount = Math.max(0, (parsedOrders[id].totalAmount || 0) - (Number(parsedOrders[id].discount) || 0) - (Number(parsedOrders[id].paidAmount) || 0));
+      }
     }
     
     // Normalize archived orders too
@@ -118,6 +134,22 @@ export const DataProvider = ({ children }) => {
         archOrder.notes = [];
       }
       if (!Array.isArray(archOrder.notes)) archOrder.notes = [];
+      
+      // Normalize items and money
+      if (archOrder.items) {
+        let total = 0;
+        archOrder.items.forEach(item => {
+          if (item.name && !item.workshop) item.workshop = item.name;
+          if (item.sellPrice !== undefined && item.unitPrice === undefined) item.unitPrice = item.sellPrice;
+          total += (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0);
+        });
+        if (archOrder.totalAmount === undefined) {
+          archOrder.totalAmount = total;
+        }
+      }
+      if (archOrder.remainingAmount === undefined) {
+        archOrder.remainingAmount = Math.max(0, (archOrder.totalAmount || 0) - (Number(archOrder.discount) || 0) - (Number(archOrder.paidAmount) || 0));
+      }
     }
 
     // Merge migrated data from Google Sheets if not done yet
