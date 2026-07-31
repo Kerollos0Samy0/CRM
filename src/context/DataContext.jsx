@@ -48,6 +48,7 @@ function normalizeOrder(o) {
     o.items.forEach(item => {
       if (item.name && !item.workshop)       item.workshop  = item.name;
       if (item.sellPrice !== undefined && item.unitPrice === undefined) item.unitPrice = item.sellPrice;
+      if (item.price !== undefined && item.unitPrice === undefined) item.unitPrice = Number(item.price) || 0;
       total += (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0);
     });
     if (o.totalAmount === undefined) o.totalAmount = total;
