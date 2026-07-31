@@ -12,6 +12,7 @@ import migrationV4Data from '../data/migration_v4_data.json';
 import chatClients from '../data/clients_from_chat.json';
 import excelOrders from '../data/orders_from_excel.json';
 import coloredOrdersUpdates from '../data/orders_status_update.json';
+import v7OrdersUpdates from '../data/orders_status_update_v7.json';
 
 const DataContext = createContext();
 
@@ -60,6 +61,7 @@ function applyMigrations(rawData) {
   let migratedV4 = rawData.migratedV4 || false;
   let migratedV5 = rawData.migratedV5 || false;
   let migratedV6 = rawData.migratedV6 || false;
+  let migratedV7 = rawData.migratedV7 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -154,6 +156,34 @@ function applyMigrations(rawData) {
     migratedV6 = true;
   }
 
+  // v7 - Re-sort imported orders based on boolean columns from original app
+  if (!migratedV7) {
+    Object.keys(orders).forEach(orderId => {
+      const order = orders[orderId];
+      if (order && order.createdBy === 'system') { // Only affect imported orders
+        const key = order.name + '_' + order.church;
+        const updateInfo = v7OrdersUpdates[key];
+        if (updateInfo) {
+          const targetStatus = updateInfo.status;
+          
+          // Find which column this order is currently in
+          let currentCol = Object.values(columns).find(c => c && c.orderIds && Array.isArray(c.orderIds) && c.orderIds.includes(orderId));
+          if (currentCol && currentCol.id !== targetStatus) {
+             // Remove from current column
+             currentCol.orderIds = currentCol.orderIds.filter(id => id !== orderId);
+             
+             // Add to target column
+             if (columns[targetStatus]) {
+                if (!columns[targetStatus].orderIds) columns[targetStatus].orderIds = [];
+                columns[targetStatus].orderIds.unshift(orderId);
+             }
+          }
+        }
+      }
+    });
+    migratedV7 = true;
+  }
+
   // always sync column titles/colors from code
   Object.keys(columns).forEach(colId => {
     if (initialColumns[colId]) {
@@ -162,7 +192,7 @@ function applyMigrations(rawData) {
     }
   });
 
-  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6 };
+  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -304,7 +334,7 @@ export const DataProvider = ({ children }) => {
           setColumns(migrated.columns);
           setArchivedOrders(migrated.archivedOrders);
           // Force save to Firebase if we migrated or restored
-          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4 || !data.migratedV5 || !data.migratedV6 || Object.keys(data.orders || {}).length === 0)
+          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4 || !data.migratedV5 || !data.migratedV6 || !data.migratedV7 || Object.keys(data.orders || {}).length === 0)
             setDoc(mainRef, migrated, { merge: true }).catch(console.error);
         } else {
           const lsOrders   = localStorage.getItem('crm_orders');
