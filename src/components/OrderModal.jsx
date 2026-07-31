@@ -160,8 +160,50 @@ const OrderModal = ({ onClose }) => {
     if (churchMatch) newFormData.church = churchMatch[1].trim();
 
     const orderSectionMatch = text.match(/(?:الاوردر|الطلب|المطلوب|التفاصيل)\s*[:\-]?\s*([\s\S]*?)(?:المدفوع|الخصم|$)/);
+    let searchTarget = text;
     if (orderSectionMatch) {
       newFormData.orderNotes = orderSectionMatch[1].trim();
+      searchTarget = orderSectionMatch[1].trim();
+    }
+
+    // Auto-detect products
+    let detectedItems = [];
+    const sortedProducts = [...products].sort((a, b) => b.name.length - a.name.length);
+    let textRemaining = searchTarget;
+
+    sortedProducts.forEach(product => {
+      if (textRemaining.includes(product.name)) {
+        let quantity = 1;
+        const escapedName = product.name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        
+        // Match numbers before or after
+        const beforeRegex = new RegExp(`(\\d+)\\s*(?:x|X|\\*|\\s)\\s*${escapedName}`, 'i');
+        const afterRegex = new RegExp(`${escapedName}\\s*(?:عدد)?\\s*(\\d+)`, 'i');
+        
+        const beforeMatch = textRemaining.match(beforeRegex);
+        const afterMatch = textRemaining.match(afterRegex);
+        
+        if (beforeMatch) {
+            quantity = parseInt(beforeMatch[1], 10);
+            textRemaining = textRemaining.replace(beforeMatch[0], '');
+        } else if (afterMatch) {
+            quantity = parseInt(afterMatch[1], 10);
+            textRemaining = textRemaining.replace(afterMatch[0], '');
+        } else {
+            textRemaining = textRemaining.replace(product.name, '');
+        }
+        
+        detectedItems.push({
+          workshop: product.name,
+          quantity: quantity,
+          unitPrice: product.sellPrice || 0,
+          status: 'new'
+        });
+      }
+    });
+
+    if (detectedItems.length > 0) {
+      newFormData.items = detectedItems;
     }
 
     const paidMatch = text.match(/(?:المدفوع|عربون|تم دفع|تم الدفع)\s*[:\-]?\s*(\d+)/);
@@ -172,7 +214,6 @@ const OrderModal = ({ onClose }) => {
 
     const deadlineMatch = text.match(/(?:الديد لاين|تاريخ التسليم|الديدلاين)\s*[:\-]?\s*(\d{4}-\d{1,2}-\d{1,2})/);
     if (deadlineMatch) {
-      // Ensure date is properly formatted with leading zeros if needed
       const parts = deadlineMatch[1].split('-');
       const yyyy = parts[0];
       const mm = parts[1].padStart(2, '0');
