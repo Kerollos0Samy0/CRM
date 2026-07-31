@@ -172,6 +172,20 @@ const Clients = () => {
             <option value="name">أبجدياً</option>
           </select>
         </div>
+
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+          <span style={{ 
+            background: 'var(--color-kirolos)', 
+            color: 'white', 
+            padding: '6px 16px', 
+            borderRadius: '20px', 
+            fontSize: '0.95rem', 
+            fontWeight: 'bold',
+            boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.2)'
+          }}>
+            العدد: {filteredAndSortedClients.length} عميل
+          </span>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
