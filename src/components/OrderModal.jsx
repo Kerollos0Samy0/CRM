@@ -58,60 +58,89 @@ const ProductSelect = ({ value, onChange, products }) => {
 };
 
 
-const ClientSelect = ({ value, onChange, onClientSelect, clients }) => {
-  const [isCustom, setIsCustom] = React.useState(false);
-  
-  React.useEffect(() => {
-    if (value && !clients.some(c => c.name === value)) {
-      setIsCustom(true);
-    }
-  }, []);
 
-  if (isCustom) {
-    return (
-      <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-        <input 
-          autoFocus
-          required 
-          type="text" 
-          value={value} 
-          onChange={e => onChange(e)} 
-          className="input-field" 
-          placeholder="اكتب اسم العميل..." 
-          style={{ flex: 1 }}
-        />
-        <button type="button" onClick={() => { setIsCustom(false); onChange({target:{value:''}}); }} className="btn btn-secondary" style={{ padding: '4px 8px' }}>
-          إلغاء
-        </button>
-      </div>
-    );
-  }
+const CustomAutocomplete = ({ value, onChange, options, placeholder, onSelect }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [search, setSearch] = React.useState(value || '');
+  const wrapperRef = React.useRef(null);
+
+  React.useEffect(() => {
+    setSearch(value || '');
+  }, [value]);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+        onChange(search); // commit whatever is typed
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [search, onChange]);
+
+  const filteredOptions = options.filter(opt => 
+    opt.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <select 
-      required 
-      value={value} 
-      onChange={e => {
-        if (e.target.value === '__CUSTOM__') {
-          setIsCustom(true);
-          onChange({target: {value: ''}});
-        } else {
-          onClientSelect(e);
-        }
-      }} 
-      className="input-field"
-    >
-      <option value="" disabled>اختر العميل (أو أضف جديد)...</option>
-      {clients.map(c => (
-        <option key={c.id} value={c.name}>{c.name}</option>
-      ))}
-      <option value="__CUSTOM__">+ عميل جديد (كتابة يدوي)</option>
-    </select>
+    <div ref={wrapperRef} style={{ position: 'relative', width: '100%' }}>
+      <input
+        type="text"
+        className="input-field"
+        placeholder={placeholder}
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          onChange(e.target.value);
+          setIsOpen(true);
+        }}
+        onFocus={() => setIsOpen(true)}
+      />
+      {isOpen && filteredOptions.length > 0 && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          background: 'var(--bg-glass)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          maxHeight: '200px',
+          overflowY: 'auto',
+          boxShadow: 'var(--shadow-md)',
+          marginTop: '4px'
+        }}>
+          {filteredOptions.map((opt, i) => (
+            <div
+              key={i}
+              style={{
+                padding: '10px 14px',
+                cursor: 'pointer',
+                borderBottom: i === filteredOptions.length - 1 ? 'none' : '1px solid var(--border-color)',
+                color: 'var(--text-primary)'
+              }}
+              onClick={() => {
+                setSearch(opt);
+                onChange(opt);
+                setIsOpen(false);
+                if (onSelect) onSelect(opt);
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'var(--bg-secondary)'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
+              {opt}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
 const OrderModal = ({ onClose }) => {
-  const { addOrder, clients, products } = useData();
+  const { addOrder, clients, products, addClient } = useData();
   const defaultDeadline = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const [formData, setFormData] = useState({
@@ -271,6 +300,16 @@ const OrderModal = ({ onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const existingClient = clients.find(c => c.name === formData.name);
+    if (!existingClient && formData.name) {
+      addClient({
+        name: formData.name,
+        phone: formData.mobile,
+        governorate: formData.governorate,
+        address: formData.address,
+        church: formData.church
+      });
+    }
     addOrder({
       ...formData,
       totalAmount,
@@ -319,7 +358,13 @@ const OrderModal = ({ onClose }) => {
         <form onSubmit={handleSubmit} className="form-grid">
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>الاسم</label>
-            <ClientSelect value={formData.name} onChange={handleNameChange} onClientSelect={handleNameChange} clients={clients} />
+            <CustomAutocomplete 
+              value={formData.name} 
+              onChange={(val) => handleNameChange({ target: { value: val } })} 
+              onSelect={(val) => handleNameChange({ target: { value: val } })}
+              options={clients.map(c => c.name)} 
+              placeholder="اختر العميل أو اكتب عميل جديد..." 
+            />
             
           </div>
 
@@ -354,7 +399,12 @@ const OrderModal = ({ onClose }) => {
             {formData.items.map((item, index) => (
               <div key={index} style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'flex-start' }}>
                 <div style={{ flex: 2 }}>
-                  <ProductSelect value={item.workshop} onChange={(val) => handleItemChange(index, 'workshop', val)} products={products} />
+                  <CustomAutocomplete 
+                    value={item.workshop} 
+                    onChange={(val) => handleItemChange(index, 'workshop', val)}
+                    options={products.map(p => p.name)}
+                    placeholder="اختر المنتج أو اكتب منتج آخر..."
+                  />
                 </div>
                 <div style={{ flex: 1 }}>
                   <input required type="number" min="0" value={item.unitPrice} onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)} className="input-field" placeholder="سعر الوحدة" />
