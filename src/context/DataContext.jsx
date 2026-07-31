@@ -76,6 +76,7 @@ function applyMigrations(rawData) {
   let migratedV11 = rawData.migratedV11 || false;
   let migratedV12 = rawData.migratedV12 || false;
   let migratedV15 = rawData.migratedV15 || false;
+  let migratedV16 = rawData.migratedV16 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -385,6 +386,49 @@ function applyMigrations(rawData) {
   }
 
 
+  
+  // v16 - Import latest live data from Google Sheets
+  if (!rawData.migratedV16) {
+    Object.values(fullOrdersV11).forEach(newOrder => {
+      // Find existing order by name and church
+      let existingOrder = Object.values(orders).find(o => o && o.name === newOrder.name && o.church === newOrder.church);
+      let targetId = newOrder.id;
+
+      if (existingOrder) {
+        targetId = existingOrder.id;
+        // Merge data, but force Google Sheet items and status
+        orders[targetId] = {
+          ...existingOrder,
+          items: newOrder.items,
+          status: newOrder.status,
+          totalAmount: newOrder.totalAmount,
+          paidAmount: newOrder.paidAmount,
+          remainingAmount: newOrder.remainingAmount,
+          createdBy: 'system' // mark as imported
+        };
+      } else {
+        orders[targetId] = newOrder;
+      }
+
+      // Force into correct column
+      const targetStatus = newOrder.status || 'pending';
+      let currentCol = Object.values(columns).find(c => c && c.orderIds && Array.isArray(c.orderIds) && c.orderIds.includes(targetId));
+      
+      if (currentCol && currentCol.id !== targetStatus) {
+         currentCol.orderIds = currentCol.orderIds.filter(id => id !== targetId);
+      }
+      
+      if (columns[targetStatus]) {
+         if (!columns[targetStatus].orderIds) columns[targetStatus].orderIds = [];
+         if (!columns[targetStatus].orderIds.includes(targetId)) {
+             columns[targetStatus].orderIds.unshift(targetId);
+         }
+      }
+    });
+    // Setting migratedV16 true is done outside this function (or returned)
+  }
+
+
   // always sync column titles/colors from code
   Object.keys(columns).forEach(colId => {
     if (initialColumns[colId]) {
@@ -393,7 +437,7 @@ function applyMigrations(rawData) {
     }
   });
 
-  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15 };
+  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -528,7 +572,7 @@ export const DataProvider = ({ children }) => {
           setColumns(migrated.columns);
           setArchivedOrders(migrated.archivedOrders);
           // Force save to Firebase if we migrated or restored
-          if (!data.migratedV2 || !data.migratedV11 || !data.migratedV12 || !data.migratedV15 || Object.keys(data.orders || {}).length === 0)
+          if (!data.migratedV2 || !data.migratedV11 || !data.migratedV12 || !data.migratedV15 || !data.migratedV16 || Object.keys(data.orders || {}).length === 0)
             setDoc(mainRef, migrated, { merge: true }).catch(console.error);
         } else {
           const lsOrders   = localStorage.getItem('crm_orders');
@@ -593,6 +637,21 @@ export const DataProvider = ({ children }) => {
               console.warn('Imported CLIENTS from Google Sheets');
           }
 
+          
+          // Force merge new initialClients (imported from importData.js)
+          initialClients.forEach(ic => {
+              if (!cData.find(c => c.name === ic.name)) {
+                  cData.push(ic);
+                  changedC = true;
+              } else {
+                 // Update missing fields
+                 let existing = cData.find(c => c.name === ic.name);
+                 if (ic.phone && !existing.phone) { existing.phone = ic.phone; changedC = true; }
+                 if (ic.church && !existing.church) { existing.church = ic.church; changedC = true; }
+                 if (ic.address && !existing.address) { existing.address = ic.address; changedC = true; }
+              }
+          });
+
           if (cData.length === 0) {
               cData = initialClients;
               setDoc(clientsRef, { clients: cData, chatMergedV1: true }).catch(console.error);
@@ -637,6 +696,19 @@ export const DataProvider = ({ children }) => {
               setDoc(productsRef, { products: pData }).catch(console.error);
               console.warn('Imported PRODUCTS from Google Sheets');
           }
+
+          
+          // Force merge new initialProducts (imported from importData.js)
+          initialProducts.forEach(ip => {
+              let existing = pData.find(p => p.name === ip.name);
+              if (!existing) {
+                  pData.push(ip);
+                  changedP = true;
+              } else if (existing.sellPrice === 0 && ip.sellPrice > 0) {
+                  existing.sellPrice = ip.sellPrice;
+                  changedP = true;
+              }
+          });
 
           if (pData.length === 0) {
               pData = initialProducts;
