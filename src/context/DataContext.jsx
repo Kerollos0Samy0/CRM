@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from './AuthContext';
 import initialProducts from '../data/products.json';
 import initialClients from '../data/clients.json';
+import migratedData from '../data/migrated_orders.json';
 
 const DataContext = createContext();
 
@@ -64,35 +65,49 @@ export const DataProvider = ({ children }) => {
     const savedOrders = localStorage.getItem('crm_orders');
     const savedColumns = localStorage.getItem('crm_columns');
     const savedTasks = localStorage.getItem('crm_tasks');
+    const savedArchived = localStorage.getItem('crm_archived_orders');
+    const migratedOrdersV2 = localStorage.getItem('crm_orders_migrated_v2');
     
-    if (savedOrders) {
-      const parsedOrders = JSON.parse(savedOrders);
-      // Migration for old single-item orders
-      for (const id in parsedOrders) {
-        if (!parsedOrders[id].items) {
-          if (parsedOrders[id].workshop) {
-            parsedOrders[id].items = [{ workshop: parsedOrders[id].workshop, quantity: parsedOrders[id].quantity }];
-          } else {
-            parsedOrders[id].items = [];
-          }
+    let parsedOrders = savedOrders ? JSON.parse(savedOrders) : {};
+    let parsedColumns = savedColumns ? JSON.parse(savedColumns) : { ...initialColumns };
+    let parsedArchived = savedArchived ? JSON.parse(savedArchived) : [];
+    
+    // Migration for old single-item orders
+    for (const id in parsedOrders) {
+      if (!parsedOrders[id].items) {
+        if (parsedOrders[id].workshop) {
+          parsedOrders[id].items = [{ workshop: parsedOrders[id].workshop, quantity: parsedOrders[id].quantity }];
+        } else {
+          parsedOrders[id].items = [];
         }
       }
-      setOrders(parsedOrders);
     }
-    if (savedColumns) {
-      let parsed = JSON.parse(savedColumns);
-      if (!parsed.new_order) {
-        parsed = { new_order: initialColumns.new_order, ...parsed };
-      }
-      if (!parsed.design) {
-        parsed.design = initialColumns.design;
-      }
-      setColumns(parsed);
-    }
-    if (savedTasks) setTasks(JSON.parse(savedTasks));
     
-    const savedArchived = localStorage.getItem('crm_archived_orders');
-    if (savedArchived) setArchivedOrders(JSON.parse(savedArchived));
+    if (!parsedColumns.new_order) {
+      parsedColumns = { new_order: initialColumns.new_order, ...parsedColumns };
+    }
+    if (!parsedColumns.design) {
+      parsedColumns.design = initialColumns.design;
+    }
+
+    // Merge migrated data from Google Sheets if not done yet
+    if (!migratedOrdersV2) {
+      parsedOrders = { ...parsedOrders, ...migratedData.orders };
+      
+      Object.keys(migratedData.columns).forEach(colId => {
+        if (!parsedColumns[colId]) parsedColumns[colId] = { ...initialColumns[colId] };
+        parsedColumns[colId].orderIds = [...new Set([...parsedColumns[colId].orderIds, ...migratedData.columns[colId].orderIds])];
+      });
+
+      parsedArchived = [...parsedArchived, ...migratedData.archivedOrders];
+      
+      setTimeout(() => localStorage.setItem('crm_orders_migrated_v2', 'true'), 100);
+    }
+
+    setOrders(parsedOrders);
+    setColumns(parsedColumns);
+    setArchivedOrders(parsedArchived);
+    if (savedTasks) setTasks(JSON.parse(savedTasks));
   }, []);
 
   // Save to local storage on change
