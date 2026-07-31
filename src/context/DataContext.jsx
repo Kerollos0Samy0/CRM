@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from './AuthContext';
 import { db } from '../firebase';
 import {
-  doc, onSnapshot, setDoc, getDoc
+  doc, onSnapshot, setDoc, getDoc, updateDoc
 } from 'firebase/firestore';
 import initialProducts from '../data/products.json';
 import initialClients from '../data/clients.json';
@@ -68,6 +68,7 @@ function applyMigrations(rawData) {
   let migratedV9 = rawData.migratedV9 || false;
   let migratedV10 = rawData.migratedV10 || false;
   let migratedV11 = rawData.migratedV11 || false;
+  let migratedV12 = rawData.migratedV12 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -323,7 +324,7 @@ function applyMigrations(rawData) {
     }
   });
 
-  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11 };
+  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -458,7 +459,7 @@ export const DataProvider = ({ children }) => {
           setColumns(migrated.columns);
           setArchivedOrders(migrated.archivedOrders);
           // Force save to Firebase if we migrated or restored
-          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4 || !data.migratedV5 || !data.migratedV6 || !data.migratedV7 || !data.migratedV8 || !data.migratedV9 || !data.migratedV10 || !data.migratedV11 || Object.keys(data.orders || {}).length === 0)
+          if (!data.migratedV2 || !data.migratedV11 || !data.migratedV12 || Object.keys(data.orders || {}).length === 0)
             setDoc(mainRef, migrated, { merge: true }).catch(console.error);
         } else {
           const lsOrders   = localStorage.getItem('crm_orders');
