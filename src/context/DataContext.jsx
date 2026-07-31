@@ -61,6 +61,8 @@ function normalizeOrder(o) {
 function applyMigrations(rawData) {
   let orders = { ...(rawData.orders || {}) };
   let columns = rawData.columns || { ...initialColumns };
+  // SAFEGUARD: Ensure all columns have an orderIds array
+  Object.values(columns).forEach(c => { if (!c || !c.orderIds || !Array.isArray(c.orderIds)) c.orderIds = []; });
   let archivedOrders = rawData.archivedOrders || [];
   let migratedV2 = rawData.migratedV2 || false;
   let migratedV3 = rawData.migratedV3 || false;
@@ -391,8 +393,6 @@ function applyMigrations(rawData) {
     }
   });
 
-  Object.values(columns).forEach(c => { if (!c || !c.orderIds || !Array.isArray(c.orderIds)) c.orderIds = []; });
-  Object.values(columns).forEach(c => { if (!c || !c.orderIds || !Array.isArray(c.orderIds)) c.orderIds = []; });
   return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15 };
 }
 
