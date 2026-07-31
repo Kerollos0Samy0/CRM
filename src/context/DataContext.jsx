@@ -8,19 +8,20 @@ import migratedData from '../data/migrated_orders.json';
 const DataContext = createContext();
 
 const initialColumns = {
-  new_order: { id: 'new_order', title: 'أوردر جديد', orderIds: [], color: 'var(--accent-primary)' },
-  design: { id: 'design', title: 'في التصميم', orderIds: [], color: 'var(--color-kirolos)' },
-  printing: { id: 'printing', title: 'المطبعة', orderIds: [], color: 'var(--state-printing)' },
-  church: { id: 'church', title: 'الكنيسة', orderIds: [], color: 'var(--state-church)' },
-  shipping: { id: 'shipping', title: 'شركة الشحن', orderIds: [], color: 'var(--state-shipping)' },
-  delivered: { id: 'delivered', title: 'وصول إلى العميل', orderIds: [], color: 'var(--state-delivered)' },
+  pending: { id: 'pending', title: 'مطلوبة ولسه متحضرتش', orderIds: [], color: '#48bb78' },
+  designing: { id: 'designing', title: 'جاري التصميم', orderIds: [], color: '#f6ad55' },
+  printing: { id: 'printing', title: 'في الطباعة', orderIds: [], color: '#f6e05e' },
+  received: { id: 'received', title: 'تم الاستلام من المطبعة', orderIds: [], color: '#38b2ac' },
+  ready: { id: 'ready', title: 'جاهزة وعايزة تتشحن', orderIds: [], color: '#ed8936' },
+  shipped: { id: 'shipped', title: 'في شركة الشحن', orderIds: [], color: '#4299e1' },
+  arrived: { id: 'arrived', title: 'أوردرات وصلت بنجاح', orderIds: [], color: '#9f7aea' },
 };
 
 export const DataProvider = ({ children }) => {
   const { currentUser } = useAuth();
   const [orders, setOrders] = useState({});
   const [columns, setColumns] = useState(initialColumns);
-  const [columnOrder, setColumnOrder] = useState(['new_order', 'design', 'printing', 'church', 'shipping', 'delivered']);
+  const [columnOrder, setColumnOrder] = useState(['pending', 'designing', 'printing', 'received', 'ready', 'shipped', 'arrived']);
   const [tasks, setTasks] = useState({}); // New tasks state
   const [archivedOrders, setArchivedOrders] = useState([]); // New archived orders state
   const [clients, setClients] = useState(() => {
@@ -67,6 +68,7 @@ export const DataProvider = ({ children }) => {
     const savedTasks = localStorage.getItem('crm_tasks');
     const savedArchived = localStorage.getItem('crm_archived_orders');
     const migratedOrdersV2 = localStorage.getItem('crm_orders_migrated_v2');
+    const migratedOrdersV3 = localStorage.getItem('crm_orders_migrated_v3');
     
     let parsedOrders = savedOrders ? JSON.parse(savedOrders) : {};
     let parsedColumns = savedColumns ? JSON.parse(savedColumns) : { ...initialColumns };
@@ -115,13 +117,6 @@ export const DataProvider = ({ children }) => {
       }
       if (!Array.isArray(archOrder.notes)) archOrder.notes = [];
     }
-    
-    if (!parsedColumns.new_order) {
-      parsedColumns = { new_order: initialColumns.new_order, ...parsedColumns };
-    }
-    if (!parsedColumns.design) {
-      parsedColumns.design = initialColumns.design;
-    }
 
     // Merge migrated data from Google Sheets if not done yet
     if (!migratedOrdersV2) {
@@ -135,6 +130,37 @@ export const DataProvider = ({ children }) => {
       parsedArchived = [...parsedArchived, ...migratedData.archivedOrders];
       
       setTimeout(() => localStorage.setItem('crm_orders_migrated_v2', 'true'), 100);
+    }
+    
+    // v3 Migration: update column names and order statuses to 7-column layout
+    if (!migratedOrdersV3) {
+      const colMap = {
+        'new_order': 'pending',
+        'design': 'designing',
+        'printing': 'printing',
+        'church': 'ready',
+        'shipping': 'shipped',
+        'delivered': 'arrived'
+      };
+      
+      const newCols = JSON.parse(JSON.stringify(initialColumns));
+      
+      Object.keys(parsedColumns).forEach(oldColId => {
+        const newColId = colMap[oldColId] || oldColId;
+        if (newCols[newColId] && parsedColumns[oldColId].orderIds) {
+          newCols[newColId].orderIds = [...new Set([...newCols[newColId].orderIds, ...parsedColumns[oldColId].orderIds])];
+        }
+      });
+      
+      Object.keys(parsedOrders).forEach(orderId => {
+        const order = parsedOrders[orderId];
+        if (colMap[order.status]) {
+          order.status = colMap[order.status];
+        }
+      });
+      
+      parsedColumns = newCols;
+      setTimeout(() => localStorage.setItem('crm_orders_migrated_v3', 'true'), 100);
     }
 
     setOrders(parsedOrders);
@@ -229,10 +255,10 @@ export const DataProvider = ({ children }) => {
     // Add to 'new_order' column by default
     setColumns((prev) => {
       const newColumn = {
-        ...prev.new_order,
-        orderIds: [id, ...prev.new_order.orderIds]
+        ...prev.pending,
+        orderIds: [id, ...prev.pending.orderIds]
       };
-      return { ...prev, new_order: newColumn };
+      return { ...prev, pending: newColumn };
     });
 
     // Auto deduct stock
@@ -326,7 +352,7 @@ export const DataProvider = ({ children }) => {
     finishOrderIds.splice(destinationIndex, 0, orderId);
     const newFinish = { ...finish, orderIds: finishOrderIds };
 
-    if (destinationColId === 'design' && sourceColId !== 'design') {
+    if (destinationColId === 'designing' && sourceColId !== 'designing') {
       const movedOrder = orders[orderId];
       if (movedOrder) {
         addTask({

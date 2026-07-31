@@ -216,7 +216,7 @@ const Dashboard = () => {
       {selectedOrder && (
         <OrderDetailsModal 
           order={selectedOrder} 
-          isDelivered={columns['delivered']?.orderIds.includes(selectedOrder.id)}
+          isDelivered={selectedOrder.status === 'arrived'} 
           onClose={() => setSelectedOrder(null)} 
         />
       )}
