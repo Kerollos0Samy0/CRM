@@ -65,6 +65,7 @@ function applyMigrations(rawData) {
   let migratedV7 = rawData.migratedV7 || false;
   let migratedV8 = rawData.migratedV8 || false;
   let migratedV9 = rawData.migratedV9 || false;
+  let migratedV10 = rawData.migratedV10 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -243,6 +244,34 @@ function applyMigrations(rawData) {
     migratedV9 = true;
   }
 
+  // v10 - Apply sorting to ALL orders matching the sheet (bypassing createdBy check)
+  if (!migratedV10) {
+    Object.keys(orders).forEach(orderId => {
+      const order = orders[orderId];
+      if (order) {
+        const key = order.name + '_' + order.church;
+        const updateInfo = v8OrdersUpdates[key];
+        if (updateInfo) {
+          const targetStatus = updateInfo.status;
+          
+          let currentCol = Object.values(columns).find(c => c && c.orderIds && Array.isArray(c.orderIds) && c.orderIds.includes(orderId));
+          
+          if (currentCol && currentCol.id !== targetStatus) {
+             currentCol.orderIds = currentCol.orderIds.filter(id => id !== orderId);
+          }
+          
+          if (columns[targetStatus]) {
+             if (!columns[targetStatus].orderIds) columns[targetStatus].orderIds = [];
+             if (!columns[targetStatus].orderIds.includes(orderId)) {
+                 columns[targetStatus].orderIds.unshift(orderId);
+             }
+          }
+        }
+      }
+    });
+    migratedV10 = true;
+  }
+
   // always sync column titles/colors from code
   Object.keys(columns).forEach(colId => {
     if (initialColumns[colId]) {
@@ -251,7 +280,7 @@ function applyMigrations(rawData) {
     }
   });
 
-  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9 };
+  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -393,7 +422,7 @@ export const DataProvider = ({ children }) => {
           setColumns(migrated.columns);
           setArchivedOrders(migrated.archivedOrders);
           // Force save to Firebase if we migrated or restored
-          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4 || !data.migratedV5 || !data.migratedV6 || !data.migratedV7 || !data.migratedV8 || !data.migratedV9 || Object.keys(data.orders || {}).length === 0)
+          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4 || !data.migratedV5 || !data.migratedV6 || !data.migratedV7 || !data.migratedV8 || !data.migratedV9 || !data.migratedV10 || Object.keys(data.orders || {}).length === 0)
             setDoc(mainRef, migrated, { merge: true }).catch(console.error);
         } else {
           const lsOrders   = localStorage.getItem('crm_orders');
