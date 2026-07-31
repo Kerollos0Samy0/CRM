@@ -7,18 +7,34 @@ import OrderDetailsModal from '../components/OrderDetailsModal';
 const Archive = () => {
   const { archivedOrders } = useData();
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterGov, setFilterGov] = useState('');
+  const [filterChurch, setFilterChurch] = useState('');
+  const [filterProduct, setFilterProduct] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const filteredOrders = (archivedOrders || []).filter(order => 
-    order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.church.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.mobile.includes(searchTerm) ||
-    order.governorate.includes(searchTerm)
-  );
+  const uniqueGovs = [...new Set((archivedOrders || []).map(o => o.governorate).filter(Boolean))].sort();
+  const uniqueChurches = [...new Set((archivedOrders || []).map(o => o.church).filter(Boolean))].sort();
+  const uniqueProducts = [...new Set((archivedOrders || []).flatMap(o => o.items?.map(i => i.workshop)).filter(Boolean))].sort();
+
+  const filteredOrders = (archivedOrders || []).filter(order => {
+    const search = searchTerm.toLowerCase();
+    const matchesSearch = 
+      (order.name || '').toLowerCase().includes(search) ||
+      (order.church || '').toLowerCase().includes(search) ||
+      (order.mobile || '').includes(search) ||
+      (order.governorate || '').includes(search) ||
+      (order.items || []).some(i => (i.workshop || '').toLowerCase().includes(search));
+      
+    const matchesGov = filterGov ? order.governorate === filterGov : true;
+    const matchesChurch = filterChurch ? order.church === filterChurch : true;
+    const matchesProduct = filterProduct ? (order.items || []).some(i => i.workshop === filterProduct) : true;
+
+    return matchesSearch && matchesGov && matchesChurch && matchesProduct;
+  });
 
   return (
     <div className="page-container">
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div>
           <h1 className="heading-xl">الأرشيف (شيت)</h1>
           <p className="text-secondary" style={{ marginTop: '8px' }}>
@@ -30,13 +46,31 @@ const Archive = () => {
           <Search size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input 
             type="text" 
-            placeholder="بحث بالاسم، الكنيسة، أو الموبايل..." 
+            placeholder="بحث شامل..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="input-field"
             style={{ paddingRight: '40px' }}
           />
         </div>
+      </div>
+      
+      {/* Filters Bar */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <select value={filterGov} onChange={e => setFilterGov(e.target.value)} className="input-field" style={{ width: '200px' }}>
+          <option value="">كل المحافظات</option>
+          {uniqueGovs.map(gov => <option key={gov} value={gov}>{gov}</option>)}
+        </select>
+        
+        <select value={filterChurch} onChange={e => setFilterChurch(e.target.value)} className="input-field" style={{ width: '200px' }}>
+          <option value="">كل الكنائس</option>
+          {uniqueChurches.map(ch => <option key={ch} value={ch}>{ch}</option>)}
+        </select>
+        
+        <select value={filterProduct} onChange={e => setFilterProduct(e.target.value)} className="input-field" style={{ width: '200px' }}>
+          <option value="">كل المنتجات</option>
+          {uniqueProducts.map(prod => <option key={prod} value={prod}>{prod}</option>)}
+        </select>
       </div>
 
       <div className="card" style={{ padding: '0', overflowX: 'auto' }}>
@@ -49,7 +83,7 @@ const Archive = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
             <thead>
               <tr style={{ background: 'var(--bg-secondary)', borderBottom: '2px solid var(--border-color)' }}>
-                <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>تاريخ الأرشفة</th>
+                <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>تاريخ الطلب</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>العميل / الكنيسة</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>بيانات التواصل</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المنتجات</th>
@@ -70,7 +104,7 @@ const Archive = () => {
                   <td style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Calendar size={14} />
-                      {new Date(order.archivedAt || order.createdAt).toLocaleDateString('ar-EG')}
+                      {new Date(order.createdAt).toLocaleDateString('ar-EG')}
                     </div>
                   </td>
                   <td style={{ padding: '16px' }}>
@@ -93,7 +127,7 @@ const Archive = () => {
                     </div>
                   </td>
                   <td style={{ padding: '16px', fontWeight: 'bold', color: 'var(--color-marina)' }}>
-                    {order.totalAmount} ج.م
+                    {order.totalAmount || order.total || 0} ج.م
                   </td>
                 </motion.tr>
               ))}
