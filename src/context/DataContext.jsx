@@ -12,7 +12,7 @@ const initialColumns = {
   pending: { id: 'pending', title: 'مطلوبة ولسه متحضرتش', orderIds: [], color: '#48bb78' },
   designing: { id: 'designing', title: 'جاري التصميم', orderIds: [], color: '#f6ad55' },
   printing: { id: 'printing', title: 'في الطباعة', orderIds: [], color: '#f6e05e' },
-  received: { id: 'received', title: 'تم الاستلام من المطبعة', orderIds: [], color: '#38b2ac' },
+  received: { id: 'received', title: 'في الكنيسة', orderIds: [], color: '#38b2ac' },
   ready: { id: 'ready', title: 'جاهزة وعايزة تتشحن', orderIds: [], color: '#ed8936' },
   shipped: { id: 'shipped', title: 'في شركة الشحن', orderIds: [], color: '#4299e1' },
   arrived: { id: 'arrived', title: 'أوردرات وصلت بنجاح', orderIds: [], color: '#9f7aea' },
@@ -226,6 +226,14 @@ export const DataProvider = ({ children }) => {
       
       setTimeout(() => localStorage.setItem('crm_orders_migrated_v4', 'true'), 100);
     }
+
+    // Always sync titles and colors from code so they update if we change them
+    Object.keys(parsedColumns).forEach(colId => {
+      if (initialColumns[colId]) {
+        parsedColumns[colId].title = initialColumns[colId].title;
+        parsedColumns[colId].color = initialColumns[colId].color;
+      }
+    });
 
     setOrders(parsedOrders);
     setColumns(parsedColumns);
