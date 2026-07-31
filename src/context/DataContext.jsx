@@ -5,6 +5,7 @@ import initialProducts from '../data/products.json';
 import initialClients from '../data/clients.json';
 import migratedData from '../data/migrated_orders.json';
 import migrationV4Data from '../data/migration_v4_data.json';
+import chatClients from '../data/clients_from_chat.json';
 
 const DataContext = createContext();
 
@@ -27,7 +28,31 @@ export const DataProvider = ({ children }) => {
   const [archivedOrders, setArchivedOrders] = useState([]); // New archived orders state
   const [clients, setClients] = useState(() => {
     const saved = localStorage.getItem('crm_clients');
-    return saved ? JSON.parse(saved) : initialClients;
+    const migratedChat = localStorage.getItem('crm_clients_chat_v1');
+    let currentClients = saved ? JSON.parse(saved) : initialClients;
+
+    if (!migratedChat) {
+      const merged = [...currentClients];
+      chatClients.forEach(chatClient => {
+         const existing = merged.find(c => 
+           (c.name && chatClient.name && c.name.trim() === chatClient.name.trim()) || 
+           (c.phone && chatClient.phone && c.phone === chatClient.phone)
+         );
+         
+         if (existing) {
+             if (!existing.phone && chatClient.phone) existing.phone = chatClient.phone;
+             if (!existing.church && chatClient.church) existing.church = chatClient.church;
+             if (!existing.address && chatClient.address) existing.address = chatClient.address;
+             if (!existing.governorate && chatClient.governorate) existing.governorate = chatClient.governorate;
+         } else {
+             merged.push({ id: uuidv4(), ...chatClient });
+         }
+      });
+      currentClients = merged;
+      setTimeout(() => localStorage.setItem('crm_clients_chat_v1', 'true'), 100);
+    }
+    
+    return currentClients;
   });
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem('crm_products');
