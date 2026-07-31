@@ -40,6 +40,7 @@ function normalizeOrder(o) {
   if (o.clientName && !o.name)       o.name        = o.clientName;
   if (o.phone !== undefined && !o.mobile) o.mobile  = String(o.phone);
   if (o.government && !o.governorate) o.governorate = o.government;
+  if (o.gov && !o.governorate) o.governorate = o.gov;
   if (typeof o.notes === 'string') { o.orderNotes = o.notes; o.notes = []; }
   if (!Array.isArray(o.notes)) o.notes = [];
   if (o.items) {

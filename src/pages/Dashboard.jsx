@@ -171,7 +171,7 @@ const Dashboard = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                             <MapPin size={14} />
-                            <span>{order.governorate}</span>
+                            <span>{order.governorate || ''} {order.region ? `- ${order.region}` : ''}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                             <Hash size={14} style={{ marginTop: '3px' }} />
