@@ -115,10 +115,12 @@ function applyMigrations(rawData) {
     
     Object.values(excelOrders).forEach(newOrder => {
       // Check if it already exists by name/church to prevent duplicates if ran twice somehow
-      const exists = Object.values(orders).find(o => o.name === newOrder.name && o.church === newOrder.church);
+      const exists = Object.values(orders).find(o => o && o.name === newOrder.name && o.church === newOrder.church);
       if (!exists) {
         orders[newOrder.id] = newOrder;
-        columns.pending.orderIds.unshift(newOrder.id);
+        if (columns.pending && columns.pending.orderIds) {
+          columns.pending.orderIds.unshift(newOrder.id);
+        }
       }
     });
     migratedV5 = true;
@@ -135,13 +137,14 @@ function applyMigrations(rawData) {
           const targetStatus = updateInfo.status; // 'received', 'shipped', 'ready', 'arrived'
           
           // Find which column this order is currently in
-          let currentCol = Object.values(columns).find(c => c.orderIds.includes(orderId));
+          let currentCol = Object.values(columns).find(c => c && c.orderIds && Array.isArray(c.orderIds) && c.orderIds.includes(orderId));
           if (currentCol && currentCol.id !== targetStatus) {
              // Remove from current column
              currentCol.orderIds = currentCol.orderIds.filter(id => id !== orderId);
              
              // Add to target column
              if (columns[targetStatus]) {
+                if (!columns[targetStatus].orderIds) columns[targetStatus].orderIds = [];
                 columns[targetStatus].orderIds.unshift(orderId);
              }
           }
