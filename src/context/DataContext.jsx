@@ -156,150 +156,69 @@ export const DataProvider = ({ children }) => {
   const productsRef = doc(db, 'crm', 'products');
   const ledgerRef   = doc(db, 'crm', 'ledger');
 
+  // ── helper: wrap any promise with a timeout ──────────────────────────────
+  function withTimeout(promise, ms = 5000) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('firestore_timeout')), ms))
+    ]);
+  }
+
+  // ── helper: load everything from localStorage ─────────────────────────────
+  function loadFromLocalStorage() {
+    const lsOrders   = localStorage.getItem('crm_orders');
+    const lsCols     = localStorage.getItem('crm_columns');
+    const lsArchived = localStorage.getItem('crm_archived_orders');
+    const lsTasks    = localStorage.getItem('crm_tasks');
+    const lsClients  = localStorage.getItem('crm_clients');
+    const lsProducts = localStorage.getItem('crm_products');
+    const lsTx       = localStorage.getItem('crm_transactions');
+    const raw = {
+      orders:         lsOrders   ? JSON.parse(lsOrders)   : {},
+      columns:        lsCols     ? JSON.parse(lsCols)      : { ...initialColumns },
+      archivedOrders: lsArchived ? JSON.parse(lsArchived)  : [],
+    };
+    const migrated = applyMigrations(raw);
+    setOrders(migrated.orders);
+    setColumns(migrated.columns);
+    setArchivedOrders(migrated.archivedOrders);
+    setTasks(lsTasks    ? JSON.parse(lsTasks)    : {});
+    setClients(lsClients  ? JSON.parse(lsClients)  : initialClients);
+    setProducts(lsProducts ? JSON.parse(lsProducts) : initialProducts);
+    setTransactions(lsTx ? JSON.parse(lsTx) : []);
+    initialised.current = true;
+    setLoading(false);
+    console.warn('⚠️ Using localStorage (Firestore unavailable)');
+  }
+
   // ── LOAD FROM FIRESTORE (once on mount) ──────────────────────────────────
   useEffect(() => {
     let unsubMain, unsubTasks, unsubClients, unsubProducts, unsubLedger;
-    let timedOut = false;
-
-    // ── Fallback: load from localStorage if Firestore takes too long ──
-    const fallbackTimer = setTimeout(() => {
-      if (!initialised.current) {
-        timedOut = true;
-        console.warn('Firestore timeout – falling back to localStorage');
-        const lsOrders   = localStorage.getItem('crm_orders');
-        const lsCols     = localStorage.getItem('crm_columns');
-        const lsArchived = localStorage.getItem('crm_archived_orders');
-        const lsTasks    = localStorage.getItem('crm_tasks');
-        const lsClients  = localStorage.getItem('crm_clients');
-        const lsProducts = localStorage.getItem('crm_products');
-        const lsTx       = localStorage.getItem('crm_transactions');
-        const raw = {
-          orders:         lsOrders   ? JSON.parse(lsOrders)   : {},
-          columns:        lsCols     ? JSON.parse(lsCols)      : { ...initialColumns },
-          archivedOrders: lsArchived ? JSON.parse(lsArchived)  : [],
-        };
-        const migrated = applyMigrations(raw);
-        setOrders(migrated.orders);
-        setColumns(migrated.columns);
-        setArchivedOrders(migrated.archivedOrders);
-        setTasks(lsTasks    ? JSON.parse(lsTasks)    : {});
-        setClients(lsClients  ? JSON.parse(lsClients)  : initialClients);
-        setProducts(lsProducts ? JSON.parse(lsProducts) : initialProducts);
-        setTransactions(lsTx ? JSON.parse(lsTx) : []);
-        initialised.current = true;
-        setLoading(false);
-      }
-    }, 8000);
 
     async function bootstrap() {
       try {
-      // --- MAIN (orders / columns / archived) ---
-      const mainSnap = await getDoc(mainRef);
-      if (mainSnap.exists()) {
-        const data = mainSnap.data();
-        const migrated = applyMigrations(data);
-        setOrders(migrated.orders);
-        setColumns(migrated.columns);
-        setArchivedOrders(migrated.archivedOrders);
-        // save migrated flags back if any migration ran
-        if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4) {
-          await setDoc(mainRef, migrated, { merge: true });
-        }
-      } else {
-        // First time ever – pull from localStorage (migration from old app)
-        const lsOrders   = localStorage.getItem('crm_orders');
-        const lsCols     = localStorage.getItem('crm_columns');
-        const lsArchived = localStorage.getItem('crm_archived_orders');
-        const raw = {
-          orders:         lsOrders   ? JSON.parse(lsOrders)   : {},
-          columns:        lsCols     ? JSON.parse(lsCols)      : { ...initialColumns },
-          archivedOrders: lsArchived ? JSON.parse(lsArchived)  : [],
-        };
-        const migrated = applyMigrations(raw);
-        await setDoc(mainRef, migrated);
-        setOrders(migrated.orders);
-        setColumns(migrated.columns);
-        setArchivedOrders(migrated.archivedOrders);
-      }
+        // Each getDoc has a 5-second timeout — if it hangs, throws 'firestore_timeout'
+        const [mainSnap, tasksSnap, clientsSnap, productsSnap, ledgerSnap] = await withTimeout(
+          Promise.all([
+            getDoc(mainRef),
+            getDoc(tasksRef),
+            getDoc(clientsRef),
+            getDoc(productsRef),
+            getDoc(ledgerRef),
+          ]),
+          5000
+        );
 
-      // --- TASKS ---
-      const tasksSnap = await getDoc(tasksRef);
-      if (tasksSnap.exists()) {
-        setTasks(tasksSnap.data().tasks || {});
-      } else {
-        const lsTasks = localStorage.getItem('crm_tasks');
-        const t = lsTasks ? JSON.parse(lsTasks) : {};
-        await setDoc(tasksRef, { tasks: t });
-        setTasks(t);
-      }
-
-      // --- CLIENTS ---
-      const clientsSnap = await getDoc(clientsRef);
-      if (clientsSnap.exists()) {
-        setClients(clientsSnap.data().clients || []);
-      } else {
-        const lsClients = localStorage.getItem('crm_clients');
-        let c = lsClients ? JSON.parse(lsClients) : initialClients;
-        c = mergeClientsWithChat(c);
-        await setDoc(clientsRef, { clients: c, chatMergedV1: true });
-        setClients(c);
-      }
-
-      // --- PRODUCTS ---
-      const productsSnap = await getDoc(productsRef);
-      if (productsSnap.exists()) {
-        setProducts(productsSnap.data().products || []);
-      } else {
-        const lsProducts = localStorage.getItem('crm_products');
-        const p = lsProducts ? JSON.parse(lsProducts) : initialProducts;
-        await setDoc(productsRef, { products: p });
-        setProducts(p);
-      }
-
-      // --- LEDGER ---
-      const ledgerSnap = await getDoc(ledgerRef);
-      if (ledgerSnap.exists()) {
-        setTransactions(ledgerSnap.data().transactions || []);
-      } else {
-        const lsTx = localStorage.getItem('crm_transactions');
-        const tx = lsTx ? JSON.parse(lsTx) : [];
-        await setDoc(ledgerRef, { transactions: tx });
-        setTransactions(tx);
-      }
-
-      clearTimeout(fallbackTimer);
-      initialised.current = true;
-      setLoading(false);
-
-      // ── REAL-TIME LISTENERS ─────────────────────────────────────────────
-      unsubMain = onSnapshot(mainRef, snap => {
-        if (!snap.exists() || !initialised.current) return;
-        const d = snap.data();
-        setOrders(d.orders || {});
-        setColumns(d.columns || initialColumns);
-        setArchivedOrders(d.archivedOrders || []);
-      });
-      unsubTasks = onSnapshot(tasksRef, snap => {
-        if (!snap.exists() || !initialised.current) return;
-        setTasks(snap.data().tasks || {});
-      });
-      unsubClients = onSnapshot(clientsRef, snap => {
-        if (!snap.exists() || !initialised.current) return;
-        setClients(snap.data().clients || []);
-      });
-      unsubProducts = onSnapshot(productsRef, snap => {
-        if (!snap.exists() || !initialised.current) return;
-        setProducts(snap.data().products || []);
-      });
-      unsubLedger = onSnapshot(ledgerRef, snap => {
-        if (!snap.exists() || !initialised.current) return;
-        setTransactions(snap.data().transactions || []);
-      });
-      } catch (err) {
-        console.error('Firestore error:', err);
-        clearTimeout(fallbackTimer);
-        if (!initialised.current) {
-          // fallback to localStorage immediately on error
+        // --- MAIN ---
+        if (mainSnap.exists()) {
+          const data = mainSnap.data();
+          const migrated = applyMigrations(data);
+          setOrders(migrated.orders);
+          setColumns(migrated.columns);
+          setArchivedOrders(migrated.archivedOrders);
+          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4)
+            setDoc(mainRef, migrated, { merge: true }).catch(console.error);
+        } else {
           const lsOrders   = localStorage.getItem('crm_orders');
           const lsCols     = localStorage.getItem('crm_columns');
           const lsArchived = localStorage.getItem('crm_archived_orders');
@@ -309,25 +228,79 @@ export const DataProvider = ({ children }) => {
             archivedOrders: lsArchived ? JSON.parse(lsArchived)  : [],
           };
           const migrated = applyMigrations(raw);
-          setOrders(migrated.orders); setColumns(migrated.columns); setArchivedOrders(migrated.archivedOrders);
-          const lsTasks = localStorage.getItem('crm_tasks');
-          const lsClients = localStorage.getItem('crm_clients');
-          const lsProducts = localStorage.getItem('crm_products');
-          const lsTx = localStorage.getItem('crm_transactions');
-          setTasks(lsTasks ? JSON.parse(lsTasks) : {});
-          setClients(lsClients ? JSON.parse(lsClients) : initialClients);
-          setProducts(lsProducts ? JSON.parse(lsProducts) : initialProducts);
-          setTransactions(lsTx ? JSON.parse(lsTx) : []);
-          initialised.current = true;
-          setLoading(false);
+          setDoc(mainRef, migrated).catch(console.error);
+          setOrders(migrated.orders);
+          setColumns(migrated.columns);
+          setArchivedOrders(migrated.archivedOrders);
         }
+
+        // --- TASKS ---
+        if (tasksSnap.exists()) {
+          setTasks(tasksSnap.data().tasks || {});
+        } else {
+          const lsTasks = localStorage.getItem('crm_tasks');
+          const t = lsTasks ? JSON.parse(lsTasks) : {};
+          setDoc(tasksRef, { tasks: t }).catch(console.error);
+          setTasks(t);
+        }
+
+        // --- CLIENTS ---
+        if (clientsSnap.exists()) {
+          setClients(clientsSnap.data().clients || []);
+        } else {
+          const lsClients = localStorage.getItem('crm_clients');
+          let c = lsClients ? JSON.parse(lsClients) : initialClients;
+          c = mergeClientsWithChat(c);
+          setDoc(clientsRef, { clients: c, chatMergedV1: true }).catch(console.error);
+          setClients(c);
+        }
+
+        // --- PRODUCTS ---
+        if (productsSnap.exists()) {
+          setProducts(productsSnap.data().products || []);
+        } else {
+          const lsProducts = localStorage.getItem('crm_products');
+          const p = lsProducts ? JSON.parse(lsProducts) : initialProducts;
+          setDoc(productsRef, { products: p }).catch(console.error);
+          setProducts(p);
+        }
+
+        // --- LEDGER ---
+        if (ledgerSnap.exists()) {
+          setTransactions(ledgerSnap.data().transactions || []);
+        } else {
+          const lsTx = localStorage.getItem('crm_transactions');
+          const tx = lsTx ? JSON.parse(lsTx) : [];
+          setDoc(ledgerRef, { transactions: tx }).catch(console.error);
+          setTransactions(tx);
+        }
+
+        initialised.current = true;
+        setLoading(false);
+        console.log('✅ Loaded from Firestore');
+
+        // ── REAL-TIME LISTENERS ──────────────────────────────────────────
+        unsubMain = onSnapshot(mainRef, snap => {
+          if (!snap.exists() || !initialised.current) return;
+          const d = snap.data();
+          setOrders(d.orders || {});
+          setColumns(d.columns || initialColumns);
+          setArchivedOrders(d.archivedOrders || []);
+        });
+        unsubTasks    = onSnapshot(tasksRef,    snap => { if (snap.exists() && initialised.current) setTasks(snap.data().tasks || {}); });
+        unsubClients  = onSnapshot(clientsRef,  snap => { if (snap.exists() && initialised.current) setClients(snap.data().clients || []); });
+        unsubProducts = onSnapshot(productsRef, snap => { if (snap.exists() && initialised.current) setProducts(snap.data().products || []); });
+        unsubLedger   = onSnapshot(ledgerRef,   snap => { if (snap.exists() && initialised.current) setTransactions(snap.data().transactions || []); });
+
+      } catch (err) {
+        console.error('Firestore unavailable, using localStorage:', err.message);
+        if (!initialised.current) loadFromLocalStorage();
       }
     }
 
     bootstrap();
 
     return () => {
-      clearTimeout(fallbackTimer);
       unsubMain?.();
       unsubTasks?.();
       unsubClients?.();
