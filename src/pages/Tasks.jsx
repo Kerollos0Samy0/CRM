@@ -18,7 +18,10 @@ const Tasks = () => {
     setFormData({ title: '', description: '', assigneeId: '' });
   };
 
-  const tasksList = Object.values(tasks);
+  const isAdmin = ['kirolos', 'marina', 'abouna'].includes(currentUser.id);
+  const tasksList = Object.values(tasks).filter(task => 
+    isAdmin || task.assigneeId === currentUser.id || task.assignerId === currentUser.id
+  );
   
   const getTasksByStatus = (status) => tasksList.filter(t => t.status === status);
   const todoTasks = getTasksByStatus('todo');
