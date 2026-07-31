@@ -72,42 +72,46 @@ const Layout = ({ children }) => {
               <Package size={18} />
               المخزن
             </button>
-            <button 
-              className="btn"
-              onClick={() => navigate('/analytics')}
-              style={{ 
-                padding: '8px 16px', fontSize: '0.9rem',
-                background: location.pathname === '/analytics' ? 'var(--bg-glass-hover)' : 'transparent',
-                color: location.pathname === '/analytics' ? 'var(--accent-primary)' : 'var(--text-secondary)'
-              }}
-            >
-              <PieChart size={18} />
-              الإحصائيات
-            </button>
-            <button 
-              className="btn"
-              onClick={() => navigate('/ledger')}
-              style={{ 
-                padding: '8px 16px', fontSize: '0.9rem',
-                background: location.pathname === '/ledger' ? 'var(--bg-glass-hover)' : 'transparent',
-                color: location.pathname === '/ledger' ? 'var(--accent-primary)' : 'var(--text-secondary)'
-              }}
-            >
-              <Wallet size={18} />
-              الحسابات
-            </button>
-            <button 
-              className="btn"
-              onClick={() => navigate('/archive')}
-              style={{ 
-                padding: '8px 16px', fontSize: '0.9rem',
-                background: location.pathname === '/archive' ? 'var(--bg-glass-hover)' : 'transparent',
-                color: location.pathname === '/archive' ? 'var(--accent-primary)' : 'var(--text-secondary)'
-              }}
-            >
-              <Archive size={18} />
-              الأرشيف
-            </button>
+            {(currentUser.id === 'kirolos' || currentUser.id === 'marina') && (
+              <>
+                <button 
+                  className="btn"
+                  onClick={() => navigate('/analytics')}
+                  style={{ 
+                    padding: '8px 16px', fontSize: '0.9rem',
+                    background: location.pathname === '/analytics' ? 'var(--bg-glass-hover)' : 'transparent',
+                    color: location.pathname === '/analytics' ? 'var(--accent-primary)' : 'var(--text-secondary)'
+                  }}
+                >
+                  <PieChart size={18} />
+                  الإحصائيات
+                </button>
+                <button 
+                  className="btn"
+                  onClick={() => navigate('/ledger')}
+                  style={{ 
+                    padding: '8px 16px', fontSize: '0.9rem',
+                    background: location.pathname === '/ledger' ? 'var(--bg-glass-hover)' : 'transparent',
+                    color: location.pathname === '/ledger' ? 'var(--accent-primary)' : 'var(--text-secondary)'
+                  }}
+                >
+                  <Wallet size={18} />
+                  الحسابات
+                </button>
+                <button 
+                  className="btn"
+                  onClick={() => navigate('/archive')}
+                  style={{ 
+                    padding: '8px 16px', fontSize: '0.9rem',
+                    background: location.pathname === '/archive' ? 'var(--bg-glass-hover)' : 'transparent',
+                    color: location.pathname === '/archive' ? 'var(--accent-primary)' : 'var(--text-secondary)'
+                  }}
+                >
+                  <Archive size={18} />
+                  الأرشيف
+                </button>
+              </>
+            )}
           </div>
         </div>
 
