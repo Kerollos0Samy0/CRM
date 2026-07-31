@@ -72,7 +72,7 @@ const Layout = ({ children }) => {
               <Package size={18} />
               المخزن
             </button>
-            {(currentUser.id === 'kirolos' || currentUser.id === 'marina') && (
+            {(currentUser.id === 'kirolos' || currentUser.id === 'marina' || currentUser.id === 'abouna') && (
               <>
                 <button 
                   className="btn"
