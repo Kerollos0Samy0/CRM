@@ -84,7 +84,7 @@ function applyMigrations(rawData) {
   let migratedV17 = rawData.migratedV17 || false;
   let migratedV18 = rawData.migratedV18 || false;
   let migratedV19 = rawData.migratedV19 || false;
-  let migratedV22 = rawData.migratedV22 || false;
+  let migratedV23 = rawData.migratedV23 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -488,7 +488,7 @@ function applyMigrations(rawData) {
   }
 
   // v20 - Restore original dates and group by 7 days
-  if (!rawData.migratedV22) {
+  if (!rawData.migratedV23) {
     if (fixedOrdersV20 && fixedOrdersV20.active) {
       orders = {};
       Object.keys(columns).forEach(colId => { columns[colId].orderIds = []; });
@@ -507,10 +507,10 @@ function applyMigrations(rawData) {
           archivedOrders = fixedOrdersV20.archived.map(o => normalizeOrder(o));
       }
     }
-    migratedV22 = true;
+    migratedV23 = true;
   }
 
-  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV19, migratedV22, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
+  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV19, migratedV23, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -878,15 +878,15 @@ export const DataProvider = ({ children }) => {
     if (!initialised.current) return;
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true, migratedV22: true }, { merge: false }).catch(console.error);
+      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true, migratedV23: true }, { merge: true }).catch(console.error);
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
 
-  useEffect(() => { if (initialised.current) setDoc(tasksRef,    { tasks },        { merge: false }).catch(console.error); }, [tasks]);       // eslint-disable-line
-  useEffect(() => { if (initialised.current) setDoc(clientsRef,  { clients },      { merge: false }).catch(console.error); }, [clients]);     // eslint-disable-line
-  useEffect(() => { if (initialised.current) setDoc(productsRef, { products },     { merge: false }).catch(console.error); }, [products]);    // eslint-disable-line
-  useEffect(() => { if (initialised.current) setDoc(ledgerRef,   { transactions }, { merge: false }).catch(console.error); }, [transactions]);// eslint-disable-line
-  useEffect(() => { if (initialised.current) setDoc(suppliesRef, { supplies },     { merge: false }).catch(console.error); }, [supplies]);    // eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(tasksRef,    { tasks },        { merge: true }).catch(console.error); }, [tasks]);       // eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(clientsRef,  { clients },      { merge: true }).catch(console.error); }, [clients]);     // eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(productsRef, { products },     { merge: true }).catch(console.error); }, [products]);    // eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(ledgerRef,   { transactions }, { merge: true }).catch(console.error); }, [transactions]);// eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(suppliesRef, { supplies },     { merge: true }).catch(console.error); }, [supplies]);    // eslint-disable-line
 
   // ── TASKS ────────────────────────────────────────────────────────────────
   const addTask = (taskData) => {
