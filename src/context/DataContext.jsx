@@ -221,12 +221,30 @@ export const DataProvider = ({ children }) => {
 
         // --- MAIN ---
         if (mainSnap.exists()) {
-          const data = mainSnap.data();
+          let data = mainSnap.data();
+          
+          // Emergency Restore: If Firebase is empty but local storage has data, restore it
+          const lsOrdersRaw = localStorage.getItem('crm_orders');
+          if (lsOrdersRaw && Object.keys(data.orders || {}).length === 0) {
+              const parsedLsOrders = JSON.parse(lsOrdersRaw);
+              if (Object.keys(parsedLsOrders).length > 0) {
+                  const lsCols = localStorage.getItem('crm_columns');
+                  const lsArchived = localStorage.getItem('crm_archived_orders');
+                  data = {
+                      orders: parsedLsOrders,
+                      columns: lsCols ? JSON.parse(lsCols) : { ...initialColumns },
+                      archivedOrders: lsArchived ? JSON.parse(lsArchived) : []
+                  };
+                  console.warn('Restored MAIN data from localStorage to Firebase');
+              }
+          }
+
           const migrated = applyMigrations(data);
           setOrders(migrated.orders);
           setColumns(migrated.columns);
           setArchivedOrders(migrated.archivedOrders);
-          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4)
+          // Force save to Firebase if we migrated or restored
+          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4 || Object.keys(data.orders || {}).length === 0)
             setDoc(mainRef, migrated, { merge: true }).catch(console.error);
         } else {
           const lsOrders   = localStorage.getItem('crm_orders');
@@ -246,7 +264,17 @@ export const DataProvider = ({ children }) => {
 
         // --- TASKS ---
         if (tasksSnap.exists()) {
-          setTasks(tasksSnap.data().tasks || {});
+          let tData = tasksSnap.data().tasks || {};
+          const lsTasksRaw = localStorage.getItem('crm_tasks');
+          if (lsTasksRaw && Object.keys(tData).length === 0) {
+              const parsedLsTasks = JSON.parse(lsTasksRaw);
+              if (Object.keys(parsedLsTasks).length > 0) {
+                  tData = parsedLsTasks;
+                  setDoc(tasksRef, { tasks: tData }).catch(console.error);
+                  console.warn('Restored TASKS from localStorage');
+              }
+          }
+          setTasks(tData);
         } else {
           const lsTasks = localStorage.getItem('crm_tasks');
           const t = lsTasks ? JSON.parse(lsTasks) : {};
@@ -256,7 +284,17 @@ export const DataProvider = ({ children }) => {
 
         // --- CLIENTS ---
         if (clientsSnap.exists()) {
-          setClients(clientsSnap.data().clients || []);
+          let cData = clientsSnap.data().clients || [];
+          const lsClientsRaw = localStorage.getItem('crm_clients');
+          if (lsClientsRaw && cData.length === 0) {
+              const parsedLsClients = JSON.parse(lsClientsRaw);
+              if (parsedLsClients.length > 0) {
+                  cData = parsedLsClients;
+                  setDoc(clientsRef, { clients: cData, chatMergedV1: true }).catch(console.error);
+                  console.warn('Restored CLIENTS from localStorage');
+              }
+          }
+          setClients(cData);
         } else {
           const lsClients = localStorage.getItem('crm_clients');
           let c = lsClients ? JSON.parse(lsClients) : initialClients;
@@ -267,7 +305,17 @@ export const DataProvider = ({ children }) => {
 
         // --- PRODUCTS ---
         if (productsSnap.exists()) {
-          setProducts(productsSnap.data().products || []);
+          let pData = productsSnap.data().products || [];
+          const lsProductsRaw = localStorage.getItem('crm_products');
+          if (lsProductsRaw && pData.length === 0) {
+              const parsedLsProducts = JSON.parse(lsProductsRaw);
+              if (parsedLsProducts.length > 0) {
+                  pData = parsedLsProducts;
+                  setDoc(productsRef, { products: pData }).catch(console.error);
+                  console.warn('Restored PRODUCTS from localStorage');
+              }
+          }
+          setProducts(pData);
         } else {
           const lsProducts = localStorage.getItem('crm_products');
           const p = lsProducts ? JSON.parse(lsProducts) : initialProducts;
@@ -277,7 +325,17 @@ export const DataProvider = ({ children }) => {
 
         // --- LEDGER ---
         if (ledgerSnap.exists()) {
-          setTransactions(ledgerSnap.data().transactions || []);
+          let txData = ledgerSnap.data().transactions || [];
+          const lsTxRaw = localStorage.getItem('crm_transactions');
+          if (lsTxRaw && txData.length === 0) {
+              const parsedLsTx = JSON.parse(lsTxRaw);
+              if (parsedLsTx.length > 0) {
+                  txData = parsedLsTx;
+                  setDoc(ledgerRef, { transactions: txData }).catch(console.error);
+                  console.warn('Restored LEDGER from localStorage');
+              }
+          }
+          setTransactions(txData);
         } else {
           const lsTx = localStorage.getItem('crm_transactions');
           const tx = lsTx ? JSON.parse(lsTx) : [];
