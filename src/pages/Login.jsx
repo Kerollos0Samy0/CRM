@@ -73,8 +73,8 @@ const Login = () => {
                       border: '1px solid var(--border-color)',
                       borderRadius: 'var(--radius-md)',
                       cursor: 'pointer',
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      color: 'white',
+                      background: 'white',
+                      color: 'var(--text-primary)',
                       fontSize: '1.1rem',
                       fontWeight: '600',
                       gap: '16px'
