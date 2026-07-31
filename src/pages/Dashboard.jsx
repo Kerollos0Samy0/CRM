@@ -95,9 +95,15 @@ const Dashboard = () => {
               padding: '2px 8px',
               borderRadius: '12px',
               fontSize: '0.8rem',
-              border: '1px solid var(--border-color)'
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
             }}>
-              {columnOrders.length}
+              <span style={{ fontWeight: 'bold' }}>{columnOrders.length} أوردر</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                {columnOrders.reduce((sum, o) => sum + (o.items?.length || 1), 0)} منتج
+              </span>
             </div>
           </div>
         </div>
