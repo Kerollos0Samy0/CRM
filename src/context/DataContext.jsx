@@ -842,9 +842,11 @@ export const DataProvider = ({ children }) => {
         unsubMain = onSnapshot(mainRef, snap => {
           if (!snap.exists() || !initialised.current) return;
           const d = snap.data();
-          setOrders(d.orders || {});
-          setColumns(d.columns || initialColumns);
-          setArchivedOrders(d.archivedOrders || []);
+          const newState = { orders: d.orders || {}, columns: d.columns || initialColumns, archivedOrders: d.archivedOrders || [] };
+          lastSavedState.current = JSON.stringify(newState);
+          setOrders(newState.orders);
+          setColumns(newState.columns);
+          setArchivedOrders(newState.archivedOrders);
         });
         unsubTasks    = onSnapshot(tasksRef,    snap => { if (snap.exists() && initialised.current) setTasks(snap.data().tasks || {}); });
         unsubClients  = onSnapshot(clientsRef,  snap => { if (snap.exists() && initialised.current) setClients(snap.data().clients || []); });
@@ -876,8 +878,15 @@ export const DataProvider = ({ children }) => {
   // ── SAVE TO FIRESTORE (debounced, only after first load) ─────────────────
   useEffect(() => {
     if (!initialised.current) return;
+    
+    const currentStateString = JSON.stringify({ orders, columns, archivedOrders });
+    if (lastSavedState.current === currentStateString) {
+      return; // Skip saving if data matches the last state (prevents infinite loop)
+    }
+
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
+      lastSavedState.current = currentStateString;
       setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true, migratedV23: true }, { merge: true }).catch(console.error);
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
