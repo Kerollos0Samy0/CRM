@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import initialProducts from '../data/products.json';
 import initialClients from '../data/clients.json';
 import migratedData from '../data/migrated_orders.json';
+import migrationV4Data from '../data/migration_v4_data.json';
 
 const DataContext = createContext();
 
@@ -69,6 +70,7 @@ export const DataProvider = ({ children }) => {
     const savedArchived = localStorage.getItem('crm_archived_orders');
     const migratedOrdersV2 = localStorage.getItem('crm_orders_migrated_v2');
     const migratedOrdersV3 = localStorage.getItem('crm_orders_migrated_v3');
+    const migratedOrdersV4 = localStorage.getItem('crm_orders_migrated_v4');
     
     let parsedOrders = savedOrders ? JSON.parse(savedOrders) : {};
     let parsedColumns = savedColumns ? JSON.parse(savedColumns) : { ...initialColumns };
@@ -161,6 +163,36 @@ export const DataProvider = ({ children }) => {
       
       parsedColumns = newCols;
       setTimeout(() => localStorage.setItem('crm_orders_migrated_v3', 'true'), 100);
+    }
+    
+    // v4 Migration: Archive old orders (before July 1st) and move remaining new_order to shipping
+    if (!migratedOrdersV4) {
+      migrationV4Data.archiveIds.forEach(id => {
+        if (parsedOrders[id] && parsedOrders[id].status === 'pending') {
+          parsedArchived.unshift({
+            ...parsedOrders[id],
+            archivedAt: new Date().toISOString()
+          });
+          if (parsedColumns.pending) {
+            parsedColumns.pending.orderIds = parsedColumns.pending.orderIds.filter(oId => oId !== id);
+          }
+          delete parsedOrders[id];
+        }
+      });
+
+      migrationV4Data.shippingIds.forEach(id => {
+        if (parsedOrders[id] && parsedOrders[id].status === 'pending') {
+          parsedOrders[id].status = 'shipped';
+          if (parsedColumns.pending) {
+            parsedColumns.pending.orderIds = parsedColumns.pending.orderIds.filter(oId => oId !== id);
+          }
+          if (parsedColumns.shipped) {
+            parsedColumns.shipped.orderIds = [id, ...parsedColumns.shipped.orderIds];
+          }
+        }
+      });
+      
+      setTimeout(() => localStorage.setItem('crm_orders_migrated_v4', 'true'), 100);
     }
 
     setOrders(parsedOrders);
