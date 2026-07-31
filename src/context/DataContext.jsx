@@ -19,6 +19,7 @@ import importedClients from '../data/imported_clients.json';
 import importedProducts from '../data/imported_products.json';
 import importedOrders from '../data/imported_orders.json';
 import missingDataMap from '../data/missing_data_map.json';
+import fixedOrdersV20 from '../data/fixed_orders_v20.json';
 
 
 const DataContext = createContext();
@@ -83,6 +84,7 @@ function applyMigrations(rawData) {
   let migratedV17 = rawData.migratedV17 || false;
   let migratedV18 = rawData.migratedV18 || false;
   let migratedV19 = rawData.migratedV19 || false;
+  let migratedV20 = rawData.migratedV20 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -485,7 +487,7 @@ function applyMigrations(rawData) {
     migratedV19 = true;
   }
 
-  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV19, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
+  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV19, migratedV20, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -853,7 +855,7 @@ export const DataProvider = ({ children }) => {
     if (!initialised.current) return;
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true }, { merge: false }).catch(console.error);
+      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true, migratedV20: true }, { merge: false }).catch(console.error);
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
 
