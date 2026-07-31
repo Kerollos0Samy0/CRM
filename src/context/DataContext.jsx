@@ -321,6 +321,68 @@ function applyMigrations(rawData) {
     migratedV11 = true;
   }
 
+  // v14 - Import from old Google Sheets CRM
+  if (!migratedV14) {
+    importedOrders.forEach(newOrder => {
+      let existingOrder = Object.values(orders).find(o => o && o.name === newOrder.name && o.totalAmount === newOrder.totalAmount && o.createdAt === newOrder.createdAt);
+      let targetId = newOrder.id;
+
+      if (existingOrder) {
+        targetId = existingOrder.id;
+        orders[targetId] = { ...existingOrder, ...newOrder, id: targetId };
+      } else {
+        orders[targetId] = newOrder;
+      }
+
+      const targetStatus = newOrder.status || 'pending';
+      let currentCol = Object.values(columns).find(c => c && c.orderIds && Array.isArray(c.orderIds) && c.orderIds.includes(targetId));
+      
+      if (currentCol && currentCol.id !== targetStatus) {
+         currentCol.orderIds = currentCol.orderIds.filter(id => id !== targetId);
+      }
+      
+      if (columns[targetStatus]) {
+         if (!columns[targetStatus].orderIds) columns[targetStatus].orderIds = [];
+         if (!columns[targetStatus].orderIds.includes(targetId)) {
+             columns[targetStatus].orderIds.unshift(targetId);
+         }
+      }
+    });
+    migratedV14 = true;
+  }
+
+
+  // v14 - Import from old Google Sheets CRM
+  if (!migratedV14) {
+    importedOrders.forEach(newOrder => {
+      let existingOrder = Object.values(orders).find(o => o && o.name === newOrder.name && o.totalAmount === newOrder.totalAmount && o.createdAt === newOrder.createdAt);
+      let targetId = newOrder.id;
+
+      if (existingOrder) {
+        targetId = existingOrder.id;
+        orders[targetId] = { ...existingOrder, ...newOrder, id: targetId };
+      } else {
+        orders[targetId] = newOrder;
+      }
+
+      const targetStatus = newOrder.status || 'pending';
+      let currentCol = Object.values(columns).find(c => c && c.orderIds && Array.isArray(c.orderIds) && c.orderIds.includes(targetId));
+      
+      if (currentCol && currentCol.id !== targetStatus) {
+         currentCol.orderIds = currentCol.orderIds.filter(id => id !== targetId);
+      }
+      
+      if (columns[targetStatus]) {
+         if (!columns[targetStatus].orderIds) columns[targetStatus].orderIds = [];
+         if (!columns[targetStatus].orderIds.includes(targetId)) {
+             columns[targetStatus].orderIds.unshift(targetId);
+         }
+      }
+    });
+    migratedV14 = true;
+  }
+
+
   // always sync column titles/colors from code
   Object.keys(columns).forEach(colId => {
     if (initialColumns[colId]) {
@@ -329,6 +391,7 @@ function applyMigrations(rawData) {
     }
   });
 
+  Object.values(columns).forEach(c => { if (!c || !c.orderIds || !Array.isArray(c.orderIds)) c.orderIds = []; });
   Object.values(columns).forEach(c => { if (!c || !c.orderIds || !Array.isArray(c.orderIds)) c.orderIds = []; });
   return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV14 };
 }
@@ -516,6 +579,7 @@ export const DataProvider = ({ children }) => {
               }
           }
           
+          
           // Merge imported clients
           let changedC = false;
           importedClients.forEach(ic => {
@@ -555,6 +619,7 @@ export const DataProvider = ({ children }) => {
                   console.warn('Restored PRODUCTS from localStorage');
               }
           }
+          
           
           // Merge imported products
           let changedP = false;
