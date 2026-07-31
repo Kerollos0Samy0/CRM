@@ -831,7 +831,7 @@ export const DataProvider = ({ children }) => {
     if (!initialised.current) return;
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      setDoc(mainRef, { orders, columns, archivedOrders }, { merge: false }).catch(console.error);
+      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true }, { merge: false }).catch(console.error);
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
 
@@ -933,14 +933,18 @@ export const DataProvider = ({ children }) => {
     const start  = columns[sourceColId];
     const finish = columns[destinationColId];
     if (start === finish) {
-      const ids = Array.from(start.orderIds);
-      ids.splice(sourceIndex, 1); ids.splice(destinationIndex, 0, orderId);
+      const ids = start.orderIds.filter(id => orders[id] && id !== orderId);
+      ids.splice(destinationIndex, 0, orderId);
       setColumns(prev => ({ ...prev, [start.id]: { ...start, orderIds: ids } }));
       return;
     }
-    const startIds = Array.from(start.orderIds);  startIds.splice(sourceIndex, 1);
-    const finishIds = Array.from(finish.orderIds); finishIds.splice(destinationIndex, 0, orderId);
-    if (destinationColId === 'designing' && sourceColId !== 'designing') {
+      const startIds = start.orderIds.filter(id => orders[id] && id !== orderId);
+      const finishIds = finish.orderIds.filter(id => orders[id] && id !== orderId);
+      finishIds.splice(destinationIndex, 0, orderId);
+      
+      setOrders(prev => ({ ...prev, [orderId]: { ...prev[orderId], status: destinationColId } }));
+
+      if (destinationColId === 'designing' && sourceColId !== 'designing') {
       const movedOrder = orders[orderId];
       if (movedOrder) addTask({ title: `تصميم أوردر: ${movedOrder.name}`, description: `برجاء عمل التصميم الخاص بأوردر العميل (${movedOrder.name}) - كنيسة: ${movedOrder.church}`, assigneeId: 'kirolos' });
     }
