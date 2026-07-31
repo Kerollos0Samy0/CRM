@@ -3,12 +3,12 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 const AuthContext = createContext();
 
 export const USERS = [
-  { id: 'kirolos', name: 'كيرلس', password: '739218', color: 'var(--color-kirolos)', bgColor: 'var(--color-kirolos-light)' },
-  { id: 'mira', name: 'ميرا', password: '482910', color: 'var(--color-mira)', bgColor: 'var(--color-mira-light)' },
-  { id: 'marina', name: 'مارينا', password: '810472', color: 'var(--color-marina)', bgColor: 'var(--color-marina-light)' },
-  { id: 'maryam', name: 'مريم', password: '593821', color: 'var(--color-maryam)', bgColor: 'var(--color-maryam-light)' },
-  { id: 'sherry', name: 'شيري', password: '284719', color: 'var(--color-sherry)', bgColor: 'var(--color-sherry-light)' },
-  { id: 'abouna', name: 'أبونا', password: '918374', color: 'var(--color-abouna)', bgColor: 'var(--color-abouna-light)' }
+  { id: 'kirolos', name: 'كيرلس', password: '739218', color: '#334155', bgColor: '#f1f5f9' },
+  { id: 'mira', name: 'ميرا', password: '482910', color: '#a855f7', bgColor: '#faf5ff' },
+  { id: 'marina', name: 'مارينا', password: '810472', color: '#ef4444', bgColor: '#fef2f2' },
+  { id: 'maryam', name: 'مريم', password: '593821', color: '#ec4899', bgColor: '#fdf2f8' },
+  { id: 'sherry', name: 'شيري', password: '284719', color: '#22c55e', bgColor: '#f0fdf4' },
+  { id: 'abouna', name: 'أبونا', password: '918374', color: '#eab308', bgColor: '#fefce8' }
 ];
 
 export const AuthProvider = ({ children }) => {
