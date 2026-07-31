@@ -10,6 +10,7 @@ import initialClients from '../data/clients.json';
 import migratedData from '../data/migrated_orders.json';
 import migrationV4Data from '../data/migration_v4_data.json';
 import chatClients from '../data/clients_from_chat.json';
+import excelOrders from '../data/orders_from_excel.json';
 
 const DataContext = createContext();
 
@@ -49,8 +50,14 @@ function normalizeOrder(o) {
 
 // Run all data-migrations that were previously done against localStorage.
 // Returns { orders, columns, archivedOrders } ready to save to Firestore.
-function applyMigrations(raw) {
-  let { orders = {}, columns = { ...initialColumns }, archivedOrders = [], migratedV2, migratedV3, migratedV4 } = raw;
+function applyMigrations(rawData) {
+  let orders = { ...(rawData.orders || {}) };
+  let columns = rawData.columns || { ...initialColumns };
+  let archivedOrders = rawData.archivedOrders || [];
+  let migratedV2 = rawData.migratedV2 || false;
+  let migratedV3 = rawData.migratedV3 || false;
+  let migratedV4 = rawData.migratedV4 || false;
+  let migratedV5 = rawData.migratedV5 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -100,6 +107,21 @@ function applyMigrations(raw) {
     migratedV4 = true;
   }
 
+  // v5 – Import orders from Excel
+  if (!migratedV5) {
+    if (!columns.pending) columns.pending = { id: 'pending', title: 'مطلوبة ولسه متحضرتش', orderIds: [], color: '#48bb78' };
+    
+    Object.values(excelOrders).forEach(newOrder => {
+      // Check if it already exists by name/church to prevent duplicates if ran twice somehow
+      const exists = Object.values(orders).find(o => o.name === newOrder.name && o.church === newOrder.church);
+      if (!exists) {
+        orders[newOrder.id] = newOrder;
+        columns.pending.orderIds.unshift(newOrder.id);
+      }
+    });
+    migratedV5 = true;
+  }
+
   // always sync column titles/colors from code
   Object.keys(columns).forEach(colId => {
     if (initialColumns[colId]) {
@@ -108,7 +130,7 @@ function applyMigrations(raw) {
     }
   });
 
-  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4 };
+  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -250,7 +272,7 @@ export const DataProvider = ({ children }) => {
           setColumns(migrated.columns);
           setArchivedOrders(migrated.archivedOrders);
           // Force save to Firebase if we migrated or restored
-          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4 || Object.keys(data.orders || {}).length === 0)
+          if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4 || !data.migratedV5 || Object.keys(data.orders || {}).length === 0)
             setDoc(mainRef, migrated, { merge: true }).catch(console.error);
         } else {
           const lsOrders   = localStorage.getItem('crm_orders');
