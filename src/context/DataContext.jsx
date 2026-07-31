@@ -84,7 +84,7 @@ function applyMigrations(rawData) {
   let migratedV17 = rawData.migratedV17 || false;
   let migratedV18 = rawData.migratedV18 || false;
   let migratedV19 = rawData.migratedV19 || false;
-  let migratedV23 = rawData.migratedV23 || false;
+  let migratedV24 = rawData.migratedV24 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -488,7 +488,7 @@ function applyMigrations(rawData) {
   }
 
   // v20 - Restore original dates and group by 7 days
-  if (!rawData.migratedV23) {
+  if (!rawData.migratedV24) {
     if (fixedOrdersV20 && fixedOrdersV20.active) {
       orders = {};
       Object.keys(columns).forEach(colId => { columns[colId].orderIds = []; });
@@ -507,10 +507,10 @@ function applyMigrations(rawData) {
           archivedOrders = fixedOrdersV20.archived.map(o => normalizeOrder(o));
       }
     }
-    migratedV23 = true;
+    migratedV24 = true;
   }
 
-  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV19, migratedV23, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
+  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV19, migratedV24, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -888,7 +888,7 @@ export const DataProvider = ({ children }) => {
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       lastSavedState.current = currentStateString;
-      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true, migratedV23: true }, { merge: true }).catch(console.error);
+      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true, migratedV24: true }, { merge: true }).catch(console.error);
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
 
