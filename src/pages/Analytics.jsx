@@ -1,6 +1,6 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
-import { TrendingUp, Package, Users, DollarSign, CheckCircle } from 'lucide-react';
+import { TrendingUp, Package, Users, DollarSign, CheckCircle, MapPin, Map, Star, BarChart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Analytics = () => {
@@ -24,21 +24,63 @@ const Analytics = () => {
   const totalPipelineValue = calculateOrderValue(allOrdersList);
   const completedSalesValue = calculateOrderValue(completedOrders);
 
-  // Top Products
-  const productCounts = {};
+  // --- Analytics Calculations ---
+  const productStats = {}; // { qty: 0, revenue: 0, profit: 0 }
+  const govStats = {}; // { count: 0 }
+  const regionStats = {}; // { count: 0 }
+
   allOrdersList.forEach(order => {
+    // Governorate
+    if (order.governorate) {
+      const gov = order.governorate.trim();
+      if (gov) govStats[gov] = (govStats[gov] || 0) + 1;
+    }
+    
+    // Region (address)
+    if (order.address) {
+      const region = order.address.trim();
+      if (region) regionStats[region] = (regionStats[region] || 0) + 1;
+    }
+
+    // Products
     if (order.items) {
       order.items.forEach(item => {
         if (item.workshop) {
-          productCounts[item.workshop] = (productCounts[item.workshop] || 0) + (Number(item.quantity) || 1);
+          const w = item.workshop.trim();
+          if (!productStats[w]) productStats[w] = { qty: 0, revenue: 0, profit: 0 };
+          
+          const qty = Number(item.quantity) || 1;
+          const unitPrice = Number(item.unitPrice) || 0;
+          
+          const productRef = products.find(p => p.name === w);
+          const buyPrice = productRef ? (Number(productRef.buyPrice) || 0) : 0;
+          
+          productStats[w].qty += qty;
+          productStats[w].revenue += (unitPrice * qty);
+          productStats[w].profit += ((unitPrice - buyPrice) * qty);
         }
       });
     }
   });
 
-  const topProducts = Object.entries(productCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
+  const getTop10 = (obj, key) => {
+    return Object.entries(obj)
+      .sort((a, b) => b[1][key] - a[1][key])
+      .slice(0, 10);
+  };
+
+  const getTop10Simple = (obj) => {
+    return Object.entries(obj)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+  };
+
+  const topProductsByQty = getTop10(productStats, 'qty');
+  const topProductsByRevenue = getTop10(productStats, 'revenue');
+  const topProductsByProfit = getTop10(productStats, 'profit');
+  const topGovs = getTop10Simple(govStats);
+  const topRegions = getTop10Simple(regionStats);
+  // -----------------------------
 
   const StatCard = ({ title, value, subtext, icon, color }) => (
     <motion.div 
@@ -58,6 +100,32 @@ const Analytics = () => {
         {subtext && <p className="text-small" style={{ marginTop: '4px' }}>{subtext}</p>}
       </div>
     </motion.div>
+  );
+
+  const TopListCard = ({ title, icon, items, valueSuffix, valueFormat = (v) => v, color = "var(--accent-primary)" }) => (
+    <div className="card">
+      <h3 className="heading-md" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {icon}
+        {title}
+      </h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {items.map(([name, value], index) => (
+          <div key={name} style={{ 
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontWeight: 800, color: 'var(--text-muted)', fontSize: '1.2rem', width: '24px' }}>#{index + 1}</span>
+              <span style={{ fontWeight: 600 }}>{name}</span>
+            </div>
+            <div className="tag" style={{ background: color, color: 'white' }}>
+              {valueFormat(value)} {valueSuffix}
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-muted text-center">لا توجد داتا كافية</p>}
+      </div>
+    </div>
   );
 
   return (
@@ -95,38 +163,54 @@ const Analytics = () => {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '16px' }}>
-        {/* Top Products */}
-        <div className="card">
-          <h3 className="heading-md" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <TrendingUp size={20} color="var(--accent-primary)" />
-            أكثر المنتجات مبيعاً
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {topProducts.map(([name, count], index) => (
-              <div key={name} style={{ 
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ 
-                    fontWeight: 800, color: 'var(--text-muted)', fontSize: '1.2rem', width: '20px' 
-                  }}>#{index + 1}</span>
-                  <span style={{ fontWeight: 600 }}>{name}</span>
-                </div>
-                <div className="tag" style={{ background: 'var(--accent-primary)', color: 'white' }}>
-                  {count} قطعة
-                </div>
-              </div>
-            ))}
-            {topProducts.length === 0 && <p className="text-muted text-center">لا توجد داتا كافية</p>}
-          </div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '16px' }}>
+        
+        <TopListCard 
+          title="أعلى 10 محافظات (بالأوردرات)"
+          icon={<Map size={20} color="var(--state-ready)" />}
+          items={topGovs}
+          valueSuffix="أوردر"
+          color="var(--state-ready)"
+        />
+
+        <TopListCard 
+          title="أعلى 10 مناطق (بالأوردرات)"
+          icon={<MapPin size={20} color="var(--state-printing)" />}
+          items={topRegions}
+          valueSuffix="أوردر"
+          color="var(--state-printing)"
+        />
+
+        <TopListCard 
+          title="أعلى 10 منتجات (بالعدد)"
+          icon={<Package size={20} color="var(--accent-primary)" />}
+          items={topProductsByQty.map(i => [i[0], i[1].qty])}
+          valueSuffix="قطعة"
+          color="var(--accent-primary)"
+        />
+
+        <TopListCard 
+          title="أعلى 10 منتجات (إجمالي السعر)"
+          icon={<DollarSign size={20} color="var(--state-shipping)" />}
+          items={topProductsByRevenue.map(i => [i[0], i[1].revenue])}
+          valueSuffix="ج.م"
+          valueFormat={(v) => v.toLocaleString()}
+          color="var(--state-shipping)"
+        />
+
+        <TopListCard 
+          title="أعلى 10 منتجات (الربح الصافي)"
+          icon={<Star size={20} color="var(--state-delivered)" />}
+          items={topProductsByProfit.map(i => [i[0], i[1].profit])}
+          valueSuffix="ج.م"
+          valueFormat={(v) => v.toLocaleString()}
+          color="var(--state-delivered)"
+        />
 
         {/* Orders by Status */}
         <div className="card">
           <h3 className="heading-md" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Package size={20} color="var(--accent-primary)" />
+            <BarChart size={20} color="var(--text-primary)" />
             حالة الأوردرات الحالية
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -142,6 +226,7 @@ const Analytics = () => {
             ))}
           </div>
         </div>
+
       </div>
 
     </div>
