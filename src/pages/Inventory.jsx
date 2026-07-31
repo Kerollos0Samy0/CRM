@@ -204,14 +204,14 @@ const Inventory = () => {
           position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px'
         }}>
-          <motion.div className="card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: '500px', padding: '32px' }}>
+          <motion.div className="card modal-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <h2 className="heading-md" style={{ marginBottom: '24px' }}>إضافة منتج جديد</h2>
             <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>اسم المنتج / الورشة</label>
                 <input required type="text" className="input-field" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="form-grid">
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>سعر الشراء</label>
                   <input required type="number" className="input-field" value={formData.buyPrice} onChange={e => setFormData({...formData, buyPrice: e.target.value})} />
@@ -221,7 +221,7 @@ const Inventory = () => {
                   <input required type="number" className="input-field" value={formData.sellPrice} onChange={e => setFormData({...formData, sellPrice: e.target.value})} />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="form-grid">
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>الرصيد الافتتاحي (المخزن)</label>
                   <input required type="number" className="input-field" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
@@ -250,7 +250,7 @@ const Inventory = () => {
           position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px'
         }}>
-          <motion.div className="card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
+          <motion.div className="card modal-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <h2 className="heading-md" style={{ marginBottom: '24px' }}>توريد كمية: {supplyForm.productName}</h2>
             <form onSubmit={handleSaveSupply} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>

@@ -188,7 +188,7 @@ const Clients = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+      <div className="responsive-grid">
         <AnimatePresence>
           {filteredAndSortedClients.map(client => {
             const stats = clientStats[client.name?.trim()] || { orderCount: 0, totalSpent: 0 };

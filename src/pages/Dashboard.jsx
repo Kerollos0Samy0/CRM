@@ -78,12 +78,7 @@ const Dashboard = () => {
     const columnOrders = column.orderIds.map(orderId => orders[orderId]).filter(Boolean);
 
     return (
-      <div key={column.id} style={{ 
-        flex: '0 0 320px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px'
-      }}>
+      <div key={column.id} className="kanban-column">
         <div className="glass-panel" style={{ 
           padding: '16px',
           borderTop: `4px solid ${column.color}`
@@ -217,8 +212,8 @@ const Dashboard = () => {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'flex', gap: '8px' }}>
+      <div className="dashboard-controls">
+        <div className="dashboard-controls-group">
           <button 
             className={`btn ${viewMode === 'kanban' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setViewMode('kanban')}
@@ -234,7 +229,7 @@ const Dashboard = () => {
             عرض القائمة
           </button>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="dashboard-controls-group">
           <button 
             className="btn btn-secondary" 
             onClick={exportToCSV}
@@ -254,7 +249,7 @@ const Dashboard = () => {
       </div>
 
       {viewMode === 'kanban' ? (
-        <div style={{ display: 'flex', gap: '24px', overflowX: 'auto', flex: 1, minHeight: 0 }}>
+        <div className="kanban-board">
           <DragDropContext onDragEnd={onDragEnd}>
             
             <div style={{ display: 'flex', padding: '24px 0' }}>
@@ -269,7 +264,7 @@ const Dashboard = () => {
               borderRadius: '16px', 
               border: '1px solid var(--border-color)',
               gap: '16px'
-            }}>
+            }} className="kanban-prep-container">
               <h2 className="heading-md" style={{ textAlign: 'center', color: 'var(--text-primary)', borderBottom: '2px dashed var(--border-color)', paddingBottom: '12px', margin: '0 24px' }}>في التحضير</h2>
               <div style={{ display: 'flex', gap: '24px' }}>
                 {columnOrder.slice(1, 4).map(renderColumn)}

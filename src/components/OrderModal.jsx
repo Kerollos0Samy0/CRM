@@ -140,10 +140,9 @@ const OrderModal = ({ onClose }) => {
       zIndex: 1000, padding: '20px'
     }}>
       <motion.div 
-        className="card"
+        className="card modal-card"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '32px', position: 'relative' }}
       >
         <button 
           onClick={onClose}
@@ -169,8 +168,7 @@ const OrderModal = ({ onClose }) => {
           />
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          
+        <form onSubmit={handleSubmit} className="form-grid">
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>الاسم</label>
             <input required list="clients-list" type="text" name="name" value={formData.name} onChange={handleNameChange} className="input-field" placeholder="اسم العميل" />
@@ -240,7 +238,7 @@ const OrderModal = ({ onClose }) => {
             <textarea name="orderNotes" value={formData.orderNotes} onChange={handleChange} className="input-field" rows="4" placeholder="تفاصيل الأوردرات المتعددة والمبالغ هنا..." />
           </div>
 
-          <div style={{ gridColumn: '1 / -1', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="form-grid" style={{ gridColumn: '1 / -1', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
             <div style={{ gridColumn: '1 / -1', marginBottom: '4px' }}>
               <label style={{ color: 'var(--text-primary)', fontWeight: 600 }}>الحسابيات</label>
             </div>

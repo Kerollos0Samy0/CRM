@@ -162,7 +162,7 @@ const OrderDetailsModal = ({ order, isDelivered, onClose }) => {
               </span>
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="header-actions">
             <a 
               href={waLink} 
               target="_blank" 
@@ -208,10 +208,10 @@ const OrderDetailsModal = ({ order, isDelivered, onClose }) => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <div className="order-details-layout">
           
           {/* Notes Sidebar (Now 35%) */}
-          <div style={{ width: '35%', borderLeft: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', background: 'var(--bg-secondary)' }}>
+          <div className="order-details-sidebar">
             <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <MessageCircle size={20} color="var(--text-secondary)" />
               <h3 className="heading-md" style={{ fontSize: '1.1rem' }}>الملاحظات</h3>
