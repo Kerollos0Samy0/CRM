@@ -143,6 +143,7 @@ export const DataProvider = ({ children }) => {
   const [clients,        setClients]        = useState([]);
   const [products,       setProducts]       = useState([]);
   const [transactions,   setTransactions]   = useState([]);
+  const [supplies,       setSupplies]       = useState([]); // New state for Supply Log
 
   // track whether initial load from Firestore is done
   const initialised = useRef(false);
@@ -155,6 +156,7 @@ export const DataProvider = ({ children }) => {
   const clientsRef  = doc(db, 'crm', 'clients');
   const productsRef = doc(db, 'crm', 'products');
   const ledgerRef   = doc(db, 'crm', 'ledger');
+  const suppliesRef = doc(db, 'crm', 'supplies');
 
   // ── helper: wrap any promise with a timeout ──────────────────────────────
   function withTimeout(promise, ms = 5000) {
@@ -174,6 +176,7 @@ export const DataProvider = ({ children }) => {
       const lsClients  = localStorage.getItem('crm_clients');
       const lsProducts = localStorage.getItem('crm_products');
       const lsTx       = localStorage.getItem('crm_transactions');
+      const lsSupplies = localStorage.getItem('crm_supplies');
       const raw = {
         orders:         lsOrders   ? JSON.parse(lsOrders)   : {},
         columns:        lsCols     ? JSON.parse(lsCols)      : { ...initialColumns },
@@ -187,6 +190,7 @@ export const DataProvider = ({ children }) => {
       setClients(lsClients  ? JSON.parse(lsClients)  : initialClients);
       setProducts(lsProducts ? JSON.parse(lsProducts) : initialProducts);
       setTransactions(lsTx ? JSON.parse(lsTx) : []);
+      setSupplies(lsSupplies ? JSON.parse(lsSupplies) : []);
       console.warn('⚠️ Using localStorage (Firestore unavailable)');
     } catch (e) {
       console.error('Failed to load from localStorage:', e);
@@ -198,23 +202,25 @@ export const DataProvider = ({ children }) => {
       setClients(initialClients);
       setProducts(initialProducts);
       setTransactions([]);
+      setSupplies([]);
     }
   }
 
   // ── LOAD FROM FIRESTORE (once on mount) ──────────────────────────────────
   useEffect(() => {
-    let unsubMain, unsubTasks, unsubClients, unsubProducts, unsubLedger;
+    let unsubMain, unsubTasks, unsubClients, unsubProducts, unsubLedger, unsubSupplies;
 
     async function bootstrap() {
       try {
         // Each getDoc has a 5-second timeout — if it hangs, throws 'firestore_timeout'
-        const [mainSnap, tasksSnap, clientsSnap, productsSnap, ledgerSnap] = await withTimeout(
+        const [mainSnap, tasksSnap, clientsSnap, productsSnap, ledgerSnap, suppliesSnap] = await withTimeout(
           Promise.all([
             getDoc(mainRef),
             getDoc(tasksRef),
             getDoc(clientsRef),
             getDoc(productsRef),
             getDoc(ledgerRef),
+            getDoc(suppliesRef),
           ]),
           5000
         );
@@ -343,6 +349,26 @@ export const DataProvider = ({ children }) => {
           setTransactions(tx);
         }
 
+        // --- SUPPLIES ---
+        if (suppliesSnap.exists()) {
+          let sData = suppliesSnap.data().supplies || [];
+          const lsSuppliesRaw = localStorage.getItem('crm_supplies');
+          if (lsSuppliesRaw && sData.length === 0) {
+              const parsedLsSupplies = JSON.parse(lsSuppliesRaw);
+              if (parsedLsSupplies.length > 0) {
+                  sData = parsedLsSupplies;
+                  setDoc(suppliesRef, { supplies: sData }).catch(console.error);
+                  console.warn('Restored SUPPLIES from localStorage');
+              }
+          }
+          setSupplies(sData);
+        } else {
+          const lsSupplies = localStorage.getItem('crm_supplies');
+          const s = lsSupplies ? JSON.parse(lsSupplies) : [];
+          setDoc(suppliesRef, { supplies: s }).catch(console.error);
+          setSupplies(s);
+        }
+
         console.log('✅ Loaded from Firestore');
 
         // ── REAL-TIME LISTENERS ──────────────────────────────────────────
@@ -357,6 +383,7 @@ export const DataProvider = ({ children }) => {
         unsubClients  = onSnapshot(clientsRef,  snap => { if (snap.exists() && initialised.current) setClients(snap.data().clients || []); });
         unsubProducts = onSnapshot(productsRef, snap => { if (snap.exists() && initialised.current) setProducts(snap.data().products || []); });
         unsubLedger   = onSnapshot(ledgerRef,   snap => { if (snap.exists() && initialised.current) setTransactions(snap.data().transactions || []); });
+        unsubSupplies = onSnapshot(suppliesRef, snap => { if (snap.exists() && initialised.current) setSupplies(snap.data().supplies || []); });
 
       } catch (err) {
         console.error('Firestore unavailable, using localStorage:', err.message);
@@ -375,6 +402,7 @@ export const DataProvider = ({ children }) => {
       unsubClients?.();
       unsubProducts?.();
       unsubLedger?.();
+      unsubSupplies?.();
     };
   }, []); // eslint-disable-line
 
@@ -391,6 +419,7 @@ export const DataProvider = ({ children }) => {
   useEffect(() => { if (initialised.current) setDoc(clientsRef,  { clients },      { merge: false }).catch(console.error); }, [clients]);     // eslint-disable-line
   useEffect(() => { if (initialised.current) setDoc(productsRef, { products },     { merge: false }).catch(console.error); }, [products]);    // eslint-disable-line
   useEffect(() => { if (initialised.current) setDoc(ledgerRef,   { transactions }, { merge: false }).catch(console.error); }, [transactions]);// eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(suppliesRef, { supplies },     { merge: false }).catch(console.error); }, [supplies]);    // eslint-disable-line
 
   // ── TASKS ────────────────────────────────────────────────────────────────
   const addTask = (taskData) => {
@@ -406,9 +435,27 @@ export const DataProvider = ({ children }) => {
   const updateClient = (id, fields)      => setClients(prev => prev.map(c => c.id === id ? { ...c, ...fields } : c));
   const deleteClient = (id)              => setClients(prev => prev.filter(c => c.id !== id));
 
-  // ── PRODUCTS ─────────────────────────────────────────────────────────────
+  // ── PRODUCTS & SUPPLIES ──────────────────────────────────────────────────
   const addProduct    = (data)       => setProducts(prev => [...prev, { id: uuidv4(), ...data, stock: Number(data.stock)||0, buyPrice: Number(data.buyPrice)||0, sellPrice: Number(data.sellPrice)||0 }]);
   const updateProduct = (id, fields) => setProducts(prev => prev.map(p => p.id === id ? { ...p, ...fields } : p));
+  const addSupply = (productId, quantity, details) => {
+    setProducts(prev => prev.map(p => {
+      if (p.id === productId) {
+        return { ...p, stock: (Number(p.stock) || 0) + Number(quantity) };
+      }
+      return p;
+    }));
+    setSupplies(prev => [{
+      id: uuidv4(),
+      productId,
+      productName: details.productName || 'Unknown Product',
+      quantity: Number(quantity),
+      date: new Date().toISOString(),
+      suppliedBy: currentUser.id,
+      supplierName: currentUser.name || currentUser.id,
+      notes: details.notes || ''
+    }, ...prev]);
+  };
 
   // ── LEDGER ───────────────────────────────────────────────────────────────
   const addTransaction    = (data) => setTransactions(prev => [...prev, { id: uuidv4(), ...data, date: new Date().toISOString(), amount: Number(data.amount)||0 }]);
@@ -509,6 +556,7 @@ export const DataProvider = ({ children }) => {
       clients, addClient, updateClient, deleteClient,
       products, addProduct, updateProduct,
       transactions, addTransaction, deleteTransaction,
+      supplies, addSupply,
       addOrder, updateOrder, deleteOrder, moveOrder, addNote, archiveOrder,
     }}>
       {children}

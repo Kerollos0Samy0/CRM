@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Plus, Edit2, Check, Package, TrendingUp } from 'lucide-react';
+import { Plus, Edit2, Check, Package, TrendingUp, Download, ClipboardList } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Inventory = () => {
-  const { products, addProduct, updateProduct } = useData();
+  const { products, addProduct, updateProduct, supplies, addSupply } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSupplyLogModalOpen, setIsSupplyLogModalOpen] = useState(false);
+  const [isSupplyModalOpen, setIsSupplyModalOpen] = useState(false);
+  const [supplyForm, setSupplyForm] = useState({ productId: null, productName: '', quantity: 0, notes: '' });
   const [editingProductId, setEditingProductId] = useState(null);
   const [editForm, setEditForm] = useState({ buyPrice: 0, sellPrice: 0, stock: 0 });
   const [searchTerm, setSearchTerm] = useState('');
+
 
   const [formData, setFormData] = useState({
     name: '', type: 'Workshop', buyPrice: 0, sellPrice: 0, stock: 0
@@ -26,6 +30,19 @@ const Inventory = () => {
     setEditForm({ buyPrice: product.buyPrice, sellPrice: product.sellPrice, stock: product.stock });
   };
 
+  const handleSupplyClick = (product) => {
+    setSupplyForm({ productId: product.id, productName: product.name, quantity: '', notes: '' });
+    setIsSupplyModalOpen(true);
+  };
+
+  const handleSaveSupply = (e) => {
+    e.preventDefault();
+    if (supplyForm.quantity && Number(supplyForm.quantity) > 0) {
+      addSupply(supplyForm.productId, supplyForm.quantity, { productName: supplyForm.productName, notes: supplyForm.notes });
+      setIsSupplyModalOpen(false);
+    }
+  };
+
   const handleSaveProduct = (id) => {
     updateProduct(id, { 
       buyPrice: Number(editForm.buyPrice), 
@@ -34,6 +51,7 @@ const Inventory = () => {
     });
     setEditingProductId(null);
   };
+
 
   const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -62,7 +80,7 @@ const Inventory = () => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '16px' }}>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           <input 
             type="text" 
             className="input-field" 
@@ -71,12 +89,17 @@ const Inventory = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: '250px' }}
           />
+          <button className="btn btn-secondary" onClick={() => setIsSupplyLogModalOpen(true)}>
+            <ClipboardList size={18} />
+            سجل التوريدات
+          </button>
           <button className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
             <Plus size={18} />
             إضافة منتج
           </button>
         </div>
       </div>
+
 
       <div className="card" style={{ overflowX: 'auto', padding: 0 }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
@@ -154,9 +177,14 @@ const Inventory = () => {
                         <Check size={14} /> حفظ
                       </button>
                     ) : (
-                      <button className="btn btn-secondary" style={{ padding: '6px 12px' }} onClick={() => handleEditClick(product)}>
-                        <Edit2 size={14} /> تعديل
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <button className="btn btn-primary" style={{ padding: '6px 12px', backgroundColor: 'var(--color-mira)' }} onClick={() => handleSupplyClick(product)}>
+                          <Download size={14} /> توريد
+                        </button>
+                        <button className="btn btn-secondary" style={{ padding: '6px 12px' }} onClick={() => handleEditClick(product)}>
+                          <Edit2 size={14} /> تعديل
+                        </button>
+                      </div>
                     )}
                   </td>
                 </motion.tr>
@@ -212,6 +240,76 @@ const Inventory = () => {
                 <button type="submit" className="btn btn-primary">حفظ المنتج</button>
               </div>
             </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Supply Modal */}
+      {isSupplyModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px'
+        }}>
+          <motion.div className="card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
+            <h2 className="heading-md" style={{ marginBottom: '24px' }}>توريد كمية: {supplyForm.productName}</h2>
+            <form onSubmit={handleSaveSupply} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>الكمية الموردة</label>
+                <input required type="number" min="1" className="input-field" value={supplyForm.quantity} onChange={e => setSupplyForm({...supplyForm, quantity: e.target.value})} />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>ملاحظات (اختياري)</label>
+                <textarea className="input-field" value={supplyForm.notes} onChange={e => setSupplyForm({...supplyForm, notes: e.target.value})} style={{ minHeight: '80px', resize: 'vertical' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsSupplyModalOpen(false)}>إلغاء</button>
+                <button type="submit" className="btn btn-primary" style={{ backgroundColor: 'var(--color-mira)' }}>حفظ التوريد</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Supply Log Modal */}
+      {isSupplyLogModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px'
+        }}>
+          <motion.div className="card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: '800px', padding: '32px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 className="heading-md">سجل التوريدات</h2>
+              <button className="btn btn-secondary" onClick={() => setIsSupplyLogModalOpen(false)}>إغلاق</button>
+            </div>
+            
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}>
+                  <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>التاريخ</th>
+                  <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>المنتج</th>
+                  <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>الكمية</th>
+                  <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>بواسطة</th>
+                  <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>ملاحظات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {supplies.length > 0 ? (
+                  supplies.map(supply => (
+                    <tr key={supply.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '12px', fontSize: '0.9rem' }}>{new Date(supply.date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                      <td style={{ padding: '12px', fontWeight: 600 }}>{supply.productName}</td>
+                      <td style={{ padding: '12px', color: 'var(--color-mira)', fontWeight: 'bold' }}>+{supply.quantity}</td>
+                      <td style={{ padding: '12px' }}>{supply.supplierName}</td>
+                      <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{supply.notes || '-'}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>لا توجد عمليات توريد مسجلة حتى الآن</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </motion.div>
         </div>
       )}
