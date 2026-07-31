@@ -15,6 +15,10 @@ import coloredOrdersUpdates from '../data/orders_status_update.json';
 import v7OrdersUpdates from '../data/orders_status_update_v7.json';
 import v8OrdersUpdates from '../data/orders_status_update_v8.json';
 import fullOrdersV11 from '../data/full_orders_v11.json';
+import importedClients from '../data/imported_clients.json';
+import importedProducts from '../data/imported_products.json';
+import importedOrders from '../data/imported_orders.json';
+
 
 const DataContext = createContext();
 
@@ -69,6 +73,7 @@ function applyMigrations(rawData) {
   let migratedV10 = rawData.migratedV10 || false;
   let migratedV11 = rawData.migratedV11 || false;
   let migratedV12 = rawData.migratedV12 || false;
+  let migratedV14 = rawData.migratedV14 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -324,7 +329,7 @@ function applyMigrations(rawData) {
     }
   });
 
-  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12 };
+  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV14 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -459,7 +464,7 @@ export const DataProvider = ({ children }) => {
           setColumns(migrated.columns);
           setArchivedOrders(migrated.archivedOrders);
           // Force save to Firebase if we migrated or restored
-          if (!data.migratedV2 || !data.migratedV11 || !data.migratedV12 || Object.keys(data.orders || {}).length === 0)
+          if (!data.migratedV2 || !data.migratedV11 || !data.migratedV12 || !data.migratedV14 || Object.keys(data.orders || {}).length === 0)
             setDoc(mainRef, migrated, { merge: true }).catch(console.error);
         } else {
           const lsOrders   = localStorage.getItem('crm_orders');
