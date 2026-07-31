@@ -52,9 +52,25 @@ const OrderModal = ({ onClose }) => {
     const churchMatch = text.match(/الكنيسة\s*[:\-]?\s*([^\n]+)/);
     if (churchMatch) newFormData.church = churchMatch[1].trim();
 
-    const orderSectionMatch = text.match(/(?:الاوردر|الطلب|المطلوب|التفاصيل)\s*[:\-]?\s*([\s\S]*)/);
+    const orderSectionMatch = text.match(/(?:الاوردر|الطلب|المطلوب|التفاصيل)\s*[:\-]?\s*([\s\S]*?)(?:المدفوع|الخصم|$)/);
     if (orderSectionMatch) {
       newFormData.orderNotes = orderSectionMatch[1].trim();
+    }
+
+    const paidMatch = text.match(/(?:المدفوع|عربون|تم دفع|تم الدفع)\s*[:\-]?\s*(\d+)/);
+    if (paidMatch) newFormData.paidAmount = parseInt(paidMatch[1], 10);
+
+    const discountMatch = text.match(/(?:الخصم)\s*[:\-]?\s*(\d+)/);
+    if (discountMatch) newFormData.discount = parseInt(discountMatch[1], 10);
+
+    const deadlineMatch = text.match(/(?:الديد لاين|تاريخ التسليم|الديدلاين)\s*[:\-]?\s*(\d{4}-\d{1,2}-\d{1,2})/);
+    if (deadlineMatch) {
+      // Ensure date is properly formatted with leading zeros if needed
+      const parts = deadlineMatch[1].split('-');
+      const yyyy = parts[0];
+      const mm = parts[1].padStart(2, '0');
+      const dd = parts[2].padStart(2, '0');
+      newFormData.deadline = `${yyyy}-${mm}-${dd}`;
     }
 
     setFormData(newFormData);
