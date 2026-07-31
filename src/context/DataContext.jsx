@@ -73,7 +73,7 @@ function applyMigrations(rawData) {
   let migratedV10 = rawData.migratedV10 || false;
   let migratedV11 = rawData.migratedV11 || false;
   let migratedV12 = rawData.migratedV12 || false;
-  let migratedV14 = rawData.migratedV14 || false;
+  let migratedV15 = rawData.migratedV15 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -322,7 +322,7 @@ function applyMigrations(rawData) {
   }
 
   // v14 - Import from old Google Sheets CRM
-  if (!migratedV14) {
+  if (!migratedV15) {
     importedOrders.forEach(newOrder => {
       let existingOrder = Object.values(orders).find(o => o && o.name === newOrder.name && o.totalAmount === newOrder.totalAmount && o.createdAt === newOrder.createdAt);
       let targetId = newOrder.id;
@@ -348,12 +348,12 @@ function applyMigrations(rawData) {
          }
       }
     });
-    migratedV14 = true;
+    migratedV15 = true;
   }
 
 
   // v14 - Import from old Google Sheets CRM
-  if (!migratedV14) {
+  if (!migratedV15) {
     importedOrders.forEach(newOrder => {
       let existingOrder = Object.values(orders).find(o => o && o.name === newOrder.name && o.totalAmount === newOrder.totalAmount && o.createdAt === newOrder.createdAt);
       let targetId = newOrder.id;
@@ -379,7 +379,7 @@ function applyMigrations(rawData) {
          }
       }
     });
-    migratedV14 = true;
+    migratedV15 = true;
   }
 
 
@@ -393,7 +393,7 @@ function applyMigrations(rawData) {
 
   Object.values(columns).forEach(c => { if (!c || !c.orderIds || !Array.isArray(c.orderIds)) c.orderIds = []; });
   Object.values(columns).forEach(c => { if (!c || !c.orderIds || !Array.isArray(c.orderIds)) c.orderIds = []; });
-  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV14 };
+  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -528,7 +528,7 @@ export const DataProvider = ({ children }) => {
           setColumns(migrated.columns);
           setArchivedOrders(migrated.archivedOrders);
           // Force save to Firebase if we migrated or restored
-          if (!data.migratedV2 || !data.migratedV11 || !data.migratedV12 || !data.migratedV14 || Object.keys(data.orders || {}).length === 0)
+          if (!data.migratedV2 || !data.migratedV11 || !data.migratedV12 || !data.migratedV15 || Object.keys(data.orders || {}).length === 0)
             setDoc(mainRef, migrated, { merge: true }).catch(console.error);
         } else {
           const lsOrders   = localStorage.getItem('crm_orders');
