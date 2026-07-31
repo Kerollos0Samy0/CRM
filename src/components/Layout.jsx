@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, LayoutDashboard, CheckSquare, Package, PieChart, Wallet, Archive } from 'lucide-react';
+import { LogOut, LayoutDashboard, CheckSquare, Package, PieChart, Wallet, Archive, Users } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Layout = ({ children }) => {
@@ -71,6 +71,18 @@ const Layout = ({ children }) => {
             >
               <Package size={18} />
               المخزن
+            </button>
+            <button 
+              className="btn"
+              onClick={() => navigate('/clients')}
+              style={{ 
+                padding: '8px 16px', fontSize: '0.9rem',
+                background: location.pathname === '/clients' ? 'var(--bg-glass-hover)' : 'transparent',
+                color: location.pathname === '/clients' ? 'var(--accent-primary)' : 'var(--text-secondary)'
+              }}
+            >
+              <Users size={18} />
+              العملاء
             </button>
             {(currentUser.id === 'kirolos' || currentUser.id === 'marina' || currentUser.id === 'abouna') && (
               <>

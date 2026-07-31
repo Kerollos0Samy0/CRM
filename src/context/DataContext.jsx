@@ -249,7 +249,8 @@ export const DataProvider = ({ children }) => {
     localStorage.setItem('crm_products', JSON.stringify(products));
     localStorage.setItem('crm_transactions', JSON.stringify(transactions));
     localStorage.setItem('crm_archived_orders', JSON.stringify(archivedOrders));
-  }, [orders, columns, tasks, products, transactions, archivedOrders]);
+    localStorage.setItem('crm_clients', JSON.stringify(clients));
+  }, [orders, columns, tasks, products, transactions, archivedOrders, clients]);
 
   // ---- Tasks Functions ----
   const addTask = (taskData) => {
@@ -276,6 +277,26 @@ export const DataProvider = ({ children }) => {
     delete newTasks[taskId];
     setTasks(newTasks);
   };
+
+  // ---- Clients Functions ----
+  const addClient = (clientData) => {
+    const newClient = {
+      id: uuidv4(),
+      ...clientData,
+    };
+    setClients(prev => [...prev, newClient]);
+  };
+
+  const updateClient = (clientId, updatedFields) => {
+    setClients(prev => prev.map(c => 
+      c.id === clientId ? { ...c, ...updatedFields } : c
+    ));
+  };
+
+  const deleteClient = (clientId) => {
+    setClients(prev => prev.filter(c => c.id !== clientId));
+  };
+  // -------------------------
 
   // ---- Products Functions ----
   const addProduct = (productData) => {
@@ -473,9 +494,10 @@ export const DataProvider = ({ children }) => {
 
   return (
     <DataContext.Provider value={{
-      orders, columns, columnOrder, 
+      orders, columns, columnOrder, archivedOrders,
       tasks, addTask, updateTaskStatus, deleteTask,
-      clients, products, addProduct, updateProduct,
+      clients, addClient, updateClient, deleteClient, 
+      products, addProduct, updateProduct,
       transactions, addTransaction, deleteTransaction,
       addOrder, updateOrder, deleteOrder, moveOrder, addNote,
       archivedOrders, archiveOrder

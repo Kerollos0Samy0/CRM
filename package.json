@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "exceljs": "^4.4.0",
     "firebase": "^12.17.0",
     "framer-motion": "^12.43.0",
     "lucide-react": "^1.28.0",
