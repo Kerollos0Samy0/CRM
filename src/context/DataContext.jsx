@@ -28,20 +28,29 @@ export const DataProvider = ({ children }) => {
   });
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem('crm_products');
+    const migratedStock = localStorage.getItem('crm_stock_migrated_v1');
+    
     if (saved) {
-      const savedProducts = JSON.parse(saved);
-      let mergedProducts = [...savedProducts];
-      initialProducts.forEach(ip => {
-        const existing = mergedProducts.find(sp => sp.name === ip.name);
-        if (existing) {
-          existing.buyPrice = ip.buyPrice;
-          existing.sellPrice = ip.sellPrice;
-          existing.type = ip.type;
-        } else {
-          mergedProducts.push(ip);
-        }
-      });
-      return mergedProducts;
+      let parsed = JSON.parse(saved);
+      if (!migratedStock) {
+        // One-time sync of stock and prices from JSON to local storage
+        let mergedProducts = [...parsed];
+        initialProducts.forEach(ip => {
+          const existing = mergedProducts.find(sp => sp.name === ip.name);
+          if (existing) {
+            existing.buyPrice = ip.buyPrice;
+            existing.sellPrice = ip.sellPrice;
+            existing.type = ip.type;
+            existing.stock = ip.stock;
+          } else {
+            mergedProducts.push(ip);
+          }
+        });
+        parsed = mergedProducts;
+        // We set it here, but it's better to let useEffect save it
+        setTimeout(() => localStorage.setItem('crm_stock_migrated_v1', 'true'), 100);
+      }
+      return parsed;
     }
     return initialProducts;
   });
