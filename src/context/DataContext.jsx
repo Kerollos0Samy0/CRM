@@ -514,6 +514,20 @@ export const DataProvider = ({ children }) => {
                   console.warn('Restored CLIENTS from localStorage');
               }
           }
+          
+          // Merge imported clients
+          let changedC = false;
+          importedClients.forEach(ic => {
+              if (!cData.find(c => c.name === ic.name)) {
+                  cData.push(ic);
+                  changedC = true;
+              }
+          });
+          if (changedC) {
+              setDoc(clientsRef, { clients: cData, chatMergedV1: true }).catch(console.error);
+              console.warn('Imported CLIENTS from Google Sheets');
+          }
+
           if (cData.length === 0) {
               cData = initialClients;
               setDoc(clientsRef, { clients: cData, chatMergedV1: true }).catch(console.error);
@@ -540,6 +554,24 @@ export const DataProvider = ({ children }) => {
                   console.warn('Restored PRODUCTS from localStorage');
               }
           }
+          
+          // Merge imported products
+          let changedP = false;
+          importedProducts.forEach(ip => {
+              let existing = pData.find(p => p.name === ip.name);
+              if (!existing) {
+                  pData.push(ip);
+                  changedP = true;
+              } else if (existing.sellPrice === 0 && ip.sellPrice > 0) {
+                  existing.sellPrice = ip.sellPrice;
+                  changedP = true;
+              }
+          });
+          if (changedP) {
+              setDoc(productsRef, { products: pData }).catch(console.error);
+              console.warn('Imported PRODUCTS from Google Sheets');
+          }
+
           if (pData.length === 0) {
               pData = initialProducts;
               setDoc(productsRef, { products: pData }).catch(console.error);
