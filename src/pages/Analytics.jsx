@@ -4,35 +4,29 @@ import { TrendingUp, Package, Users, DollarSign, CheckCircle } from 'lucide-reac
 import { motion } from 'framer-motion';
 
 const Analytics = () => {
-  const { orders, columns, products } = useData();
+  const { orders, columns, products, archivedOrders = [] } = useData();
   
-  const ordersList = Object.values(orders);
+  const activeOrdersList = Object.values(orders);
+  const allOrdersList = [...activeOrdersList, ...archivedOrders];
   
-  // Calculate completed orders (in delivered column)
-  const deliveredOrderIds = columns.delivered?.orderIds || [];
-  const completedOrders = deliveredOrderIds.map(id => orders[id]).filter(Boolean);
+  // Calculate completed orders (in arrived column + archived)
+  const arrivedOrderIds = columns.arrived?.orderIds || [];
+  const activeCompletedOrders = arrivedOrderIds.map(id => orders[id]).filter(Boolean);
+  const completedOrders = [...activeCompletedOrders, ...archivedOrders];
 
   // Total Sales Pipeline
   const calculateOrderValue = (orderList) => {
     return orderList.reduce((acc, order) => {
-      let orderTotal = 0;
-      if (order.items) {
-        order.items.forEach(item => {
-          const product = products.find(p => p.name === item.workshop);
-          const price = product ? product.sellPrice : 0;
-          orderTotal += (price * (Number(item.quantity) || 0));
-        });
-      }
-      return acc + orderTotal;
+      return acc + (Number(order.totalAmount) || 0);
     }, 0);
   };
 
-  const totalPipelineValue = calculateOrderValue(ordersList);
+  const totalPipelineValue = calculateOrderValue(allOrdersList);
   const completedSalesValue = calculateOrderValue(completedOrders);
 
   // Top Products
   const productCounts = {};
-  ordersList.forEach(order => {
+  allOrdersList.forEach(order => {
     if (order.items) {
       order.items.forEach(item => {
         if (item.workshop) {
@@ -73,7 +67,7 @@ const Analytics = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
         <StatCard 
           title="إجمالي الأوردرات" 
-          value={ordersList.length} 
+          value={allOrdersList.length} 
           subtext="كل الأوردرات في النظام"
           icon={<Package size={24} />} 
           color="var(--accent-primary)" 
