@@ -18,6 +18,7 @@ import fullOrdersV11 from '../data/full_orders_v11.json';
 import importedClients from '../data/imported_clients.json';
 import importedProducts from '../data/imported_products.json';
 import importedOrders from '../data/imported_orders.json';
+import missingDataMap from '../data/missing_data_map.json';
 
 
 const DataContext = createContext();
@@ -81,6 +82,7 @@ function applyMigrations(rawData) {
   let migratedV16 = rawData.migratedV16 || false;
   let migratedV17 = rawData.migratedV17 || false;
   let migratedV18 = rawData.migratedV18 || false;
+  let migratedV19 = rawData.migratedV19 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -452,6 +454,8 @@ function applyMigrations(rawData) {
       if (fullOrdersV11.archived) { archivedOrders = fullOrdersV11.archived.map(o => normalizeOrder(o)); }
     }
     migratedV17 = true;
+  }
+  
   // v18 - Re-sync with grouped orders
   if (!rawData.migratedV18) {
     if (fullOrdersV11 && fullOrdersV11.active) {
@@ -461,9 +465,27 @@ function applyMigrations(rawData) {
     }
     migratedV18 = true;
   }
-;
+  
+  // v19 - Enrich missing data
+  if (!rawData.migratedV19) {
+    const enrichOrder = (o) => {
+      if (!o.governorate && o.gov) o.governorate = o.gov;
+      if (!o.church && o.region) o.church = o.region;
+      const enrich = missingDataMap[o.name];
+      if (enrich) {
+         if (!o.mobile && enrich.mobile) o.mobile = String(enrich.mobile);
+         if (!o.church && enrich.church) o.church = enrich.church;
+         if (!o.governorate && enrich.governorate) o.governorate = enrich.governorate;
+      }
+    };
+    
+    Object.values(orders).forEach(o => { if (o) enrichOrder(o); });
+    archivedOrders.forEach(o => { if (o) enrichOrder(o); });
+    
+    migratedV19 = true;
   }
-  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
+
+  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV19, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -831,7 +853,7 @@ export const DataProvider = ({ children }) => {
     if (!initialised.current) return;
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true }, { merge: false }).catch(console.error);
+      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true }, { merge: false }).catch(console.error);
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
 
