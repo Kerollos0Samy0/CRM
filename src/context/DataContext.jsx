@@ -1,6 +1,10 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from './AuthContext';
+import { db } from '../firebase';
+import {
+  doc, onSnapshot, setDoc, getDoc
+} from 'firebase/firestore';
 import initialProducts from '../data/products.json';
 import initialClients from '../data/clients.json';
 import migratedData from '../data/migrated_orders.json';
@@ -10,522 +14,399 @@ import chatClients from '../data/clients_from_chat.json';
 const DataContext = createContext();
 
 const initialColumns = {
-  pending: { id: 'pending', title: 'مطلوبة ولسه متحضرتش', orderIds: [], color: '#48bb78' },
-  designing: { id: 'designing', title: 'جاري التصميم', orderIds: [], color: '#f6ad55' },
-  printing: { id: 'printing', title: 'في الطباعة', orderIds: [], color: '#f6e05e' },
-  received: { id: 'received', title: 'في الكنيسة', orderIds: [], color: '#38b2ac' },
-  ready: { id: 'ready', title: 'جاهزة وعايزة تتشحن', orderIds: [], color: '#ed8936' },
-  shipped: { id: 'shipped', title: 'في شركة الشحن', orderIds: [], color: '#4299e1' },
-  arrived: { id: 'arrived', title: 'أوردرات وصلت بنجاح', orderIds: [], color: '#9f7aea' },
+  pending:   { id: 'pending',   title: 'مطلوبة ولسه متحضرتش', orderIds: [], color: '#48bb78' },
+  designing: { id: 'designing', title: 'جاري التصميم',          orderIds: [], color: '#f6ad55' },
+  printing:  { id: 'printing',  title: 'في الطباعة',            orderIds: [], color: '#f6e05e' },
+  received:  { id: 'received',  title: 'في الكنيسة',            orderIds: [], color: '#38b2ac' },
+  ready:     { id: 'ready',     title: 'جاهزة وعايزة تتشحن',   orderIds: [], color: '#ed8936' },
+  shipped:   { id: 'shipped',   title: 'في شركة الشحن',         orderIds: [], color: '#4299e1' },
+  arrived:   { id: 'arrived',   title: 'أوردرات وصلت بنجاح',   orderIds: [], color: '#9f7aea' },
 };
 
+// ── helpers ─────────────────────────────────────────────────────────────────
+function normalizeOrder(o) {
+  if (!o.items) {
+    o.items = o.workshop ? [{ workshop: o.workshop, quantity: o.quantity }] : [];
+  }
+  if (o.clientName && !o.name)       o.name        = o.clientName;
+  if (o.phone !== undefined && !o.mobile) o.mobile  = String(o.phone);
+  if (o.government && !o.governorate) o.governorate = o.government;
+  if (typeof o.notes === 'string') { o.orderNotes = o.notes; o.notes = []; }
+  if (!Array.isArray(o.notes)) o.notes = [];
+  if (o.items) {
+    let total = 0;
+    o.items.forEach(item => {
+      if (item.name && !item.workshop)       item.workshop  = item.name;
+      if (item.sellPrice !== undefined && item.unitPrice === undefined) item.unitPrice = item.sellPrice;
+      total += (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0);
+    });
+    if (o.totalAmount === undefined) o.totalAmount = total;
+  }
+  if (o.remainingAmount === undefined)
+    o.remainingAmount = Math.max(0, (o.totalAmount || 0) - (Number(o.discount) || 0) - (Number(o.paidAmount) || 0));
+  return o;
+}
+
+// Run all data-migrations that were previously done against localStorage.
+// Returns { orders, columns, archivedOrders } ready to save to Firestore.
+function applyMigrations(raw) {
+  let { orders = {}, columns = { ...initialColumns }, archivedOrders = [], migratedV2, migratedV3, migratedV4 } = raw;
+
+  // normalise every order
+  Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
+  archivedOrders = archivedOrders.map(o => normalizeOrder({ ...o }));
+
+  // v2 – merge Google-Sheets import
+  if (!migratedV2) {
+    orders = { ...orders, ...migratedData.orders };
+    Object.keys(migratedData.columns).forEach(colId => {
+      if (!columns[colId]) columns[colId] = { ...initialColumns[colId] };
+      columns[colId].orderIds = [...new Set([...columns[colId].orderIds, ...migratedData.columns[colId].orderIds])];
+    });
+    archivedOrders = [...archivedOrders, ...migratedData.archivedOrders];
+    migratedV2 = true;
+  }
+
+  // v3 – rename columns
+  if (!migratedV3) {
+    const colMap = { new_order: 'pending', design: 'designing', printing: 'printing', church: 'ready', shipping: 'shipped', delivered: 'arrived' };
+    const newCols = JSON.parse(JSON.stringify(initialColumns));
+    Object.keys(columns).forEach(oldId => {
+      const newId = colMap[oldId] || oldId;
+      if (newCols[newId] && columns[oldId].orderIds)
+        newCols[newId].orderIds = [...new Set([...newCols[newId].orderIds, ...columns[oldId].orderIds])];
+    });
+    Object.keys(orders).forEach(id => { if (colMap[orders[id].status]) orders[id].status = colMap[orders[id].status]; });
+    columns = newCols;
+    migratedV3 = true;
+  }
+
+  // v4 – archive/ship old orders
+  if (!migratedV4) {
+    migrationV4Data.archiveIds.forEach(id => {
+      if (orders[id] && orders[id].status === 'pending') {
+        archivedOrders.unshift({ ...orders[id], archivedAt: new Date().toISOString() });
+        if (columns.pending) columns.pending.orderIds = columns.pending.orderIds.filter(x => x !== id);
+        delete orders[id];
+      }
+    });
+    migrationV4Data.shippingIds.forEach(id => {
+      if (orders[id] && orders[id].status === 'pending') {
+        orders[id].status = 'shipped';
+        if (columns.pending) columns.pending.orderIds = columns.pending.orderIds.filter(x => x !== id);
+        if (columns.shipped) columns.shipped.orderIds = [id, ...columns.shipped.orderIds];
+      }
+    });
+    migratedV4 = true;
+  }
+
+  // always sync column titles/colors from code
+  Object.keys(columns).forEach(colId => {
+    if (initialColumns[colId]) {
+      columns[colId].title = initialColumns[colId].title;
+      columns[colId].color = initialColumns[colId].color;
+    }
+  });
+
+  return { orders, columns, archivedOrders, migratedV2, migratedV3, migratedV4 };
+}
+
+function mergeClientsWithChat(currentClients) {
+  const merged = [...currentClients];
+  chatClients.forEach(chatClient => {
+    const existing = merged.find(c =>
+      (c.name && chatClient.name && c.name.trim() === chatClient.name.trim()) ||
+      (c.phone && chatClient.phone && c.phone === chatClient.phone)
+    );
+    if (existing) {
+      if (!existing.phone       && chatClient.phone)       existing.phone       = chatClient.phone;
+      if (!existing.church      && chatClient.church)      existing.church      = chatClient.church;
+      if (!existing.address     && chatClient.address)     existing.address     = chatClient.address;
+      if (!existing.governorate && chatClient.governorate) existing.governorate = chatClient.governorate;
+    } else {
+      merged.push({ id: uuidv4(), ...chatClient });
+    }
+  });
+  return merged;
+}
+
+// ── Provider ────────────────────────────────────────────────────────────────
 export const DataProvider = ({ children }) => {
   const { currentUser } = useAuth();
-  const [orders, setOrders] = useState({});
-  const [columns, setColumns] = useState(initialColumns);
-  const [columnOrder, setColumnOrder] = useState(['pending', 'designing', 'printing', 'received', 'ready', 'shipped', 'arrived']);
-  const [tasks, setTasks] = useState({}); // New tasks state
-  const [archivedOrders, setArchivedOrders] = useState([]); // New archived orders state
-  const [clients, setClients] = useState(() => {
-    const saved = localStorage.getItem('crm_clients');
-    const migratedChat = localStorage.getItem('crm_clients_chat_v1');
-    let currentClients = saved ? JSON.parse(saved) : initialClients;
 
-    if (!migratedChat) {
-      const merged = [...currentClients];
-      chatClients.forEach(chatClient => {
-         const existing = merged.find(c => 
-           (c.name && chatClient.name && c.name.trim() === chatClient.name.trim()) || 
-           (c.phone && chatClient.phone && c.phone === chatClient.phone)
-         );
-         
-         if (existing) {
-             if (!existing.phone && chatClient.phone) existing.phone = chatClient.phone;
-             if (!existing.church && chatClient.church) existing.church = chatClient.church;
-             if (!existing.address && chatClient.address) existing.address = chatClient.address;
-             if (!existing.governorate && chatClient.governorate) existing.governorate = chatClient.governorate;
-         } else {
-             merged.push({ id: uuidv4(), ...chatClient });
-         }
-      });
-      currentClients = merged;
-      setTimeout(() => localStorage.setItem('crm_clients_chat_v1', 'true'), 100);
-    }
-    
-    return currentClients;
-  });
-  const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem('crm_products');
-    const migratedStock = localStorage.getItem('crm_stock_migrated_v1');
-    
-    if (saved) {
-      let parsed = JSON.parse(saved);
-      if (!migratedStock) {
-        // One-time sync of stock and prices from JSON to local storage
-        let mergedProducts = [...parsed];
-        initialProducts.forEach(ip => {
-          const existing = mergedProducts.find(sp => sp.name === ip.name);
-          if (existing) {
-            existing.buyPrice = ip.buyPrice;
-            existing.sellPrice = ip.sellPrice;
-            existing.type = ip.type;
-            existing.stock = ip.stock;
-          } else {
-            mergedProducts.push(ip);
-          }
-        });
-        parsed = mergedProducts;
-        // We set it here, but it's better to let useEffect save it
-        setTimeout(() => localStorage.setItem('crm_stock_migrated_v1', 'true'), 100);
-      }
-      return parsed;
-    }
-    return initialProducts;
-  });
-  const [transactions, setTransactions] = useState(() => {
-    const saved = localStorage.getItem('crm_transactions');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [loading,        setLoading]        = useState(true);
+  const [orders,         setOrders]         = useState({});
+  const [columns,        setColumns]        = useState(initialColumns);
+  const [columnOrder]                       = useState(['pending','designing','printing','received','ready','shipped','arrived']);
+  const [tasks,          setTasks]          = useState({});
+  const [archivedOrders, setArchivedOrders] = useState([]);
+  const [clients,        setClients]        = useState([]);
+  const [products,       setProducts]       = useState([]);
+  const [transactions,   setTransactions]   = useState([]);
 
-  // Load from local storage on mount
+  // track whether initial load from Firestore is done
+  const initialised = useRef(false);
+  // debounce timer refs
+  const saveTimer = useRef(null);
+
+  // ── FIRESTORE DOCUMENT REFS ───────────────────────────────────────────────
+  const mainRef     = doc(db, 'crm', 'main');       // orders + columns + archived
+  const tasksRef    = doc(db, 'crm', 'tasks');
+  const clientsRef  = doc(db, 'crm', 'clients');
+  const productsRef = doc(db, 'crm', 'products');
+  const ledgerRef   = doc(db, 'crm', 'ledger');
+
+  // ── LOAD FROM FIRESTORE (once on mount) ──────────────────────────────────
   useEffect(() => {
-    const savedOrders = localStorage.getItem('crm_orders');
-    const savedColumns = localStorage.getItem('crm_columns');
-    const savedTasks = localStorage.getItem('crm_tasks');
-    const savedArchived = localStorage.getItem('crm_archived_orders');
-    const migratedOrdersV2 = localStorage.getItem('crm_orders_migrated_v2');
-    const migratedOrdersV3 = localStorage.getItem('crm_orders_migrated_v3');
-    const migratedOrdersV4 = localStorage.getItem('crm_orders_migrated_v4');
-    
-    let parsedOrders = savedOrders ? JSON.parse(savedOrders) : {};
-    let parsedColumns = savedColumns ? JSON.parse(savedColumns) : { ...initialColumns };
-    let parsedArchived = savedArchived ? JSON.parse(savedArchived) : [];
-    
-    // Migration for old single-item orders and fixing field names from Google Sheets
-    for (const id in parsedOrders) {
-      if (!parsedOrders[id].items) {
-        if (parsedOrders[id].workshop) {
-          parsedOrders[id].items = [{ workshop: parsedOrders[id].workshop, quantity: parsedOrders[id].quantity }];
-        } else {
-          parsedOrders[id].items = [];
-        }
-      }
-      
-      // Normalize field names
-      if (parsedOrders[id].clientName && !parsedOrders[id].name) {
-        parsedOrders[id].name = parsedOrders[id].clientName;
-      }
-      if (parsedOrders[id].phone !== undefined && !parsedOrders[id].mobile) {
-        parsedOrders[id].mobile = String(parsedOrders[id].phone);
-      }
-      if (parsedOrders[id].government && !parsedOrders[id].governorate) {
-        parsedOrders[id].governorate = parsedOrders[id].government;
-      }
-      
-      // Fix string notes from migration
-      if (typeof parsedOrders[id].notes === 'string') {
-        parsedOrders[id].orderNotes = parsedOrders[id].notes; // Move string to orderNotes
-        parsedOrders[id].notes = []; // Set notes to array as expected by addNote
-      }
-      if (!Array.isArray(parsedOrders[id].notes)) {
-        parsedOrders[id].notes = [];
-      }
-      
-      // Normalize items and money
-      if (parsedOrders[id].items) {
-        let total = 0;
-        parsedOrders[id].items.forEach(item => {
-          if (item.name && !item.workshop) item.workshop = item.name;
-          if (item.sellPrice !== undefined && item.unitPrice === undefined) item.unitPrice = item.sellPrice;
-          total += (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0);
-        });
-        if (parsedOrders[id].totalAmount === undefined) {
-          parsedOrders[id].totalAmount = total;
-        }
-      }
-      if (parsedOrders[id].remainingAmount === undefined) {
-        parsedOrders[id].remainingAmount = Math.max(0, (parsedOrders[id].totalAmount || 0) - (Number(parsedOrders[id].discount) || 0) - (Number(parsedOrders[id].paidAmount) || 0));
-      }
-    }
-    
-    // Normalize archived orders too
-    for (let i = 0; i < parsedArchived.length; i++) {
-      let archOrder = parsedArchived[i];
-      if (archOrder.clientName && !archOrder.name) archOrder.name = archOrder.clientName;
-      if (archOrder.phone !== undefined && !archOrder.mobile) archOrder.mobile = String(archOrder.phone);
-      if (archOrder.government && !archOrder.governorate) archOrder.governorate = archOrder.government;
-      if (typeof archOrder.notes === 'string') {
-        archOrder.orderNotes = archOrder.notes;
-        archOrder.notes = [];
-      }
-      if (!Array.isArray(archOrder.notes)) archOrder.notes = [];
-      
-      // Normalize items and money
-      if (archOrder.items) {
-        let total = 0;
-        archOrder.items.forEach(item => {
-          if (item.name && !item.workshop) item.workshop = item.name;
-          if (item.sellPrice !== undefined && item.unitPrice === undefined) item.unitPrice = item.sellPrice;
-          total += (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0);
-        });
-        if (archOrder.totalAmount === undefined) {
-          archOrder.totalAmount = total;
-        }
-      }
-      if (archOrder.remainingAmount === undefined) {
-        archOrder.remainingAmount = Math.max(0, (archOrder.totalAmount || 0) - (Number(archOrder.discount) || 0) - (Number(archOrder.paidAmount) || 0));
-      }
-    }
+    let unsubMain, unsubTasks, unsubClients, unsubProducts, unsubLedger;
 
-    // Merge migrated data from Google Sheets if not done yet
-    if (!migratedOrdersV2) {
-      parsedOrders = { ...parsedOrders, ...migratedData.orders };
-      
-      Object.keys(migratedData.columns).forEach(colId => {
-        if (!parsedColumns[colId]) parsedColumns[colId] = { ...initialColumns[colId] };
-        parsedColumns[colId].orderIds = [...new Set([...parsedColumns[colId].orderIds, ...migratedData.columns[colId].orderIds])];
-      });
+    async function bootstrap() {
+      // --- MAIN (orders / columns / archived) ---
+      const mainSnap = await getDoc(mainRef);
+      if (mainSnap.exists()) {
+        const data = mainSnap.data();
+        const migrated = applyMigrations(data);
+        setOrders(migrated.orders);
+        setColumns(migrated.columns);
+        setArchivedOrders(migrated.archivedOrders);
+        // save migrated flags back if any migration ran
+        if (!data.migratedV2 || !data.migratedV3 || !data.migratedV4) {
+          await setDoc(mainRef, migrated, { merge: true });
+        }
+      } else {
+        // First time ever – pull from localStorage (migration from old app)
+        const lsOrders   = localStorage.getItem('crm_orders');
+        const lsCols     = localStorage.getItem('crm_columns');
+        const lsArchived = localStorage.getItem('crm_archived_orders');
+        const raw = {
+          orders:         lsOrders   ? JSON.parse(lsOrders)   : {},
+          columns:        lsCols     ? JSON.parse(lsCols)      : { ...initialColumns },
+          archivedOrders: lsArchived ? JSON.parse(lsArchived)  : [],
+        };
+        const migrated = applyMigrations(raw);
+        await setDoc(mainRef, migrated);
+        setOrders(migrated.orders);
+        setColumns(migrated.columns);
+        setArchivedOrders(migrated.archivedOrders);
+      }
 
-      parsedArchived = [...parsedArchived, ...migratedData.archivedOrders];
-      
-      setTimeout(() => localStorage.setItem('crm_orders_migrated_v2', 'true'), 100);
-    }
-    
-    // v3 Migration: update column names and order statuses to 7-column layout
-    if (!migratedOrdersV3) {
-      const colMap = {
-        'new_order': 'pending',
-        'design': 'designing',
-        'printing': 'printing',
-        'church': 'ready',
-        'shipping': 'shipped',
-        'delivered': 'arrived'
-      };
-      
-      const newCols = JSON.parse(JSON.stringify(initialColumns));
-      
-      Object.keys(parsedColumns).forEach(oldColId => {
-        const newColId = colMap[oldColId] || oldColId;
-        if (newCols[newColId] && parsedColumns[oldColId].orderIds) {
-          newCols[newColId].orderIds = [...new Set([...newCols[newColId].orderIds, ...parsedColumns[oldColId].orderIds])];
-        }
-      });
-      
-      Object.keys(parsedOrders).forEach(orderId => {
-        const order = parsedOrders[orderId];
-        if (colMap[order.status]) {
-          order.status = colMap[order.status];
-        }
-      });
-      
-      parsedColumns = newCols;
-      setTimeout(() => localStorage.setItem('crm_orders_migrated_v3', 'true'), 100);
-    }
-    
-    // v4 Migration: Archive old orders (before July 1st) and move remaining new_order to shipping
-    if (!migratedOrdersV4) {
-      migrationV4Data.archiveIds.forEach(id => {
-        if (parsedOrders[id] && parsedOrders[id].status === 'pending') {
-          parsedArchived.unshift({
-            ...parsedOrders[id],
-            archivedAt: new Date().toISOString()
-          });
-          if (parsedColumns.pending) {
-            parsedColumns.pending.orderIds = parsedColumns.pending.orderIds.filter(oId => oId !== id);
-          }
-          delete parsedOrders[id];
-        }
-      });
+      // --- TASKS ---
+      const tasksSnap = await getDoc(tasksRef);
+      if (tasksSnap.exists()) {
+        setTasks(tasksSnap.data().tasks || {});
+      } else {
+        const lsTasks = localStorage.getItem('crm_tasks');
+        const t = lsTasks ? JSON.parse(lsTasks) : {};
+        await setDoc(tasksRef, { tasks: t });
+        setTasks(t);
+      }
 
-      migrationV4Data.shippingIds.forEach(id => {
-        if (parsedOrders[id] && parsedOrders[id].status === 'pending') {
-          parsedOrders[id].status = 'shipped';
-          if (parsedColumns.pending) {
-            parsedColumns.pending.orderIds = parsedColumns.pending.orderIds.filter(oId => oId !== id);
-          }
-          if (parsedColumns.shipped) {
-            parsedColumns.shipped.orderIds = [id, ...parsedColumns.shipped.orderIds];
-          }
-        }
+      // --- CLIENTS ---
+      const clientsSnap = await getDoc(clientsRef);
+      if (clientsSnap.exists()) {
+        setClients(clientsSnap.data().clients || []);
+      } else {
+        const lsClients = localStorage.getItem('crm_clients');
+        let c = lsClients ? JSON.parse(lsClients) : initialClients;
+        c = mergeClientsWithChat(c);
+        await setDoc(clientsRef, { clients: c, chatMergedV1: true });
+        setClients(c);
+      }
+
+      // --- PRODUCTS ---
+      const productsSnap = await getDoc(productsRef);
+      if (productsSnap.exists()) {
+        setProducts(productsSnap.data().products || []);
+      } else {
+        const lsProducts = localStorage.getItem('crm_products');
+        const p = lsProducts ? JSON.parse(lsProducts) : initialProducts;
+        await setDoc(productsRef, { products: p });
+        setProducts(p);
+      }
+
+      // --- LEDGER ---
+      const ledgerSnap = await getDoc(ledgerRef);
+      if (ledgerSnap.exists()) {
+        setTransactions(ledgerSnap.data().transactions || []);
+      } else {
+        const lsTx = localStorage.getItem('crm_transactions');
+        const tx = lsTx ? JSON.parse(lsTx) : [];
+        await setDoc(ledgerRef, { transactions: tx });
+        setTransactions(tx);
+      }
+
+      initialised.current = true;
+      setLoading(false);
+
+      // ── REAL-TIME LISTENERS ─────────────────────────────────────────────
+      unsubMain = onSnapshot(mainRef, snap => {
+        if (!snap.exists() || !initialised.current) return;
+        const d = snap.data();
+        setOrders(d.orders || {});
+        setColumns(d.columns || initialColumns);
+        setArchivedOrders(d.archivedOrders || []);
       });
-      
-      setTimeout(() => localStorage.setItem('crm_orders_migrated_v4', 'true'), 100);
+      unsubTasks = onSnapshot(tasksRef, snap => {
+        if (!snap.exists() || !initialised.current) return;
+        setTasks(snap.data().tasks || {});
+      });
+      unsubClients = onSnapshot(clientsRef, snap => {
+        if (!snap.exists() || !initialised.current) return;
+        setClients(snap.data().clients || []);
+      });
+      unsubProducts = onSnapshot(productsRef, snap => {
+        if (!snap.exists() || !initialised.current) return;
+        setProducts(snap.data().products || []);
+      });
+      unsubLedger = onSnapshot(ledgerRef, snap => {
+        if (!snap.exists() || !initialised.current) return;
+        setTransactions(snap.data().transactions || []);
+      });
     }
 
-    // Always sync titles and colors from code so they update if we change them
-    Object.keys(parsedColumns).forEach(colId => {
-      if (initialColumns[colId]) {
-        parsedColumns[colId].title = initialColumns[colId].title;
-        parsedColumns[colId].color = initialColumns[colId].color;
-      }
-    });
+    bootstrap().catch(console.error);
 
-    setOrders(parsedOrders);
-    setColumns(parsedColumns);
-    setArchivedOrders(parsedArchived);
-    if (savedTasks) setTasks(JSON.parse(savedTasks));
-  }, []);
+    return () => {
+      unsubMain?.();
+      unsubTasks?.();
+      unsubClients?.();
+      unsubProducts?.();
+      unsubLedger?.();
+    };
+  }, []); // eslint-disable-line
 
-  // Save to local storage on change
+  // ── SAVE TO FIRESTORE (debounced, only after first load) ─────────────────
   useEffect(() => {
-    localStorage.setItem('crm_orders', JSON.stringify(orders));
-    localStorage.setItem('crm_columns', JSON.stringify(columns));
-    localStorage.setItem('crm_tasks', JSON.stringify(tasks));
-    localStorage.setItem('crm_products', JSON.stringify(products));
-    localStorage.setItem('crm_transactions', JSON.stringify(transactions));
-    localStorage.setItem('crm_archived_orders', JSON.stringify(archivedOrders));
-    localStorage.setItem('crm_clients', JSON.stringify(clients));
-  }, [orders, columns, tasks, products, transactions, archivedOrders, clients]);
+    if (!initialised.current) return;
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      setDoc(mainRef, { orders, columns, archivedOrders }, { merge: false }).catch(console.error);
+    }, 800);
+  }, [orders, columns, archivedOrders]); // eslint-disable-line
 
-  // ---- Tasks Functions ----
+  useEffect(() => { if (initialised.current) setDoc(tasksRef,    { tasks },        { merge: false }).catch(console.error); }, [tasks]);       // eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(clientsRef,  { clients },      { merge: false }).catch(console.error); }, [clients]);     // eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(productsRef, { products },     { merge: false }).catch(console.error); }, [products]);    // eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(ledgerRef,   { transactions }, { merge: false }).catch(console.error); }, [transactions]);// eslint-disable-line
+
+  // ── TASKS ────────────────────────────────────────────────────────────────
   const addTask = (taskData) => {
     const id = uuidv4();
-    const newTask = {
-      id,
-      ...taskData,
-      assignerId: currentUser.id,
-      status: 'todo', // 'todo', 'in-progress', 'done'
-      createdAt: new Date().toISOString(),
-    };
+    const newTask = { id, ...taskData, assignerId: currentUser.id, status: 'todo', createdAt: new Date().toISOString() };
     setTasks(prev => ({ ...prev, [id]: newTask }));
   };
+  const updateTaskStatus = (taskId, newStatus) => setTasks(prev => ({ ...prev, [taskId]: { ...prev[taskId], status: newStatus } }));
+  const deleteTask       = (taskId) => { const t = { ...tasks }; delete t[taskId]; setTasks(t); };
 
-  const updateTaskStatus = (taskId, newStatus) => {
-    setTasks(prev => ({
-      ...prev,
-      [taskId]: { ...prev[taskId], status: newStatus }
-    }));
-  };
-  
-  const deleteTask = (taskId) => {
-    const newTasks = { ...tasks };
-    delete newTasks[taskId];
-    setTasks(newTasks);
-  };
+  // ── CLIENTS ──────────────────────────────────────────────────────────────
+  const addClient    = (data)            => setClients(prev => [...prev, { id: uuidv4(), ...data }]);
+  const updateClient = (id, fields)      => setClients(prev => prev.map(c => c.id === id ? { ...c, ...fields } : c));
+  const deleteClient = (id)              => setClients(prev => prev.filter(c => c.id !== id));
 
-  // ---- Clients Functions ----
-  const addClient = (clientData) => {
-    const newClient = {
-      id: uuidv4(),
-      ...clientData,
-    };
-    setClients(prev => [...prev, newClient]);
-  };
+  // ── PRODUCTS ─────────────────────────────────────────────────────────────
+  const addProduct    = (data)       => setProducts(prev => [...prev, { id: uuidv4(), ...data, stock: Number(data.stock)||0, buyPrice: Number(data.buyPrice)||0, sellPrice: Number(data.sellPrice)||0 }]);
+  const updateProduct = (id, fields) => setProducts(prev => prev.map(p => p.id === id ? { ...p, ...fields } : p));
 
-  const updateClient = (clientId, updatedFields) => {
-    setClients(prev => prev.map(c => 
-      c.id === clientId ? { ...c, ...updatedFields } : c
-    ));
-  };
+  // ── LEDGER ───────────────────────────────────────────────────────────────
+  const addTransaction    = (data) => setTransactions(prev => [...prev, { id: uuidv4(), ...data, date: new Date().toISOString(), amount: Number(data.amount)||0 }]);
+  const deleteTransaction = (id)   => setTransactions(prev => prev.filter(t => t.id !== id));
 
-  const deleteClient = (clientId) => {
-    setClients(prev => prev.filter(c => c.id !== clientId));
-  };
-  // -------------------------
-
-  // ---- Products Functions ----
-  const addProduct = (productData) => {
-    const newProduct = {
-      id: uuidv4(),
-      ...productData,
-      stock: Number(productData.stock) || 0,
-      buyPrice: Number(productData.buyPrice) || 0,
-      sellPrice: Number(productData.sellPrice) || 0,
-    };
-    setProducts(prev => [...prev, newProduct]);
-  };
-
-  const updateProduct = (productId, updatedFields) => {
-    setProducts(prev => prev.map(p => 
-      p.id === productId ? { ...p, ...updatedFields } : p
-    ));
-  };
-  // -------------------------
-
-  // ---- Ledger Functions ----
-  const addTransaction = (transactionData) => {
-    const newTransaction = {
-      id: uuidv4(),
-      ...transactionData,
-      date: new Date().toISOString(),
-      amount: Number(transactionData.amount) || 0
-    };
-    setTransactions(prev => [...prev, newTransaction]);
-  };
-
-  const deleteTransaction = (id) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
-  };
-  // -------------------------
-
+  // ── ORDERS ───────────────────────────────────────────────────────────────
   const addOrder = (orderData) => {
     const id = uuidv4();
-    const newOrder = {
-      id,
-      ...orderData,
-      createdBy: currentUser.id, // Links order color to user
-      createdAt: new Date().toISOString(),
-      notes: []
-    };
-
-    setOrders((prev) => ({ ...prev, [id]: newOrder }));
-    
-    // Add to 'new_order' column by default
-    setColumns((prev) => {
-      const newColumn = {
-        ...prev.pending,
-        orderIds: [id, ...prev.pending.orderIds]
-      };
-      return { ...prev, pending: newColumn };
-    });
-
-    // Auto deduct stock
-    if (orderData.items && orderData.items.length > 0) {
+    const newOrder = { id, ...orderData, createdBy: currentUser.id, createdAt: new Date().toISOString(), notes: [] };
+    setOrders(prev => ({ ...prev, [id]: newOrder }));
+    setColumns(prev => ({ ...prev, pending: { ...prev.pending, orderIds: [id, ...prev.pending.orderIds] } }));
+    if (orderData.items?.length > 0) {
       setProducts(prev => {
-        let newProducts = [...prev];
+        let np = [...prev];
         orderData.items.forEach(item => {
-          const index = newProducts.findIndex(p => p.name === item.workshop);
-          if (index !== -1 && item.quantity) {
-            newProducts[index] = { ...newProducts[index], stock: newProducts[index].stock - Number(item.quantity) };
-          }
+          const idx = np.findIndex(p => p.name === item.workshop);
+          if (idx !== -1 && item.quantity) np[idx] = { ...np[idx], stock: np[idx].stock - Number(item.quantity) };
         });
-        return newProducts;
+        return np;
       });
     }
   };
 
-  const updateOrder = (id, updatedData) => {
-    setOrders((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], ...updatedData }
-    }));
-  };
+  const updateOrder = (id, updatedData) => setOrders(prev => ({ ...prev, [id]: { ...prev[id], ...updatedData } }));
 
   const addNote = (orderId, text) => {
-    setOrders((prev) => {
+    setOrders(prev => {
       const order = prev[orderId];
-      const newNote = {
-        id: uuidv4(),
-        text,
-        createdBy: currentUser.name,
-        timestamp: new Date().toISOString()
-      };
-      return {
-        ...prev,
-        [orderId]: { ...order, notes: [...order.notes, newNote] }
-      };
+      const newNote = { id: uuidv4(), text, createdBy: currentUser.name, timestamp: new Date().toISOString() };
+      return { ...prev, [orderId]: { ...order, notes: [...order.notes, newNote] } };
     });
   };
 
   const deleteOrder = (orderId) => {
     const orderToDelete = orders[orderId];
-    
-    // Restore stock
-    if (orderToDelete && orderToDelete.items && orderToDelete.items.length > 0) {
+    if (orderToDelete?.items?.length > 0) {
       setProducts(prev => {
-        let newProducts = [...prev];
+        let np = [...prev];
         orderToDelete.items.forEach(item => {
-          const index = newProducts.findIndex(p => p.name === item.workshop);
-          if (index !== -1 && item.quantity) {
-            newProducts[index] = { ...newProducts[index], stock: newProducts[index].stock + Number(item.quantity) };
-          }
+          const idx = np.findIndex(p => p.name === item.workshop);
+          if (idx !== -1 && item.quantity) np[idx] = { ...np[idx], stock: np[idx].stock + Number(item.quantity) };
         });
-        return newProducts;
+        return np;
       });
     }
-
-    const newOrders = { ...orders };
-    delete newOrders[orderId];
-    setOrders(newOrders);
-
-    setColumns((prev) => {
-      const newColumns = { ...prev };
-      for (const colId in newColumns) {
-        newColumns[colId].orderIds = newColumns[colId].orderIds.filter(id => id !== orderId);
-      }
-      return newColumns;
+    const newOrders = { ...orders }; delete newOrders[orderId]; setOrders(newOrders);
+    setColumns(prev => {
+      const nc = { ...prev };
+      for (const colId in nc) nc[colId] = { ...nc[colId], orderIds: nc[colId].orderIds.filter(id => id !== orderId) };
+      return nc;
     });
   };
 
   const moveOrder = (sourceColId, destinationColId, sourceIndex, destinationIndex, orderId) => {
-    const start = columns[sourceColId];
+    const start  = columns[sourceColId];
     const finish = columns[destinationColId];
-
     if (start === finish) {
-      const newOrderIds = Array.from(start.orderIds);
-      newOrderIds.splice(sourceIndex, 1);
-      newOrderIds.splice(destinationIndex, 0, orderId);
-
-      const newColumn = { ...start, orderIds: newOrderIds };
-      setColumns((prev) => ({ ...prev, [newColumn.id]: newColumn }));
+      const ids = Array.from(start.orderIds);
+      ids.splice(sourceIndex, 1); ids.splice(destinationIndex, 0, orderId);
+      setColumns(prev => ({ ...prev, [start.id]: { ...start, orderIds: ids } }));
       return;
     }
-
-    // Moving between columns
-    const startOrderIds = Array.from(start.orderIds);
-    startOrderIds.splice(sourceIndex, 1);
-    const newStart = { ...start, orderIds: startOrderIds };
-
-    const finishOrderIds = Array.from(finish.orderIds);
-    finishOrderIds.splice(destinationIndex, 0, orderId);
-    const newFinish = { ...finish, orderIds: finishOrderIds };
-
+    const startIds = Array.from(start.orderIds);  startIds.splice(sourceIndex, 1);
+    const finishIds = Array.from(finish.orderIds); finishIds.splice(destinationIndex, 0, orderId);
     if (destinationColId === 'designing' && sourceColId !== 'designing') {
       const movedOrder = orders[orderId];
-      if (movedOrder) {
-        addTask({
-          title: `تصميم أوردر: ${movedOrder.name}`,
-          description: `برجاء عمل التصميم الخاص بأوردر العميل (${movedOrder.name}) - كنيسة: ${movedOrder.church}`,
-          assigneeId: 'kirolos'
-        });
-      }
+      if (movedOrder) addTask({ title: `تصميم أوردر: ${movedOrder.name}`, description: `برجاء عمل التصميم الخاص بأوردر العميل (${movedOrder.name}) - كنيسة: ${movedOrder.church}`, assigneeId: 'kirolos' });
     }
-
-    setColumns((prev) => ({
-      ...prev,
-      [newStart.id]: newStart,
-      [newFinish.id]: newFinish
-    }));
+    setColumns(prev => ({ ...prev, [start.id]: { ...start, orderIds: startIds }, [finish.id]: { ...finish, orderIds: finishIds } }));
   };
 
   const archiveOrder = (orderId) => {
     const orderToArchive = orders[orderId];
     if (!orderToArchive) return;
-    
-    // 1. Add to archived
-    const archivedOrder = {
-      ...orderToArchive,
-      archivedAt: new Date().toISOString()
-    };
-    setArchivedOrders(prev => [archivedOrder, ...prev]);
-
-    // 2. Remove from active orders
-    const newOrders = { ...orders };
-    delete newOrders[orderId];
-    setOrders(newOrders);
-
-    // 3. Remove from columns
+    setArchivedOrders(prev => [{ ...orderToArchive, archivedAt: new Date().toISOString() }, ...prev]);
+    const newOrders = { ...orders }; delete newOrders[orderId]; setOrders(newOrders);
     setColumns(prev => {
-      const newColumns = { ...prev };
-      for (const colId in newColumns) {
-        newColumns[colId] = {
-          ...newColumns[colId],
-          orderIds: newColumns[colId].orderIds.filter(id => id !== orderId)
-        };
-      }
-      return newColumns;
+      const nc = { ...prev };
+      for (const colId in nc) nc[colId] = { ...nc[colId], orderIds: nc[colId].orderIds.filter(id => id !== orderId) };
+      return nc;
     });
   };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ width: '48px', height: '48px', border: '4px solid #e2e8f0', borderTopColor: '#4f46e5', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <p style={{ fontFamily: 'Cairo, sans-serif', color: '#475569', fontSize: '1rem' }}>جاري تحميل البيانات...</p>
+      </div>
+    );
+  }
 
   return (
     <DataContext.Provider value={{
       orders, columns, columnOrder, archivedOrders,
       tasks, addTask, updateTaskStatus, deleteTask,
-      clients, addClient, updateClient, deleteClient, 
+      clients, addClient, updateClient, deleteClient,
       products, addProduct, updateProduct,
       transactions, addTransaction, deleteTransaction,
-      addOrder, updateOrder, deleteOrder, moveOrder, addNote,
-      archivedOrders, archiveOrder
+      addOrder, updateOrder, deleteOrder, moveOrder, addNote, archiveOrder,
     }}>
       {children}
     </DataContext.Provider>
