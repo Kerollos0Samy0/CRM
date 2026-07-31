@@ -3,6 +3,113 @@ import { useData } from '../context/DataContext';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+
+const ProductSelect = ({ value, onChange, products }) => {
+  const [isCustom, setIsCustom] = React.useState(false);
+  
+  // If the product exists in the predefined list, use it. Otherwise, if it has a value, it must be custom.
+  React.useEffect(() => {
+    if (value && !products.some(p => p.name === value)) {
+      setIsCustom(true);
+    }
+  }, []);
+
+  if (isCustom) {
+    return (
+      <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+        <input 
+          autoFocus
+          required 
+          type="text" 
+          value={value} 
+          onChange={e => onChange(e.target.value)} 
+          className="input-field" 
+          placeholder="اكتب اسم المنتج..." 
+          style={{ flex: 1 }}
+        />
+        <button type="button" onClick={() => { setIsCustom(false); onChange(''); }} className="btn btn-secondary" style={{ padding: '4px 8px' }}>
+          إلغاء
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <select 
+      required 
+      value={value} 
+      onChange={e => {
+        if (e.target.value === '__CUSTOM__') {
+          setIsCustom(true);
+          onChange('');
+        } else {
+          onChange(e.target.value);
+        }
+      }} 
+      className="input-field"
+    >
+      <option value="" disabled>اختر المنتج...</option>
+      {products.map(p => (
+        <option key={p.id} value={p.name}>{p.name}</option>
+      ))}
+      <option value="__CUSTOM__">+ منتج آخر (كتابة يدوي)</option>
+    </select>
+  );
+};
+
+
+const ClientSelect = ({ value, onChange, onClientSelect, clients }) => {
+  const [isCustom, setIsCustom] = React.useState(false);
+  
+  React.useEffect(() => {
+    if (value && !clients.some(c => c.name === value)) {
+      setIsCustom(true);
+    }
+  }, []);
+
+  if (isCustom) {
+    return (
+      <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+        <input 
+          autoFocus
+          required 
+          type="text" 
+          value={value} 
+          onChange={e => onChange(e)} 
+          className="input-field" 
+          placeholder="اكتب اسم العميل..." 
+          style={{ flex: 1 }}
+        />
+        <button type="button" onClick={() => { setIsCustom(false); onChange({target:{value:''}}); }} className="btn btn-secondary" style={{ padding: '4px 8px' }}>
+          إلغاء
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <select 
+      required 
+      value={value} 
+      onChange={e => {
+        if (e.target.value === '__CUSTOM__') {
+          setIsCustom(true);
+          onChange({target: {value: ''}});
+        } else {
+          onClientSelect(e);
+        }
+      }} 
+      className="input-field"
+    >
+      <option value="" disabled>اختر العميل (أو أضف جديد)...</option>
+      {clients.map(c => (
+        <option key={c.id} value={c.name}>{c.name}</option>
+      ))}
+      <option value="__CUSTOM__">+ عميل جديد (كتابة يدوي)</option>
+    </select>
+  );
+};
+
 const OrderModal = ({ onClose }) => {
   const { addOrder, clients, products } = useData();
   const defaultDeadline = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -171,10 +278,8 @@ const OrderModal = ({ onClose }) => {
         <form onSubmit={handleSubmit} className="form-grid">
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>الاسم</label>
-            <input required list="clients-list" type="text" name="name" value={formData.name} onChange={handleNameChange} className="input-field" placeholder="اسم العميل" />
-            <datalist id="clients-list">
-              {clients.map(c => <option key={c.id} value={c.name} />)}
-            </datalist>
+            <ClientSelect value={formData.name} onChange={handleNameChange} onClientSelect={handleNameChange} clients={clients} />
+            
           </div>
 
           <div>
@@ -208,7 +313,7 @@ const OrderModal = ({ onClose }) => {
             {formData.items.map((item, index) => (
               <div key={index} style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'flex-start' }}>
                 <div style={{ flex: 2 }}>
-                  <input required list="products-list" type="text" value={item.workshop} onChange={(e) => handleItemChange(index, 'workshop', e.target.value)} className="input-field" placeholder="اسم الورشة / المنتج" />
+                  <ProductSelect value={item.workshop} onChange={(val) => handleItemChange(index, 'workshop', val)} products={products} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <input required type="number" min="0" value={item.unitPrice} onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)} className="input-field" placeholder="سعر الوحدة" />
@@ -223,9 +328,7 @@ const OrderModal = ({ onClose }) => {
                 )}
               </div>
             ))}
-            <datalist id="products-list">
-              {products.map(p => <option key={p.id} value={p.name} />)}
-            </datalist>
+            
           </div>
 
           <div style={{ gridColumn: '1 / -1' }}>
