@@ -78,6 +78,7 @@ function applyMigrations(rawData) {
   let migratedV15 = rawData.migratedV15 || false;
   let migratedV16 = rawData.migratedV16 || false;
   let migratedV17 = rawData.migratedV17 || false;
+  let migratedV18 = rawData.migratedV18 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -449,8 +450,18 @@ function applyMigrations(rawData) {
       if (fullOrdersV11.archived) { archivedOrders = fullOrdersV11.archived.map(o => normalizeOrder(o)); }
     }
     migratedV17 = true;
+  // v18 - Re-sync with grouped orders
+  if (!rawData.migratedV18) {
+    if (fullOrdersV11 && fullOrdersV11.active) {
+      orders = {};
+      Object.keys(columns).forEach(colId => { columns[colId].orderIds = []; });
+      Object.values(fullOrdersV11.active).forEach(newOrder => { const orderId = newOrder.id; orders[orderId] = normalizeOrder(newOrder); const targetStatus = newOrder.status || 'pending'; if (columns[targetStatus]) { if (!columns[targetStatus].orderIds) columns[targetStatus].orderIds = []; if (!columns[targetStatus].orderIds.includes(orderId)) { columns[targetStatus].orderIds.unshift(orderId); } } });
+    }
+    migratedV18 = true;
   }
-  return { orders, columns, archivedOrders, migratedV17, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
+;
+  }
+  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -585,7 +596,7 @@ export const DataProvider = ({ children }) => {
           setColumns(migrated.columns);
           setArchivedOrders(migrated.archivedOrders);
           // Force save to Firebase if we migrated or restored
-          if (!data.migratedV2 || !data.migratedV11 || !data.migratedV12 || !data.migratedV15 || !data.migratedV16 || !data.migratedV17 || Object.keys(data.orders || {}).length === 0)
+          if (!data.migratedV2 || !data.migratedV11 || !data.migratedV12 || !data.migratedV15 || !data.migratedV16 || !data.migratedV17 || !data.migratedV18 || Object.keys(data.orders || {}).length === 0)
             setDoc(mainRef, migrated, { merge: true }).catch(console.error);
         } else {
           const lsOrders   = localStorage.getItem('crm_orders');
