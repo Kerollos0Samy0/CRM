@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from './AuthContext';
 import { db } from '../firebase';
 import {
-  doc, onSnapshot, setDoc, getDoc, updateDoc
+  doc, onSnapshot, setDoc, getDoc, updateDoc, deleteField
 } from 'firebase/firestore';
 import initialProducts from '../data/products.json';
 import initialClients from '../data/clients.json';
@@ -995,7 +995,10 @@ export const DataProvider = ({ children }) => {
     setTasks(prev => ({ ...prev, [id]: newTask }));
   };
   const updateTaskStatus = (taskId, newStatus) => setTasks(prev => ({ ...prev, [taskId]: { ...prev[taskId], status: newStatus } }));
-  const deleteTask       = (taskId) => setTasks(prev => { const t = { ...prev }; delete t[taskId]; return t; });
+  const deleteTask = (taskId) => {
+    setTasks(prev => { const t = { ...prev }; delete t[taskId]; return t; });
+    updateDoc(tasksRef, { [`tasks.${taskId}`]: deleteField() }).catch(console.error);
+  };
 
   // ── CLIENTS ──────────────────────────────────────────────────────────────
   const addClient    = (data)            => setClients(prev => [...prev, { id: uuidv4(), ...data }]);
