@@ -89,6 +89,7 @@ function applyMigrations(rawData) {
   let migratedV26 = rawData.migratedV26 || false;
   let migratedV28 = rawData.migratedV28 || false;
     let migratedV29 = rawData.migratedV29 || false;
+  let migratedV30 = rawData.migratedV30 || false;
 
   // normalise every order
   Object.keys(orders).forEach(id => { orders[id] = normalizeOrder({ ...orders[id] }); });
@@ -549,7 +550,7 @@ function applyMigrations(rawData) {
     migratedV26 = true;
   }
 
-  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV19, migratedV24, migratedV26, migratedV28, migratedV29, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
+  return { orders, columns, archivedOrders, migratedV17, migratedV18, migratedV19, migratedV24, migratedV26, migratedV28, migratedV29, migratedV30, migratedV2, migratedV3, migratedV4, migratedV5, migratedV6, migratedV7, migratedV8, migratedV9, migratedV10, migratedV11, migratedV12, migratedV15, migratedV16 };
 }
 
 function mergeClientsWithChat(currentClients) {
@@ -837,50 +838,23 @@ export const DataProvider = ({ children }) => {
         }
 
         // --- LEDGER ---
-                  if (ledgerSnap.exists()) {
+                  
+          if (ledgerSnap.exists()) {
             let txData = ledgerSnap.data().transactions || [];
-            const doneTx = localStorage.getItem('migrated_historical_tx_3');
-            if (!doneTx) {
-               const manualExpenses = [
-                  { id: 'hist-1', date: '2026-03-28T12:00:00Z', type: 'debt', category: 'admin', amount: 1000, supplier: 'مصاريف إدارية (مستوردة)' },
-                  { id: 'hist-2', date: '2026-03-28T12:00:00Z', type: 'debt', category: 'products', amount: 4570, supplier: 'مصاريف المخزن (مستوردة)' },
-                  { id: 'hist-3', date: '2026-03-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 2400, supplier: 'مصاريف الورشة (مستوردة)' },
-                  
-                  { id: 'hist-4', date: '2026-04-28T12:00:00Z', type: 'debt', category: 'admin', amount: 3000, supplier: 'مصاريف إدارية (مستوردة)' },
-                  { id: 'hist-5', date: '2026-04-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 750, supplier: 'مصاريف الورشة (مستوردة)' },
-                  
-                  { id: 'hist-6', date: '2026-05-28T12:00:00Z', type: 'debt', category: 'admin', amount: 1500, supplier: 'مصاريف إدارية (مستوردة)' },
-                  { id: 'hist-7', date: '2026-05-28T12:00:00Z', type: 'debt', category: 'products', amount: 1200, supplier: 'مصاريف المخزن (مستوردة)' },
-                  { id: 'hist-8', date: '2026-05-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 750, supplier: 'مصاريف الورشة (مستوردة)' },
-                  
-                  { id: 'hist-9', date: '2026-06-28T12:00:00Z', type: 'debt', category: 'admin', amount: 3750, supplier: 'مصاريف إدارية (مستوردة)' },
-                  { id: 'hist-10', date: '2026-06-28T12:00:00Z', type: 'debt', category: 'products', amount: 4568, supplier: 'مصاريف المخزن (مستوردة)' },
-                  { id: 'hist-11', date: '2026-06-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 5375, supplier: 'مصاريف الورشة (مستوردة)' },
-                  
-                  { id: 'hist-12', date: '2026-07-28T12:00:00Z', type: 'debt', category: 'admin', amount: 14500, supplier: 'مصاريف إدارية (مستوردة)' },
-                  { id: 'hist-13', date: '2026-07-28T12:00:00Z', type: 'debt', category: 'products', amount: 6231, supplier: 'مصاريف المخزن (مستوردة)' },
-                  { id: 'hist-14', date: '2026-07-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 6543, supplier: 'مصاريف الورشة (مستوردة)' }
-               ];
-               if (!txData.some(t => t.id && t.id.startsWith('hist-'))) {
-                  txData = [...txData, ...manualExpenses];
-                  try {
-                    // It's inside a try-catch in DataContext, but let's avoid using setDoc directly if we don't have it imported here.
-                    // wait, setDoc is imported.
-                  } catch (e) {}
-               }
-               localStorage.setItem('migrated_historical_tx_3', 'true');
+            
+            // Wipe transactions if not done yet
+            const wiped = localStorage.getItem('wiped_tx_v30');
+            if (!wiped) {
+               txData = [];
+               try {
+                 setDoc(ledgerRef, { transactions: [] }).catch(console.error);
+               } catch(e) {}
+               localStorage.setItem('wiped_tx_v30', 'true');
             }
-          const lsTxRaw = localStorage.getItem('crm_transactions');
-          if (lsTxRaw && txData.length === 0) {
-              const parsedLsTx = JSON.parse(lsTxRaw);
-              if (parsedLsTx.length > 0) {
-                  txData = parsedLsTx;
-                  setDoc(ledgerRef, { transactions: txData }).catch(console.error);
-                  console.warn('Restored LEDGER from localStorage');
-              }
+            
+            setTransactions(txData);
           }
-          setTransactions(txData);
-        } else {
+ else {
           const lsTx = localStorage.getItem('crm_transactions');
           const tx = lsTx ? JSON.parse(lsTx) : [];
           setDoc(ledgerRef, { transactions: tx }).catch(console.error);
@@ -958,7 +932,7 @@ export const DataProvider = ({ children }) => {
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       lastSavedState.current = currentStateString;
-      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true, migratedV24: true, migratedV26: true, migratedV28: true, migratedV29: true }, { merge: true }).catch(console.error);
+      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true, migratedV24: true, migratedV26: true, migratedV28: true, migratedV29: true, migratedV30: true }, { merge: true }).catch(console.error);
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
 
