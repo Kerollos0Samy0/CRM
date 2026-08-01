@@ -944,11 +944,11 @@ export const DataProvider = ({ children }) => {
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       lastSavedState.current = currentStateString;
-      setDoc(mainRef, { orders, columns, archivedOrders, migratedV1: true, migratedV2: true, migratedV3: true, migratedV4: true, migratedV5: true, migratedV6: true, migratedV7: true, migratedV8: true, migratedV9: true, migratedV10: true, migratedV11: true, migratedV12: true, migratedV13: true, migratedV14: true, migratedV15: true, migratedV16: true, migratedV17: true, migratedV18: true, migratedV19: true, migratedV24: true, migratedV26: true, migratedV28: true, migratedV29: true, migratedV30: true }, { merge: true }).catch(console.error);
+      updateDoc(mainRef, { orders, columns, archivedOrders }).catch(console.error);
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
 
-  useEffect(() => { if (initialised.current) setDoc(tasksRef,    { tasks },        { merge: true }).catch(console.error); }, [tasks]);       // eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(tasksRef,    { tasks }).catch(console.error); }, [tasks]);       // eslint-disable-line
   useEffect(() => { if (initialised.current) setDoc(clientsRef,  { clients },      { merge: true }).catch(console.error); }, [clients]);     // eslint-disable-line
   useEffect(() => { if (initialised.current) setDoc(productsRef, { products },     { merge: true }).catch(console.error); }, [products]);    // eslint-disable-line
   useEffect(() => { if (initialised.current) setDoc(ledgerRef,   { transactions }, { merge: true }).catch(console.error); }, [transactions]);// eslint-disable-line
