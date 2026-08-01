@@ -90,14 +90,17 @@ export const useMonthlyStats = ({ orders, archivedOrders, transactions, products
        }
     });
 
-    // Force August 2026 to be open
-    if (!stats['2026-08']) {
-      stats['2026-08'] = {
-        sales: 0, cogs: 0, products: 0, admin: 0, workshop: 0, other: 0,
-        label: new Date('2026-08-01').toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' }),
-        ordersList: [], transactionsList: []
-      };
-    }
+    // Force August to December 2026 to be open
+    const futureMonths = ['2026-08', '2026-09', '2026-10', '2026-11', '2026-12'];
+    futureMonths.forEach(m => {
+      if (!stats[m]) {
+        stats[m] = {
+          sales: 0, cogs: 0, products: 0, admin: 0, workshop: 0, other: 0,
+          label: new Date(m + '-01').toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' }),
+          ordersList: [], transactionsList: []
+        };
+      }
+    });
 
     return Object.entries(stats).sort((a, b) => b[0].localeCompare(a[0]));
 
