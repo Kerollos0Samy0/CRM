@@ -722,10 +722,33 @@ export const DataProvider = ({ children }) => {
                   console.warn('Restored TASKS from localStorage');
               }
           }
+          
+          let hasRogueTasks = false;
+          Object.keys(tData).forEach(key => {
+            const t = tData[key];
+            if (t && (t.title?.includes('ديانا عماد') || !t.id)) {
+              delete tData[key];
+              hasRogueTasks = true;
+            }
+          });
+          if (hasRogueTasks) {
+            updateDoc(tasksRef, { tasks: tData }).catch(console.error);
+          }
+          
           setTasks(tData);
         } else {
           const lsTasks = localStorage.getItem('crm_tasks');
           const t = lsTasks ? JSON.parse(lsTasks) : {};
+          
+          let hasRogueTasks = false;
+          Object.keys(t).forEach(key => {
+            const taskObj = t[key];
+            if (taskObj && (taskObj.title?.includes('ديانا عماد') || !taskObj.id)) {
+              delete t[key];
+              hasRogueTasks = true;
+            }
+          });
+          
           setDoc(tasksRef, { tasks: t }).catch(console.error);
           setTasks(t);
         }
