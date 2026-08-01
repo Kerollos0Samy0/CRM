@@ -934,6 +934,39 @@ export const DataProvider = ({ children }) => {
   useEffect(() => { if (initialised.current) setDoc(ledgerRef,   { transactions }, { merge: true }).catch(console.error); }, [transactions]);// eslint-disable-line
   useEffect(() => { if (initialised.current) setDoc(suppliesRef, { supplies },     { merge: true }).catch(console.error); }, [supplies]);    // eslint-disable-line
 
+  useEffect(() => { 
+      if (initialised.current) {
+         const done = localStorage.getItem('migrated_historical_tx');
+         if (!done && transactions.length > 0) {
+             const manualExpenses = [
+                { id: 'hist-1', date: '2026-03-28T12:00:00Z', type: 'debt', category: 'admin', amount: 1000, supplier: 'مصاريف إدارية (مستوردة)' },
+                { id: 'hist-2', date: '2026-03-28T12:00:00Z', type: 'debt', category: 'products', amount: 4570, supplier: 'مصاريف المخزن (مستوردة)' },
+                { id: 'hist-3', date: '2026-03-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 2400, supplier: 'مصاريف الورشة (مستوردة)' },
+                
+                { id: 'hist-4', date: '2026-04-28T12:00:00Z', type: 'debt', category: 'admin', amount: 3000, supplier: 'مصاريف إدارية (مستوردة)' },
+                { id: 'hist-5', date: '2026-04-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 750, supplier: 'مصاريف الورشة (مستوردة)' },
+                
+                { id: 'hist-6', date: '2026-05-28T12:00:00Z', type: 'debt', category: 'admin', amount: 1500, supplier: 'مصاريف إدارية (مستوردة)' },
+                { id: 'hist-7', date: '2026-05-28T12:00:00Z', type: 'debt', category: 'products', amount: 1200, supplier: 'مصاريف المخزن (مستوردة)' },
+                { id: 'hist-8', date: '2026-05-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 750, supplier: 'مصاريف الورشة (مستوردة)' },
+                
+                { id: 'hist-9', date: '2026-06-28T12:00:00Z', type: 'debt', category: 'admin', amount: 3750, supplier: 'مصاريف إدارية (مستوردة)' },
+                { id: 'hist-10', date: '2026-06-28T12:00:00Z', type: 'debt', category: 'products', amount: 4568, supplier: 'مصاريف المخزن (مستوردة)' },
+                { id: 'hist-11', date: '2026-06-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 5375, supplier: 'مصاريف الورشة (مستوردة)' },
+                
+                { id: 'hist-12', date: '2026-07-28T12:00:00Z', type: 'debt', category: 'admin', amount: 14500, supplier: 'مصاريف إدارية (مستوردة)' },
+                { id: 'hist-13', date: '2026-07-28T12:00:00Z', type: 'debt', category: 'products', amount: 6231, supplier: 'مصاريف المخزن (مستوردة)' },
+                { id: 'hist-14', date: '2026-07-28T12:00:00Z', type: 'debt', category: 'workshop', amount: 6543, supplier: 'مصاريف الورشة (مستوردة)' }
+             ];
+             setTransactions(prev => {
+                if (prev.some(t => t.id && t.id.startsWith('hist-'))) return prev;
+                return [...prev, ...manualExpenses];
+             });
+             localStorage.setItem('migrated_historical_tx', 'true');
+         }
+      }
+    }, [transactions.length]); // trigger when transactions load
+
   // ── TASKS ────────────────────────────────────────────────────────────────
   const addTask = (taskData) => {
     const id = uuidv4();
