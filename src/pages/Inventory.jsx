@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Plus, Edit2, Check, Package, TrendingUp, Download, ClipboardList, Printer } from 'lucide-react';
+import { Plus, Edit2, Check, Package, TrendingUp, Download, ClipboardList, Printer, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Inventory = () => {
@@ -9,10 +9,34 @@ const Inventory = () => {
   const [isSupplyLogModalOpen, setIsSupplyLogModalOpen] = useState(false);
   const [isSupplyModalOpen, setIsSupplyModalOpen] = useState(false);
   const [isShortageModalOpen, setIsShortageModalOpen] = useState(false);
+  const [shortageItems, setShortageItems] = useState([]);
   const [supplyForm, setSupplyForm] = useState({ productId: null, productName: '', quantity: 0, notes: '' });
   const [editingProductId, setEditingProductId] = useState(null);
   const [editForm, setEditForm] = useState({ buyPrice: 0, sellPrice: 0, stock: 0 });
   const [searchTerm, setSearchTerm] = useState('');
+
+  const openShortages = () => {
+    const items = products.filter(p => p.stock < 10).map(p => ({
+      ...p,
+      selected: true,
+      reqQty: 10 - p.stock
+    }));
+    setShortageItems(items);
+    setIsShortageModalOpen(true);
+  };
+
+  const handleShareWhatsApp = () => {
+    const selected = shortageItems.filter(item => item.selected);
+    if (selected.length === 0) return;
+    
+    let text = "نواقص المطبعة:\n\n";
+    selected.forEach(item => {
+      text += `- ${item.name}: مطلوب ${item.reqQty} نسخة\n`;
+    });
+    
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
 
 
   const [formData, setFormData] = useState({
@@ -90,7 +114,7 @@ const Inventory = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: '250px' }}
           />
-          <button className="btn btn-secondary" style={{ color: 'var(--color-marina)', borderColor: 'var(--color-marina)' }} onClick={() => setIsShortageModalOpen(true)}>
+          <button className="btn btn-secondary" style={{ color: 'var(--color-marina)', borderColor: 'var(--color-marina)' }} onClick={openShortages}>
             <Printer size={18} />
             نواقص المطبعة
           </button>
@@ -338,9 +362,13 @@ const Inventory = () => {
           <motion.div className="card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: '700px', padding: '32px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div className="print-area">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h2 className="heading-md" style={{ color: 'var(--color-marina)' }}>جدول النواقص (المطبعة) - أقل من 10 قطع</h2>
+                <h2 className="heading-md" style={{ color: 'var(--color-marina)' }}>جدول النواقص (المطبعة)</h2>
                 <div className="no-print" style={{ display: 'flex', gap: '12px' }}>
                   <button className="btn btn-secondary" onClick={() => setIsShortageModalOpen(false)}>إغلاق</button>
+                  <button className="btn btn-primary" style={{ backgroundColor: '#25D366' }} onClick={handleShareWhatsApp}>
+                    <MessageCircle size={18} />
+                    شير واتساب
+                  </button>
                   <button className="btn btn-primary" onClick={() => window.print()}>
                     <Printer size={18} />
                     طباعة
@@ -351,29 +379,71 @@ const Inventory = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}>
+                    <th className="no-print" style={{ padding: '12px', width: '40px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={shortageItems.length > 0 && shortageItems.every(i => i.selected)} 
+                        onChange={e => {
+                          const val = e.target.checked;
+                          setShortageItems(shortageItems.map(item => ({ ...item, selected: val })));
+                        }} 
+                      />
+                    </th>
                     <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>المنتج</th>
                     <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>الكمية الحالية</th>
-                    <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>الكمية المطلوبة للطباعة</th>
+                    <th style={{ padding: '12px', color: 'var(--text-secondary)', width: '150px' }}>الكمية المطلوبة للطباعة</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {products.filter(p => p.stock < 10).length > 0 ? (
-                    products.filter(p => p.stock < 10).map(product => (
-                      <tr key={product.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  {shortageItems.length > 0 ? (
+                    shortageItems.map((product, idx) => (
+                      <tr key={product.id} style={{ borderBottom: '1px solid var(--border-color)', opacity: product.selected ? 1 : 0.5 }}>
+                        <td className="no-print" style={{ padding: '12px' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={product.selected}
+                            onChange={(e) => {
+                              const newItems = [...shortageItems];
+                              newItems[idx].selected = e.target.checked;
+                              setShortageItems(newItems);
+                            }}
+                          />
+                        </td>
                         <td style={{ padding: '12px', fontWeight: 600 }}>{product.name}</td>
                         <td style={{ padding: '12px', color: 'var(--color-marina)', fontWeight: 'bold' }}>{product.stock}</td>
-                        <td style={{ padding: '12px', borderLeft: '1px dashed var(--border-color)', borderRight: '1px dashed var(--border-color)' }}></td>
+                        <td style={{ padding: '12px' }}>
+                          <input 
+                            type="number" 
+                            className="input-field no-print" 
+                            min="1"
+                            value={product.reqQty}
+                            onChange={(e) => {
+                              const newItems = [...shortageItems];
+                              newItems[idx].reqQty = e.target.value;
+                              setShortageItems(newItems);
+                            }}
+                            style={{ padding: '6px 12px', textAlign: 'center', width: '80px' }}
+                          />
+                          <span className="print-only" style={{ display: 'none' }}>{product.reqQty}</span>
+                          <style>
+                            {`
+                              @media print {
+                                .print-only { display: inline !important; font-weight: bold; }
+                              }
+                            `}
+                          </style>
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="3" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>لا توجد أي منتجات أقل من 10 قطع حالياً</td>
+                      <td colSpan="4" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>لا توجد أي منتجات أقل من 10 قطع حالياً</td>
                     </tr>
                   )}
                 </tbody>
               </table>
               <div style={{ marginTop: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                تاريخ الطباعة: {new Date().toLocaleDateString('ar-EG')}
+                تاريخ الاستخراج: {new Date().toLocaleDateString('ar-EG')}
               </div>
             </div>
           </motion.div>
