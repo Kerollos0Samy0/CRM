@@ -45,14 +45,18 @@ const OrderTransactions = () => {
       totalRemaining += (Number(order.remainingAmount) || 0);
     }
 
-    let orderCollected = 0;
-    if (order.isDepositPaid) orderCollected += (Number(order.paidAmount) || 0);
-    if (order.isRestPaid) orderCollected += (Number(order.remainingAmount) || 0);
+    if (order.isDepositPaid && !order.isDepositTransferred) {
+      totalMarinaCustody += (Number(order.paidAmount) || 0);
+    }
+    if (order.isRestPaid && !order.isRestTransferred) {
+      totalMarinaCustody += (Number(order.remainingAmount) || 0);
+    }
 
-    if (order.isTransferredToKirolos) {
-      totalTransferredToKirolos += orderCollected;
-    } else {
-      totalMarinaCustody += orderCollected;
+    if (order.isDepositTransferred) {
+      totalTransferredToKirolos += (Number(order.paidAmount) || 0);
+    }
+    if (order.isRestTransferred) {
+      totalTransferredToKirolos += (Number(order.remainingAmount) || 0);
     }
   });
 
@@ -112,9 +116,10 @@ const OrderTransactions = () => {
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المرحلة</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الإجمالي</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الديبوزت</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>دفع الديبوزت؟</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>تحويل كيرلس</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المتبقي</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>دفع؟</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>دفع الباقي</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>دفع الباقي؟</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>تحويل كيرلس</th>
             </tr>
           </thead>
@@ -147,9 +152,6 @@ const OrderTransactions = () => {
                     </td>
                     <td style={{ padding: '16px', fontWeight: 'bold' }}>{(Number(order.totalAmount) || 0).toLocaleString()}</td>
                     <td style={{ padding: '16px', fontWeight: 'bold', color: 'var(--color-marina)' }}>{(Number(order.paidAmount) || 0).toLocaleString()}</td>
-                    <td style={{ padding: '16px', fontWeight: 'bold', backgroundColor: remAmount > 0 ? '#fee2e2' : '#dcfce7', color: remAmount > 0 ? '#ef4444' : '#22c55e', textAlign: 'center' }}>
-                      {remAmount.toLocaleString()}
-                    </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <input 
                         type="checkbox" 
@@ -157,6 +159,17 @@ const OrderTransactions = () => {
                         onChange={(e) => updateOrder(order.id, { isDepositPaid: e.target.checked })} 
                         style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                       />
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'center' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={!!order.isDepositTransferred} 
+                        onChange={(e) => updateOrder(order.id, { isDepositTransferred: e.target.checked })} 
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                    </td>
+                    <td style={{ padding: '16px', fontWeight: 'bold', backgroundColor: remAmount > 0 ? '#fee2e2' : '#dcfce7', color: remAmount > 0 ? '#ef4444' : '#22c55e', textAlign: 'center' }}>
+                      {remAmount.toLocaleString()}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <input 
@@ -169,8 +182,8 @@ const OrderTransactions = () => {
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <input 
                         type="checkbox" 
-                        checked={!!order.isTransferredToKirolos} 
-                        onChange={(e) => updateOrder(order.id, { isTransferredToKirolos: e.target.checked })} 
+                        checked={!!order.isRestTransferred} 
+                        onChange={(e) => updateOrder(order.id, { isRestTransferred: e.target.checked })} 
                         style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                       />
                     </td>
@@ -180,7 +193,7 @@ const OrderTransactions = () => {
             </AnimatePresence>
             {filteredOrders.length === 0 && (
               <tr>
-                <td colSpan="13" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>لا يوجد أوردرات مطابقة للبحث أو في هذه الفترة</td>
+                <td colSpan="14" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>لا يوجد أوردرات مطابقة للبحث أو في هذه الفترة</td>
               </tr>
             )}
           </tbody>
@@ -189,8 +202,9 @@ const OrderTransactions = () => {
               <td colSpan="7" style={{ padding: '16px', fontWeight: 800, textAlign: 'left' }}>الإجماليات الكلية:</td>
               <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{totalValue.toLocaleString()} ج.م</td>
               <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-marina)' }}>{totalDeposit.toLocaleString()} ج.م</td>
-              <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-marina)' }}>{totalRemaining.toLocaleString()} ج.م</td>
-              <td colSpan="3"></td>
+              <td colSpan="2"></td>
+              <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-marina)', textAlign: 'center' }}>{totalRemaining.toLocaleString()} ج.م</td>
+              <td colSpan="2"></td>
             </tr>
           </tfoot>
         </table>

@@ -37,15 +37,13 @@ const Ledger = () => {
 
   const totalDebt = Object.values(balances).reduce((sum, b) => sum + b.total, 0);
 
-  // Calculate Kirolos Balance
   let totalTransferredToKirolos = 0;
   Object.values(orders || {}).forEach(order => {
-    let orderCollected = 0;
-    if (order.isDepositPaid) orderCollected += (Number(order.paidAmount) || 0);
-    if (order.isRestPaid) orderCollected += (Number(order.remainingAmount) || 0);
-    
-    if (order.isTransferredToKirolos) {
-      totalTransferredToKirolos += orderCollected;
+    if (order.isDepositTransferred) {
+      totalTransferredToKirolos += (Number(order.paidAmount) || 0);
+    }
+    if (order.isRestTransferred) {
+      totalTransferredToKirolos += (Number(order.remainingAmount) || 0);
     }
   });
 
