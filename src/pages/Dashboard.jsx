@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { Plus, MessageCircle, MapPin, Calendar, Hash, Download, List, LayoutGrid } from 'lucide-react';
+import { Plus, MessageCircle, MapPin, Calendar, Hash, Download, List, LayoutGrid, Search } from 'lucide-react';
 import OrderModal from '../components/OrderModal';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 
@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'list'
+  const [searchQuery, setSearchQuery] = useState('');
 
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
@@ -75,7 +76,13 @@ const Dashboard = () => {
   const renderColumn = (columnId) => {
     const column = columns[columnId];
     if (!column) return null;
-    const columnOrders = column.orderIds.map(orderId => orders[orderId]).filter(Boolean);
+    const columnOrders = column.orderIds
+      .map(orderId => orders[orderId])
+      .filter(order => {
+        if (!order) return false;
+        if (searchQuery && !order.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        return true;
+      });
 
     return (
       <div key={column.id} className="kanban-column">
@@ -120,7 +127,7 @@ const Dashboard = () => {
               }}
             >
               {columnOrders.map((order, index) => (
-                <Draggable key={order.id} draggableId={order.id} index={index}>
+                <Draggable key={order.id} draggableId={order.id} index={index} isDragDisabled={!!searchQuery}>
                   {(provided, snapshot) => {
                     const creatorColor = getUserColor(order.createdBy);
                     
@@ -131,7 +138,7 @@ const Dashboard = () => {
                     }, {}) || {};
 
                     // Compute total order items string
-                    const itemsString = order.items?.map(i => `${i.workshop} (${i.quantity})`).join('، ') || '';
+                    const itemsString = order.items?.map(i => `${i.workshop} (${i.quantity})`).join(' - ') || '';
 
                     return (
                       <div
@@ -148,6 +155,32 @@ const Dashboard = () => {
                           boxShadow: snapshot.isDragging ? 'var(--shadow-glass)' : 'none',
                         }}
                       >
+                        <div style={{ marginBottom: '12px' }}>
+                          <select 
+                            className="input-field" 
+                            style={{ padding: '4px 8px', minHeight: '28px', width: '100%', fontSize: '0.8rem', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+                            value={columnId}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              const newColId = e.target.value;
+                              if (newColId === columnId) return;
+                              
+                              if (newColId === 'shipping' && order.hasMissingItems) {
+                                window.alert(`لا يمكن نقل الطلب للجاهزية لوجود نواقص:\n${order.missingNotes || 'نواقص غير محددة'}`);
+                                return;
+                              }
+                              
+                              const destIndex = columns[newColId].orderIds.length;
+                              const sourceIndex = 0;
+                              moveOrder(columnId, newColId, sourceIndex, destIndex, order.id);
+                            }}
+                          >
+                            {columnOrder.map(cId => (
+                              <option key={cId} value={cId}>نقل إلى: {columns[cId].title}</option>
+                            ))}
+                          </select>
+                        </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                           <h4 style={{ fontWeight: 600, fontSize: '1.1rem' }}>{order.name}</h4>
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -228,6 +261,17 @@ const Dashboard = () => {
             <List size={18} />
             عرض القائمة
           </button>
+        </div>
+        <div className="dashboard-controls-group" style={{ flex: 1, position: 'relative', maxWidth: '400px', minWidth: '200px' }}>
+          <Search size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input 
+            type="text" 
+            placeholder="بحث باسم العميل..." 
+            className="input-field" 
+            style={{ paddingRight: '40px', width: '100%' }}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         <div className="dashboard-controls-group">
           <button 
