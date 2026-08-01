@@ -16,10 +16,10 @@ const Layout = ({ children }) => {
     { path: '/', label: 'الأوردرات', icon: LayoutDashboard },
     { path: '/tasks', label: 'المهام', icon: CheckSquare },
     { path: '/inventory', label: 'المخزن', icon: Package },
-    { path: '/clients', label: 'العملاء', icon: Users },
   ];
 
   const adminNavItems = [
+    { path: '/clients', label: 'العملاء', icon: Users },
     { path: '/analytics', label: 'الإحصائيات', icon: PieChart },
     { path: '/transactions', label: 'المعاملات', icon: Receipt },
     { path: '/ledger', label: 'الحسابات', icon: Wallet },
