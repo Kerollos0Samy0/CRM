@@ -157,7 +157,7 @@ const Ledger = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {monthlyStats.map(([monthKey, data]) => {
-                const netProfit = data.sales - (data.cogs + data.admin + data.workshop + data.other);
+                const netProfit = data.sales - (data.cogs + data.admin + data.other);
                 const isExpanded = expandedMonth === monthKey;
                 
                 return (
@@ -192,10 +192,7 @@ const Ledger = () => {
                         <div style={{ color: '#b45309', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.admin.toLocaleString()} ج.م</div>
                       </div>
 
-                      <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
-                        <div style={{ color: '#2563eb', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><Wrench size={14}/> مصاريف ورشة</div>
-                        <div style={{ color: '#1d4ed8', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.workshop.toLocaleString()} ج.م</div>
-                      </div>
+                      
 
                     </div>
                     
@@ -366,7 +363,7 @@ const Ledger = () => {
                         <ArrowDownRight size={12} /> 
                         {(!t.category || t.category === 'products') ? 'مصاريف منتجات' : 
                          t.category === 'admin' ? 'مصاريف إدارية' : 
-                         t.category === 'workshop' ? 'مصاريف ورشة' : 
+                          
                          'مصاريف أخرى'}
                       </span>
                     ) : (
@@ -420,7 +417,7 @@ const Ledger = () => {
                   <select className="input-field" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
                     <option value="products">مصاريف المنتجات (مواد خام، طباعة، الخ)</option>
                     <option value="admin">مصاريف إدارية (إعلانات، رواتب، باقات، الخ)</option>
-                    <option value="workshop">مصاريف ورشة (أدوات، صيانة، إيجار، الخ)</option>
+                    
                     <option value="other">أخرى</option>
                   </select>
                 </div>
