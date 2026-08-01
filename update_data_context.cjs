@@ -1,69 +1,46 @@
 const fs = require('fs');
 let code = fs.readFileSync('src/context/DataContext.jsx', 'utf8');
 
+// 1. Add state variable
 code = code.replace(
-  "import fixedOrdersV20 from '../data/fixed_orders_v20.json';", 
-  "import fixedOrdersV20 from '../data/fixed_orders_v20.json';\nimport sheetsOrders from '../data/sheets_orders.json';"
+   'const [transactions,   setTransactions]   = useState([]);\n    const [supplies,       setSupplies]       = useState([]);',
+   'const [transactions,   setTransactions]   = useState([]);\n    const [supplies,       setSupplies]       = useState([]);\n    const [profitShares,   setProfitShares]   = useState({ workshopDeductions: {}, withdrawals: {} });'
+);
+
+// 2. Read from ledgerSnap
+code = code.replace(
+   'setTransactions(txData);\n          }',
+   'setTransactions(txData);\n            setProfitShares(ledgerSnap.data().profitShares || { workshopDeductions: {}, withdrawals: {} });\n          }'
 );
 
 code = code.replace(
-  "let migratedV26 = rawData.migratedV26 || false;",
-  "let migratedV26 = rawData.migratedV26 || false;\n  let migratedV28 = rawData.migratedV28 || false;"
+   "setDoc(ledgerRef, { transactions: tx }).catch(console.error);\n            setTransactions(tx);",
+   "setDoc(ledgerRef, { transactions: tx, profitShares: { workshopDeductions: {}, withdrawals: {} } }).catch(console.error);\n            setTransactions(tx);\n            setProfitShares({ workshopDeductions: {}, withdrawals: {} });"
 );
 
-const migrationBlock = `
-  // v28 - Replace archaic archive with the 749 meticulously formatted sheets from User
-  if (!migratedV28) {
-    if (sheetsOrders && sheetsOrders.archived && sheetsOrders.archived.length > 0) {
-      // 1. Wipe old archived orders
-      archivedOrders = sheetsOrders.archived;
-      
-      // 2. Remove any active order created before August 2026, as they are now in the archive
-      const augustCutoff = new Date('2026-08-01T00:00:00Z').getTime();
-      const cleanedOrders = {};
-      Object.entries(orders).forEach(([id, o]) => {
-         const t = new Date(o.createdAt || o.archivedAt).getTime();
-         if (t >= augustCutoff) {
-            cleanedOrders[id] = o;
-         } else {
-            // Drop from columns
-            Object.keys(columns).forEach(colId => {
-              if (columns[colId].orderIds) {
-                 columns[colId].orderIds = columns[colId].orderIds.filter(oid => oid !== id);
-              }
-            });
-         }
-      });
-      orders = cleanedOrders;
+
+// 3. updateProfitShares function
+const updateCode = `
+  const updateProfitShares = async (newShares) => {
+    try {
+      const ledgerRef = doc(db, 'crm', 'ledger');
+      await updateDoc(ledgerRef, { profitShares: newShares });
+      setProfitShares(newShares);
+    } catch (error) {
+      console.error('Error updating profit shares:', error);
     }
-    migratedV28 = true;
-  }
+  };
 `;
 
 code = code.replace(
-  "migratedV26 = true;\n    }",
-  "migratedV26 = true;\n    }\n" + migrationBlock
+   'return Object.entries(groups)',
+   updateCode + '\n  return Object.entries(groups)'
 );
 
+// 4. Export it
 code = code.replace(
-  "migratedV26, migratedV2,",
-  "migratedV26, migratedV28, migratedV2,"
-);
-
-code = code.replace(
-  "migratedV26, \r\nmigratedV2",
-  "migratedV26, migratedV28, \r\nmigratedV2"
-);
-
-code = code.replace(
-  "migratedV26, \nmigratedV2",
-  "migratedV26, migratedV28, \nmigratedV2"
-);
-
-
-code = code.replace(
-  "migratedV26: true }",
-  "migratedV26: true, migratedV28: true }"
+   'transactions, addTransaction, deleteTransaction,\n      supplies, addSupply, deleteSupply,\n      monthlyStats',
+   'transactions, addTransaction, deleteTransaction,\n      supplies, addSupply, deleteSupply,\n      profitShares, updateProfitShares,\n      monthlyStats'
 );
 
 fs.writeFileSync('src/context/DataContext.jsx', code);

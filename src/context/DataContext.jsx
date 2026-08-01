@@ -853,6 +853,7 @@ export const DataProvider = ({ children }) => {
             }
             
             setTransactions(txData);
+            setProfitShares(ledgerSnap.data().profitShares || { workshopDeductions: {}, withdrawals: {} });
           }
  else {
           const lsTx = localStorage.getItem('crm_transactions');

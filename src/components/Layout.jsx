@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, LayoutDashboard, CheckSquare, Package, PieChart, Wallet, Archive, Users, MoreHorizontal, X } from 'lucide-react';
+import { LogOut, LayoutDashboard, CheckSquare, Package, PieChart, Wallet, Archive, Users, MoreHorizontal, X, Percent } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Layout = ({ children }) => {
@@ -23,6 +23,7 @@ const Layout = ({ children }) => {
     { path: '/analytics', label: 'الإحصائيات', icon: PieChart },
     { path: '/ledger', label: 'الحسابات', icon: Wallet },
     { path: '/archive', label: 'الأرشيف', icon: Archive },
+    { path: '/profits', label: 'تقسيم الأرباح', icon: Percent },
   ];
 
   // Mobile bottom nav: show 4 main + "more" if admin
