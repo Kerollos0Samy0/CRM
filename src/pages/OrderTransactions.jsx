@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search } from 'lucide-react';
+import OrderDetailsModal from '../components/OrderDetailsModal';
 
 const OrderTransactions = () => {
   const { orders } = useData();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Filter orders: >= 2026-08-01
   const targetDate = new Date('2026-08-01T00:00:00Z');
@@ -76,7 +78,7 @@ const OrderTransactions = () => {
                     style={{ borderBottom: '1px solid var(--border-color)' }}
                   >
                     <td style={{ padding: '16px', color: 'var(--text-secondary)' }}>{orderDate}</td>
-                    <td style={{ padding: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>{order.name}</td>
+                    <td style={{ padding: '16px', fontWeight: 600, color: 'var(--color-mira)', cursor: 'pointer' }} onClick={() => setSelectedOrder(order)}>{order.name}</td>
                     <td style={{ padding: '16px', color: 'var(--text-secondary)' }}>{order.church}</td>
                     <td style={{ padding: '16px', fontSize: '0.9rem' }}>{itemsString}</td>
                     <td style={{ padding: '16px', fontWeight: 'bold' }}>{(Number(order.totalAmount) || 0).toLocaleString()} ج.م</td>
@@ -102,6 +104,14 @@ const OrderTransactions = () => {
           </tfoot>
         </table>
       </div>
+
+      {selectedOrder && (
+        <OrderDetailsModal 
+          order={selectedOrder} 
+          isDelivered={selectedOrder.status === 'arrived'} 
+          onClose={() => setSelectedOrder(null)} 
+        />
+      )}
     </div>
   );
 };
