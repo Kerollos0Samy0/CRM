@@ -39,8 +39,7 @@ const Ledger = () => {
 
     // Process Sales & COGS
     allOrders.forEach(o => {
-      // Only delivered/arrived orders count towards sales
-      if (o.status !== 'delivered' && o.status !== 'arrived') return;
+      // Count all orders in the month towards sales volume (pending and delivered)
       
       const date = o.createdAt || o.archivedAt;
       if (!date) return;
