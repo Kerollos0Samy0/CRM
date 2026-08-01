@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, LayoutDashboard, CheckSquare, Package, PieChart, Wallet, Archive, Users, MoreHorizontal, X, Percent, BarChart3 } from 'lucide-react';
+import { LogOut, LayoutDashboard, CheckSquare, Package, PieChart, Wallet, Archive, Users, MoreHorizontal, X, Percent, BarChart3, Receipt } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Layout = ({ children }) => {
@@ -21,6 +21,7 @@ const Layout = ({ children }) => {
 
   const adminNavItems = [
     { path: '/analytics', label: 'الإحصائيات', icon: PieChart },
+    { path: '/transactions', label: 'المعاملات', icon: Receipt },
     { path: '/ledger', label: 'الحسابات', icon: Wallet },
     { path: '/archive', label: 'الأرشيف', icon: Archive },
     { path: '/profits', label: 'تقسيم الأرباح', icon: Percent },

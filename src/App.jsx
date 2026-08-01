@@ -11,6 +11,7 @@ import Tasks from './pages/Tasks';
 import Inventory from './pages/Inventory';
 import Analytics from './pages/Analytics';
 import Ledger from './pages/Ledger';
+import OrderTransactions from './pages/OrderTransactions';
 import Archive from './pages/Archive';
 import Clients from './pages/Clients';
 import ProfitSharing from './pages/ProfitSharing';
@@ -32,6 +33,7 @@ const AppRoutes = () => {
       <Route path="/inventory" element={<ProtectedRoute><Layout><Inventory /></Layout></ProtectedRoute>} />
       <Route path="/analytics" element={<ProtectedRoute><Layout><Analytics /></Layout></ProtectedRoute>} />
       <Route path="/ledger" element={<ProtectedRoute><Layout><Ledger /></Layout></ProtectedRoute>} />
+      <Route path="/transactions" element={<ProtectedRoute><Layout><OrderTransactions /></Layout></ProtectedRoute>} />
       <Route path="/archive" element={<ProtectedRoute><Layout><Archive /></Layout></ProtectedRoute>} />
       <Route path="/profits" element={<ProtectedRoute><Layout><ProfitSharing /></Layout></ProtectedRoute>} />
       <Route path="/monthly-stats" element={<ProtectedRoute><Layout><MonthlyStats /></Layout></ProtectedRoute>} />
