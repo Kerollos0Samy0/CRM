@@ -102,7 +102,8 @@ const ProfitSharing = () => {
                 const override = historicalProfitShares[monthKey];
                 const netProfit = override ? override.profit : (data.sales - (data.cogs + data.admin + data.other));
                 const church50 = Math.round(netProfit * 0.50);
-                const workshop = override ? override.workshop : (profitShares?.workshopDeductions?.[monthKey] || 0);
+                const fbWorkshop = profitShares?.workshopDeductions?.[monthKey];
+                const workshop = fbWorkshop !== undefined ? fbWorkshop : (override ? override.workshop : 0);
                 const churchNet = church50 - workshop;
                 const p1 = override ? override.p1 : Math.round(netProfit * 0.14);
                 const p2 = override ? override.p2 : Math.round(netProfit * 0.14);
@@ -123,18 +124,14 @@ const ProfitSharing = () => {
                     <td style={tdStyle}>{monthKey}</td>
                     <td style={{...tdStyle, fontWeight: 'bold'}}>{netProfit.toLocaleString()}</td>
                     <td style={{...tdStyle, background: '#fdf2f8'}}>{church50.toLocaleString()}</td>
-                    <td style={{...tdStyle, background: '#fdf2f8', padding: override ? '8px' : '4px'}}>
-                      {override ? (
-                        workshop.toLocaleString()
-                      ) : (
-                        <input 
-                          type="number" 
-                          className="input-field"
-                          style={{ textAlign: 'center', padding: '4px', height: '30px' }}
-                          value={workshop || ''} 
-                          onChange={(e) => handleWorkshopChange(monthKey, e.target.value)}
-                        />
-                      )}
+                    <td style={{...tdStyle, background: '#fdf2f8', padding: '4px'}}>
+                      <input 
+                        type="number" 
+                        className="input-field"
+                        style={{ textAlign: 'center', padding: '4px', height: '30px' }}
+                        value={workshop === 0 && !fbWorkshop && !override?.workshop ? '' : workshop} 
+                        onChange={(e) => handleWorkshopChange(monthKey, e.target.value)}
+                      />
                     </td>
                     <td style={{...tdStyle, background: '#fdf2f8', color: churchNet < 0 ? 'red' : 'inherit'}}>{churchNet.toLocaleString()}</td>
                     <td style={tdStyle}>{p1.toLocaleString()}</td>
@@ -180,10 +177,16 @@ const ProfitSharing = () => {
             <tbody>
               {[...monthlyStats].reverse().map(([monthKey]) => {
                 const overrideW = historicalWithdrawals[monthKey];
-                const w1 = overrideW ? (overrideW['1'] || 0) : (profitShares?.withdrawals?.[monthKey]?.['1'] || 0);
-                const w2 = overrideW ? (overrideW['2'] || 0) : (profitShares?.withdrawals?.[monthKey]?.['2'] || 0);
-                const w3 = overrideW ? (overrideW['3'] || 0) : (profitShares?.withdrawals?.[monthKey]?.['3'] || 0);
-                const w4 = overrideW ? (overrideW['4'] || 0) : (profitShares?.withdrawals?.[monthKey]?.['4'] || 0);
+                
+                const fbW1 = profitShares?.withdrawals?.[monthKey]?.['1'];
+                const fbW2 = profitShares?.withdrawals?.[monthKey]?.['2'];
+                const fbW3 = profitShares?.withdrawals?.[monthKey]?.['3'];
+                const fbW4 = profitShares?.withdrawals?.[monthKey]?.['4'];
+
+                const w1 = fbW1 !== undefined ? fbW1 : (overrideW ? (overrideW['1'] || 0) : 0);
+                const w2 = fbW2 !== undefined ? fbW2 : (overrideW ? (overrideW['2'] || 0) : 0);
+                const w3 = fbW3 !== undefined ? fbW3 : (overrideW ? (overrideW['3'] || 0) : 0);
+                const w4 = fbW4 !== undefined ? fbW4 : (overrideW ? (overrideW['4'] || 0) : 0);
 
                 totalWithdrawnP1 += w1;
                 totalWithdrawnP2 += w2;
@@ -193,45 +196,29 @@ const ProfitSharing = () => {
                 return (
                   <tr key={`w-${monthKey}`}>
                     <td style={tdStyle}>{monthKey}</td>
-                    <td style={{...tdStyle, padding: overrideW ? '8px' : '4px'}}>
-                      {overrideW ? (
-                        w1.toLocaleString()
-                      ) : (
-                        <input 
-                          type="number" className="input-field" style={{ textAlign: 'center', padding: '4px', height: '30px' }}
-                          value={w1 || ''} onChange={(e) => handleWithdrawalChange(monthKey, '1', e.target.value)}
-                        />
-                      )}
+                    <td style={{...tdStyle, padding: '4px'}}>
+                      <input 
+                        type="number" className="input-field" style={{ textAlign: 'center', padding: '4px', height: '30px' }}
+                        value={w1 === 0 && !fbW1 && !overrideW?.['1'] ? '' : w1} onChange={(e) => handleWithdrawalChange(monthKey, '1', e.target.value)}
+                      />
                     </td>
-                    <td style={{...tdStyle, padding: overrideW ? '8px' : '4px'}}>
-                      {overrideW ? (
-                        w2.toLocaleString()
-                      ) : (
-                        <input 
-                          type="number" className="input-field" style={{ textAlign: 'center', padding: '4px', height: '30px' }}
-                          value={w2 || ''} onChange={(e) => handleWithdrawalChange(monthKey, '2', e.target.value)}
-                        />
-                      )}
+                    <td style={{...tdStyle, padding: '4px'}}>
+                      <input 
+                        type="number" className="input-field" style={{ textAlign: 'center', padding: '4px', height: '30px' }}
+                        value={w2 === 0 && !fbW2 && !overrideW?.['2'] ? '' : w2} onChange={(e) => handleWithdrawalChange(monthKey, '2', e.target.value)}
+                      />
                     </td>
-                    <td style={{...tdStyle, padding: overrideW ? '8px' : '4px'}}>
-                      {overrideW ? (
-                        w3.toLocaleString()
-                      ) : (
-                        <input 
-                          type="number" className="input-field" style={{ textAlign: 'center', padding: '4px', height: '30px' }}
-                          value={w3 || ''} onChange={(e) => handleWithdrawalChange(monthKey, '3', e.target.value)}
-                        />
-                      )}
+                    <td style={{...tdStyle, padding: '4px'}}>
+                      <input 
+                        type="number" className="input-field" style={{ textAlign: 'center', padding: '4px', height: '30px' }}
+                        value={w3 === 0 && !fbW3 && !overrideW?.['3'] ? '' : w3} onChange={(e) => handleWithdrawalChange(monthKey, '3', e.target.value)}
+                      />
                     </td>
-                    <td style={{...tdStyle, padding: overrideW ? '8px' : '4px'}}>
-                      {overrideW ? (
-                        w4.toLocaleString()
-                      ) : (
-                        <input 
-                          type="number" className="input-field" style={{ textAlign: 'center', padding: '4px', height: '30px' }}
-                          value={w4 || ''} onChange={(e) => handleWithdrawalChange(monthKey, '4', e.target.value)}
-                        />
-                      )}
+                    <td style={{...tdStyle, padding: '4px'}}>
+                      <input 
+                        type="number" className="input-field" style={{ textAlign: 'center', padding: '4px', height: '30px' }}
+                        value={w4 === 0 && !fbW4 && !overrideW?.['4'] ? '' : w4} onChange={(e) => handleWithdrawalChange(monthKey, '4', e.target.value)}
+                      />
                     </td>
                   </tr>
                 );
