@@ -30,9 +30,7 @@ const MonthlyStats = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {monthlyStats.map(([monthKey, data]) => {
-                const manualAdmin = profitShares?.adminExpenses?.[monthKey];
-                const effectiveAdmin = (manualAdmin !== undefined && manualAdmin !== null) ? manualAdmin : data.admin;
-                const netProfit = data.sales - (data.cogs + effectiveAdmin + data.other);
+                const netProfit = data.sales - (data.cogs + data.admin + data.other);
                 const isExpanded = expandedMonth === monthKey;
                 
                 return (
@@ -61,28 +59,8 @@ const MonthlyStats = () => {
                       </div>
 
                       <div style={{ background: '#fffbeb', padding: '12px', borderRadius: '8px', border: '1px solid #fde68a' }}>
-                        <div style={{ color: '#d97706', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={14}/> مصاريف إدارية (يدوي)</div>
-                        <input 
-                          type="number" 
-                          className="input-field" 
-                          style={{ width: '100%', padding: '6px', fontWeight: 'bold', fontSize: '1.1rem', color: '#b45309', border: '1px solid #fcd34d', borderRadius: '4px' }}
-                          value={profitShares?.adminExpenses?.[monthKey] !== undefined ? profitShares.adminExpenses[monthKey] : (data.admin > 0 ? data.admin : '')}
-                          placeholder={data.admin > 0 ? data.admin.toString() : '0'}
-                          onChange={(e) => {
-                            const val = e.target.value ? parseInt(e.target.value) : null;
-                            const currentAdmin = profitShares?.adminExpenses || {};
-                            updateProfitShares({
-                              ...profitShares,
-                              adminExpenses: {
-                                ...currentAdmin,
-                                [monthKey]: val
-                              }
-                            });
-                          }}
-                        />
-                        {data.admin > 0 && profitShares?.adminExpenses?.[monthKey] !== undefined && (
-                          <div style={{ fontSize: '0.75rem', color: '#d97706', marginTop: '4px' }}>المحسوب آلياً: {data.admin}</div>
-                        )}
+                        <div style={{ color: '#d97706', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={14}/> مصاريف إدارية</div>
+                        <div style={{ color: '#b45309', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.admin.toLocaleString()} ج.م</div>
                       </div>
                     </div>
                     

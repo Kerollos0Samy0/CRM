@@ -88,9 +88,7 @@ const ProfitSharing = () => {
             <tbody>
               {/* Note: monthlyStats is sorted descending by default, let's sort it ascending for this table */}
               {[...monthlyStats].reverse().map(([monthKey, data]) => {
-                const manualAdmin = profitShares?.adminExpenses?.[monthKey];
-                const effectiveAdmin = (manualAdmin !== undefined && manualAdmin !== null) ? manualAdmin : data.admin;
-                const netProfit = data.sales - (data.cogs + effectiveAdmin + data.other);
+                const netProfit = data.sales - (data.cogs + data.admin + data.other);
                 const church50 = Math.round(netProfit * 0.50);
                 const workshop = profitShares?.workshopDeductions?.[monthKey] || 0;
                 const churchNet = church50 - workshop;
