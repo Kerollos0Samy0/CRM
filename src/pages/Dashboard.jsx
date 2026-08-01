@@ -328,6 +328,7 @@ const Dashboard = () => {
               <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الأوردر / العميل</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الكنيسة</th>
+                <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المُنشئ</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الحالة</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>تسليم</th>
                 <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المنتجات</th>
@@ -341,6 +342,8 @@ const Dashboard = () => {
                 return column.orderIds.map(orderId => {
                   const order = orders[orderId];
                   if (!order) return null;
+                  if (searchQuery && !order.name.toLowerCase().includes(searchQuery.toLowerCase())) return null;
+
                   const itemsString = order.items?.map(i => `${i.workshop} (${i.quantity})`).join('، ') || '-';
                   return (
                     <tr key={order.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
@@ -349,6 +352,7 @@ const Dashboard = () => {
                         {order.hasMissingItems && <div style={{ fontSize: '0.8rem', color: 'var(--color-marina)', marginTop: '4px' }}>⚠️ {order.missingNotes}</div>}
                       </td>
                       <td style={{ padding: '16px' }}>{order.church}</td>
+                      <td style={{ padding: '16px', fontSize: '0.9rem' }}>{users.find(u => u.id === order.createdBy)?.name || '-'}</td>
                       <td style={{ padding: '16px' }}>
                         <span className="tag" style={{ backgroundColor: column.color, color: 'white', fontWeight: 'bold' }}>{column.title}</span>
                       </td>
