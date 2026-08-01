@@ -5,9 +5,19 @@ import { Search } from 'lucide-react';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 
 const OrderTransactions = () => {
-  const { orders } = useData();
+  const { orders, columns } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const getOrderStatus = (orderId) => {
+    if (!columns) return 'غير معروف';
+    for (const colId of Object.keys(columns)) {
+      if (columns[colId].orderIds?.includes(orderId)) {
+        return columns[colId].title;
+      }
+    }
+    return 'غير معروف';
+  };
 
   // Filter orders: >= 2026-08-01
   const targetDate = new Date('2026-08-01T00:00:00Z');
@@ -56,10 +66,13 @@ const OrderTransactions = () => {
             <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>التاريخ</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>العميل / الأوردر</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الموبايل</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المحافظة</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الكنيسة</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المنتجات</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>إجمالي الأوردر</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الديبوزت (مدفوع)</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المرحلة</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الإجمالي</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الديبوزت</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المتبقي</th>
             </tr>
           </thead>
@@ -68,6 +81,8 @@ const OrderTransactions = () => {
               {filteredOrders.map(order => {
                 const itemsString = order.items?.map(i => `${i.workshop} (${i.quantity})`).join('، ') || '-';
                 const orderDate = new Date(order.createdAt).toLocaleDateString('ar-EG');
+                const status = getOrderStatus(order.id);
+                const remAmount = Number(order.remainingAmount) || 0;
                 
                 return (
                   <motion.tr 
@@ -79,24 +94,33 @@ const OrderTransactions = () => {
                   >
                     <td style={{ padding: '16px', color: 'var(--text-secondary)' }}>{orderDate}</td>
                     <td style={{ padding: '16px', fontWeight: 600, color: 'var(--color-mira)', cursor: 'pointer' }} onClick={() => setSelectedOrder(order)}>{order.name}</td>
+                    <td style={{ padding: '16px', color: 'var(--text-secondary)', direction: 'ltr', textAlign: 'right' }}>{order.mobile}</td>
+                    <td style={{ padding: '16px', color: 'var(--text-secondary)' }}>{order.governorate}</td>
                     <td style={{ padding: '16px', color: 'var(--text-secondary)' }}>{order.church}</td>
                     <td style={{ padding: '16px', fontSize: '0.9rem' }}>{itemsString}</td>
-                    <td style={{ padding: '16px', fontWeight: 'bold' }}>{(Number(order.totalAmount) || 0).toLocaleString()} ج.م</td>
-                    <td style={{ padding: '16px', fontWeight: 'bold', color: 'var(--color-marina)' }}>{(Number(order.paidAmount) || 0).toLocaleString()} ج.م</td>
-                    <td style={{ padding: '16px', fontWeight: 'bold', color: 'var(--color-marina)' }}>{(Number(order.remainingAmount) || 0).toLocaleString()} ج.م</td>
+                    <td style={{ padding: '16px', fontWeight: 500 }}>
+                      <span className="tag" style={{ backgroundColor: 'var(--bg-glass)', border: '1px solid var(--border-color)' }}>
+                        {status}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px', fontWeight: 'bold' }}>{(Number(order.totalAmount) || 0).toLocaleString()}</td>
+                    <td style={{ padding: '16px', fontWeight: 'bold', color: 'var(--color-marina)' }}>{(Number(order.paidAmount) || 0).toLocaleString()}</td>
+                    <td style={{ padding: '16px', fontWeight: 'bold', backgroundColor: remAmount > 0 ? '#fee2e2' : '#dcfce7', color: remAmount > 0 ? '#ef4444' : '#22c55e', textAlign: 'center' }}>
+                      {remAmount.toLocaleString()}
+                    </td>
                   </motion.tr>
                 );
               })}
             </AnimatePresence>
             {filteredOrders.length === 0 && (
               <tr>
-                <td colSpan="7" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>لا يوجد أوردرات مطابقة للبحث أو في هذه الفترة</td>
+                <td colSpan="10" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>لا يوجد أوردرات مطابقة للبحث أو في هذه الفترة</td>
               </tr>
             )}
           </tbody>
           <tfoot>
             <tr style={{ backgroundColor: 'var(--bg-secondary)', borderTop: '2px solid var(--border-color)' }}>
-              <td colSpan="4" style={{ padding: '16px', fontWeight: 800, textAlign: 'left' }}>الإجماليات الكلية:</td>
+              <td colSpan="7" style={{ padding: '16px', fontWeight: 800, textAlign: 'left' }}>الإجماليات الكلية:</td>
               <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{totalValue.toLocaleString()} ج.م</td>
               <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-marina)' }}>{totalDeposit.toLocaleString()} ج.م</td>
               <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-marina)' }}>{totalRemaining.toLocaleString()} ج.م</td>
