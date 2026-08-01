@@ -179,7 +179,7 @@ const Dashboard = () => {
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                             <Calendar size={14} />
-                            <span>تسليم: {order.deadline}</span>
+                            <span>دخول: {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB') : '-'} | تسليم: {order.deadline}</span>
                           </div>
                         </div>
                         
