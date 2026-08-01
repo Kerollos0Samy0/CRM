@@ -1,14 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import { Plus, Trash2, ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-react';
+import { Plus, Trash2, ArrowUpRight, ArrowDownRight, Wallet, BarChart3, TrendingUp, ShoppingCart, Wrench, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Ledger = () => {
-  const { transactions, addTransaction, deleteTransaction } = useData();
+  const { transactions, addTransaction, deleteTransaction, orders, archivedOrders } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     supplier: '',
     type: 'debt', // 'debt' (مديونية علينا), 'payment' (دفعة مسددة)
+    category: 'products',
     amount: '',
     description: ''
   });
@@ -17,13 +18,58 @@ const Ledger = () => {
     e.preventDefault();
     addTransaction(formData);
     setIsAddModalOpen(false);
-    setFormData({ supplier: '', type: 'debt', amount: '', description: '' });
+    setFormData({ supplier: '', type: 'debt', category: 'products', amount: '', description: '' });
   };
+
+  // Calculate monthly stats
+  const monthlyStats = useMemo(() => {
+    const stats = {};
+    const allOrders = [...Object.values(orders || {}), ...(archivedOrders || [])];
+    
+    // Process Sales
+    allOrders.forEach(o => {
+      const date = o.createdAt || o.archivedAt;
+      if (!date) return;
+      const d = new Date(date);
+      if (isNaN(d)) return;
+      
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!stats[monthKey]) {
+        stats[monthKey] = { sales: 0, products: 0, admin: 0, workshop: 0, other: 0, label: d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' }) };
+      }
+      stats[monthKey].sales += Number(o.totalAmount || o.total || 0);
+    });
+
+    // Process Expenses
+    (transactions || []).forEach(t => {
+      if (t.type !== 'debt') return; 
+      
+      const date = t.date;
+      if (!date) return;
+      const d = new Date(date);
+      if (isNaN(d)) return;
+      
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!stats[monthKey]) {
+        stats[monthKey] = { sales: 0, products: 0, admin: 0, workshop: 0, other: 0, label: d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' }) };
+      }
+
+      const amount = Number(t.amount || 0);
+      const cat = t.category || 'products';
+      
+      if (cat === 'products') stats[monthKey].products += amount;
+      else if (cat === 'admin') stats[monthKey].admin += amount;
+      else if (cat === 'workshop') stats[monthKey].workshop += amount;
+      else stats[monthKey].other += amount;
+    });
+
+    return Object.entries(stats).sort((a, b) => b[0].localeCompare(a[0]));
+  }, [orders, archivedOrders, transactions]);
 
   // Calculate balances per supplier
   const balances = useMemo(() => {
     const acc = {};
-    transactions.forEach(t => {
+    (transactions || []).forEach(t => {
       if (!acc[t.supplier]) acc[t.supplier] = { debt: 0, payment: 0, total: 0 };
       if (t.type === 'debt') acc[t.supplier].debt += t.amount;
       if (t.type === 'payment') acc[t.supplier].payment += t.amount;
@@ -47,6 +93,60 @@ const Ledger = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
         
+        {/* Monthly Stats Section */}
+        <div className="card" style={{ gridColumn: '1 / -1' }}>
+          <h3 className="heading-md" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BarChart3 size={20} color="var(--color-marina)" />
+            إحصائيات الشهور
+          </h3>
+          
+          {monthlyStats.length === 0 ? (
+            <p className="text-muted">لا توجد بيانات متاحة بعد.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {monthlyStats.map(([monthKey, data]) => {
+                const netProfit = data.sales - (data.products + data.admin + data.workshop + data.other);
+                return (
+                  <div key={monthKey} style={{ background: 'var(--bg-secondary)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <h4 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '16px', color: 'var(--text-primary)' }}>{data.label}</h4>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+                      
+                      <div style={{ background: '#ecfdf5', padding: '12px', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
+                        <div style={{ color: '#059669', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><TrendingUp size={14}/> إجمالي المبيعات</div>
+                        <div style={{ color: '#047857', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.sales.toLocaleString()} ج.م</div>
+                      </div>
+
+                      <div style={{ background: '#fef2f2', padding: '12px', borderRadius: '8px', border: '1px solid #fecaca' }}>
+                        <div style={{ color: '#dc2626', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><ShoppingCart size={14}/> مصاريف المنتجات</div>
+                        <div style={{ color: '#b91c1c', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.products.toLocaleString()} ج.م</div>
+                      </div>
+
+                      <div style={{ background: '#fffbeb', padding: '12px', borderRadius: '8px', border: '1px solid #fde68a' }}>
+                        <div style={{ color: '#d97706', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={14}/> مصاريف إدارية</div>
+                        <div style={{ color: '#b45309', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.admin.toLocaleString()} ج.م</div>
+                      </div>
+
+                      <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                        <div style={{ color: '#2563eb', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><Wrench size={14}/> مصاريف ورشة</div>
+                        <div style={{ color: '#1d4ed8', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.workshop.toLocaleString()} ج.م</div>
+                      </div>
+
+                    </div>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px dashed var(--border-color)', paddingTop: '16px' }}>
+                      <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>صافي الربح التقريبي:</span>
+                      <span style={{ fontWeight: 'bold', fontSize: '1.4rem', color: netProfit >= 0 ? '#059669' : '#dc2626' }}>
+                        {netProfit.toLocaleString()} ج.م
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Total Debt Summary Card */}
         <div className="card" style={{ borderTop: '4px solid var(--color-marina)', display: 'flex', gap: '16px', alignItems: 'center' }}>
           <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '50%' }}>
@@ -117,12 +217,16 @@ const Ledger = () => {
                   </td>
                   <td style={{ padding: '12px' }}>
                     {t.type === 'debt' ? (
-                      <span className="tag" style={{ background: '#fee2e2', color: '#ef4444' }}>
-                        <ArrowDownRight size={12} style={{ marginLeft: '4px' }}/> مديونية (فاتورة)
+                      <span className="tag" style={{ background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <ArrowDownRight size={12} /> 
+                        {(!t.category || t.category === 'products') ? 'مصاريف منتجات' : 
+                         t.category === 'admin' ? 'مصاريف إدارية' : 
+                         t.category === 'workshop' ? 'مصاريف ورشة' : 
+                         'مصاريف أخرى'}
                       </span>
                     ) : (
-                      <span className="tag" style={{ background: '#dcfce7', color: '#22c55e' }}>
-                        <ArrowUpRight size={12} style={{ marginLeft: '4px' }}/> دفعة مسددة
+                      <span className="tag" style={{ background: '#dcfce7', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <ArrowUpRight size={12} /> دفعة مسددة
                       </span>
                     )}
                   </td>
@@ -161,10 +265,21 @@ const Ledger = () => {
               <div>
                 <label className="text-secondary" style={{ display: 'block', marginBottom: '8px' }}>نوع المعاملة</label>
                 <select className="input-field" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
-                  <option value="debt">فاتورة مديونية علينا</option>
+                  <option value="debt">مصروفات / مديونية علينا</option>
                   <option value="payment">دفعة تم تسديدها لهم</option>
                 </select>
               </div>
+              {formData.type === 'debt' && (
+                <div>
+                  <label className="text-secondary" style={{ display: 'block', marginBottom: '8px' }}>تصنيف المصروف</label>
+                  <select className="input-field" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                    <option value="products">مصاريف المنتجات (مواد خام، طباعة، الخ)</option>
+                    <option value="admin">مصاريف إدارية (إعلانات، رواتب، باقات، الخ)</option>
+                    <option value="workshop">مصاريف ورشة (أدوات، صيانة، إيجار، الخ)</option>
+                    <option value="other">أخرى</option>
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="text-secondary" style={{ display: 'block', marginBottom: '8px' }}>المبلغ</label>
                 <input required type="number" className="input-field" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} placeholder="0" />
