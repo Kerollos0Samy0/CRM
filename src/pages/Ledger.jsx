@@ -10,7 +10,7 @@ const Ledger = () => {
   const [formData, setFormData] = useState({
     supplier: '',
     type: 'debt', // 'debt' (مديونية علينا), 'payment' (دفعة مسددة)
-    category: 'products',
+    category: 'admin',
     amount: '',
     description: ''
   });
@@ -19,7 +19,7 @@ const Ledger = () => {
     e.preventDefault();
     addTransaction(formData);
     setIsAddModalOpen(false);
-    setFormData({ supplier: '', type: 'debt', category: 'products', amount: '', description: '' });
+    setFormData({ supplier: '', type: 'debt', category: 'admin', amount: '', description: '' });
   };
 
   // Calculate monthly stats
@@ -157,7 +157,7 @@ const Ledger = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {monthlyStats.map(([monthKey, data]) => {
-                const netProfit = data.sales - (data.cogs + data.products + data.admin + data.workshop + data.other);
+                const netProfit = data.sales - (data.cogs + data.admin + data.workshop + data.other);
                 const isExpanded = expandedMonth === monthKey;
                 
                 return (
@@ -185,10 +185,7 @@ const Ledger = () => {
                         <div style={{ color: '#b91c1c', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.cogs.toLocaleString()} ج.م</div>
                       </div>
 
-                      <div style={{ background: '#fdf4ff', padding: '12px', borderRadius: '8px', border: '1px solid #fbcfe8' }}>
-                        <div style={{ color: '#c026d3', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><ShoppingCart size={14}/> مصاريف المنتجات</div>
-                        <div style={{ color: '#a21caf', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.products.toLocaleString()} ج.م</div>
-                      </div>
+                      
 
                       <div style={{ background: '#fffbeb', padding: '12px', borderRadius: '8px', border: '1px solid #fde68a' }}>
                         <div style={{ color: '#d97706', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={14}/> مصاريف إدارية</div>
