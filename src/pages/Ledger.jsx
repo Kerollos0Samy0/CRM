@@ -178,10 +178,7 @@ const Ledger = () => {
                 <div>
                   <label className="text-secondary" style={{ display: 'block', marginBottom: '8px' }}>تصنيف المصروف</label>
                   <select className="input-field" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-                    <option value="products">مصاريف المنتجات (مواد خام، طباعة، الخ)</option>
                     <option value="admin">مصاريف إدارية (إعلانات، رواتب، باقات، الخ)</option>
-                    
-                    <option value="other">أخرى</option>
                   </select>
                 </div>
               )}
