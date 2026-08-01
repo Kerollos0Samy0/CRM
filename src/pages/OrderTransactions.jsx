@@ -5,7 +5,7 @@ import { Search } from 'lucide-react';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 
 const OrderTransactions = () => {
-  const { orders, columns } = useData();
+  const { orders, columns, updateOrder } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -74,6 +74,9 @@ const OrderTransactions = () => {
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الإجمالي</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الديبوزت</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المتبقي</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>دفع؟</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>تحويل كيرلس</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>دفع الباقي</th>
             </tr>
           </thead>
           <tbody>
@@ -108,13 +111,37 @@ const OrderTransactions = () => {
                     <td style={{ padding: '16px', fontWeight: 'bold', backgroundColor: remAmount > 0 ? '#fee2e2' : '#dcfce7', color: remAmount > 0 ? '#ef4444' : '#22c55e', textAlign: 'center' }}>
                       {remAmount.toLocaleString()}
                     </td>
+                    <td style={{ padding: '16px', textAlign: 'center' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={!!order.isDepositPaid} 
+                        onChange={(e) => updateOrder(order.id, { isDepositPaid: e.target.checked })} 
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'center' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={!!order.isTransferredToKirolos} 
+                        onChange={(e) => updateOrder(order.id, { isTransferredToKirolos: e.target.checked })} 
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'center' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={!!order.isRestPaid} 
+                        onChange={(e) => updateOrder(order.id, { isRestPaid: e.target.checked })} 
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                    </td>
                   </motion.tr>
                 );
               })}
             </AnimatePresence>
             {filteredOrders.length === 0 && (
               <tr>
-                <td colSpan="10" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>لا يوجد أوردرات مطابقة للبحث أو في هذه الفترة</td>
+                <td colSpan="13" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>لا يوجد أوردرات مطابقة للبحث أو في هذه الفترة</td>
               </tr>
             )}
           </tbody>
@@ -124,6 +151,7 @@ const OrderTransactions = () => {
               <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{totalValue.toLocaleString()} ج.م</td>
               <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-marina)' }}>{totalDeposit.toLocaleString()} ج.م</td>
               <td style={{ padding: '16px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-marina)' }}>{totalRemaining.toLocaleString()} ج.م</td>
+              <td colSpan="3"></td>
             </tr>
           </tfoot>
         </table>

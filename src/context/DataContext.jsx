@@ -667,11 +667,25 @@ export const DataProvider = ({ children }) => {
             getDoc(suppliesRef),
         ]);
 
-        // --- MAIN ---
-        if (mainSnap.exists()) {
-          let data = mainSnap.data();
-          
-          // Emergency Restore: If Firebase is empty but local storage has data, restore it
+          // --- MAIN ---
+          if (mainSnap.exists()) {
+            let data = mainSnap.data();
+            
+            // Temporary cleanup for specific orders
+            if (data.orders) {
+               const samuelOrder = Object.values(data.orders).find(o => o.name === 'صمويل الفريد');
+               if (samuelOrder) {
+                   delete data.orders[samuelOrder.id];
+                   Object.keys(data.columns || {}).forEach(colId => {
+                     if(data.columns[colId].orderIds) {
+                       data.columns[colId].orderIds = data.columns[colId].orderIds.filter(id => id !== samuelOrder.id);
+                     }
+                   });
+                   console.log("Deleted order صمويل الفريد");
+               }
+            }
+
+            // Emergency Restore: If Firebase is empty but local storage has data, restore it
           const lsOrdersRaw = localStorage.getItem('crm_orders');
           if (lsOrdersRaw && Object.keys(data.orders || {}).length === 0) {
               const parsedLsOrders = JSON.parse(lsOrdersRaw);
