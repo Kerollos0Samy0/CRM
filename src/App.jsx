@@ -14,6 +14,7 @@ import Ledger from './pages/Ledger';
 import Archive from './pages/Archive';
 import Clients from './pages/Clients';
 import ProfitSharing from './pages/ProfitSharing';
+import MonthlyStats from './pages/MonthlyStats';
 
 const ProtectedRoute = ({ children }) => {
   const { currentUser, loading } = useAuth();
@@ -33,6 +34,7 @@ const AppRoutes = () => {
       <Route path="/ledger" element={<ProtectedRoute><Layout><Ledger /></Layout></ProtectedRoute>} />
       <Route path="/archive" element={<ProtectedRoute><Layout><Archive /></Layout></ProtectedRoute>} />
       <Route path="/profits" element={<ProtectedRoute><Layout><ProfitSharing /></Layout></ProtectedRoute>} />
+      <Route path="/monthly-stats" element={<ProtectedRoute><Layout><MonthlyStats /></Layout></ProtectedRoute>} />
       <Route path="/clients" element={<ProtectedRoute><Layout><Clients /></Layout></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
