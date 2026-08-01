@@ -38,7 +38,15 @@ const Ledger = () => {
   const totalDebt = Object.values(balances).reduce((sum, b) => sum + b.total, 0);
 
   let totalTransferredToKirolos = 0;
+  let totalMarinaCustody = 0;
   Object.values(orders || {}).forEach(order => {
+    if (order.isDepositPaid && !order.isDepositTransferred) {
+      totalMarinaCustody += (Number(order.paidAmount) || 0);
+    }
+    if (order.isRestPaid && !order.isRestTransferred) {
+      totalMarinaCustody += (Number(order.remainingAmount) || 0);
+    }
+
     if (order.isDepositTransferred) {
       totalTransferredToKirolos += (Number(order.paidAmount) || 0);
     }
@@ -66,13 +74,29 @@ const Ledger = () => {
 
 
         {/* Total Debt Summary Card */}
+        <div className="card" style={{ borderTop: '4px solid #ef4444', display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '50%' }}>
+            <Wallet size={32} color="#ef4444" />
+          </div>
+          <div>
+            <h3 className="text-secondary">إجمالي الديون المستحقة</h3>
+            <div className="heading-lg" style={{ color: '#ef4444' }}>{totalDebt.toLocaleString()} ج.م</div>
+          </div>
+        </div>
+
+        {/* Marina Custody Summary Card */}
         <div className="card" style={{ borderTop: '4px solid var(--color-marina)', display: 'flex', gap: '16px', alignItems: 'center' }}>
           <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '50%' }}>
             <Wallet size={32} color="var(--color-marina)" />
           </div>
           <div>
-            <h3 className="text-secondary">إجمالي الديون المستحقة</h3>
-            <div className="heading-lg" style={{ color: 'var(--color-marina)' }}>{totalDebt.toLocaleString()} ج.م</div>
+            <h3 className="text-secondary">رصيد مع مارينا (مُحصّل)</h3>
+            <div className="heading-lg" style={{ color: 'var(--color-marina)' }}>
+              {totalMarinaCustody.toLocaleString()} ج.م
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+              ينتظر التحويل إلى كيرلس
+            </div>
           </div>
         </div>
 
