@@ -5,7 +5,6 @@ import { TrendingUp, Package, Users, DollarSign, CheckCircle, MapPin, Map, Star,
 
 
 const Analytics = () => {
-  const [expandedMonth, setExpandedMonth] = useState(null);
   const { orders, columns, products, archivedOrders = [] } = useData();
   
   const activeOrdersList = Object.values(orders);
