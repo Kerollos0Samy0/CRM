@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { Search, Wallet, Send } from 'lucide-react';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 
 const OrderTransactions = () => {
@@ -33,15 +33,50 @@ const OrderTransactions = () => {
   let totalValue = 0;
   let totalDeposit = 0;
   let totalRemaining = 0;
+  let totalMarinaCustody = 0;
+  let totalTransferredToKirolos = 0;
 
   filteredOrders.forEach(order => {
     totalValue += (Number(order.totalAmount) || 0);
     totalDeposit += (Number(order.paidAmount) || 0);
     totalRemaining += (Number(order.remainingAmount) || 0);
+
+    let orderCollected = 0;
+    if (order.isDepositPaid) orderCollected += (Number(order.paidAmount) || 0);
+    if (order.isRestPaid) orderCollected += (Number(order.remainingAmount) || 0);
+
+    if (order.isTransferredToKirolos) {
+      totalTransferredToKirolos += orderCollected;
+    } else {
+      totalMarinaCustody += orderCollected;
+    }
   });
 
   return (
     <div className="fade-in" style={{ padding: '24px 0', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      
+      {/* Custody Dashboard */}
+      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+        <div className="card" style={{ flex: '1 1 250px', background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%)', border: 'none', color: '#880e4f', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.3)', padding: '12px', borderRadius: '50%' }}>
+            <Wallet size={24} />
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, opacity: 0.8 }}>عهدة مارينا (مُحصّل ولم يُحول)</p>
+            <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 'bold' }}>{totalMarinaCustody.toLocaleString()} ج.م</h2>
+          </div>
+        </div>
+
+        <div className="card" style={{ flex: '1 1 250px', background: 'linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%)', border: 'none', color: '#004d40', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.3)', padding: '12px', borderRadius: '50%' }}>
+            <Send size={24} />
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, opacity: 0.8 }}>تم تحويله إلى كيرلس</p>
+            <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 'bold' }}>{totalTransferredToKirolos.toLocaleString()} ج.م</h2>
+          </div>
+        </div>
+      </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 className="heading-lg" style={{ color: 'var(--text-primary)' }}>المعاملات</h1>

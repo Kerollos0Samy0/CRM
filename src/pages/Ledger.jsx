@@ -37,6 +37,21 @@ const Ledger = () => {
 
   const totalDebt = Object.values(balances).reduce((sum, b) => sum + b.total, 0);
 
+  // Calculate Kirolos Balance
+  let totalTransferredToKirolos = 0;
+  Object.values(orders || {}).forEach(order => {
+    let orderCollected = 0;
+    if (order.isDepositPaid) orderCollected += (Number(order.paidAmount) || 0);
+    if (order.isRestPaid) orderCollected += (Number(order.remainingAmount) || 0);
+    
+    if (order.isTransferredToKirolos) {
+      totalTransferredToKirolos += orderCollected;
+    }
+  });
+
+  const totalPaymentsMade = (transactions || []).reduce((sum, t) => t.type === 'payment' ? sum + Number(t.amount) : sum, 0);
+  const kirolosBalance = totalTransferredToKirolos - totalPaymentsMade;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
@@ -60,6 +75,22 @@ const Ledger = () => {
           <div>
             <h3 className="text-secondary">إجمالي الديون المستحقة</h3>
             <div className="heading-lg" style={{ color: 'var(--color-marina)' }}>{totalDebt.toLocaleString()} ج.م</div>
+          </div>
+        </div>
+
+        {/* Kirolos Balance Summary Card */}
+        <div className="card" style={{ borderTop: '4px solid var(--state-delivered)', display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '50%' }}>
+            <BarChart3 size={32} color="var(--state-delivered)" />
+          </div>
+          <div>
+            <h3 className="text-secondary">رصيد الخزنة الفعلي (مع كيرلس)</h3>
+            <div className="heading-lg" style={{ color: kirolosBalance >= 0 ? 'var(--state-delivered)' : 'var(--color-marina)' }}>
+              {kirolosBalance.toLocaleString()} ج.م
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+              إجمالي المحول: {totalTransferredToKirolos.toLocaleString()} | المدفوعات: {totalPaymentsMade.toLocaleString()}
+            </div>
           </div>
         </div>
 
@@ -126,7 +157,8 @@ const Ledger = () => {
                         <ArrowDownRight size={12} /> 
                         {(!t.category || t.category === 'products') ? 'مصاريف منتجات' : 
                          t.category === 'admin' ? 'مصاريف إدارية' : 
-                          
+                         t.category === 'printing' ? 'مصاريف مطبعة' : 
+                         t.category === 'workshop' ? 'مصاريف ورشة' : 
                          'مصاريف أخرى'}
                       </span>
                     ) : (
@@ -179,6 +211,9 @@ const Ledger = () => {
                   <label className="text-secondary" style={{ display: 'block', marginBottom: '8px' }}>تصنيف المصروف</label>
                   <select className="input-field" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
                     <option value="admin">مصاريف إدارية (إعلانات، رواتب، باقات، الخ)</option>
+                    <option value="printing">مصاريف مطبعة (شغل خارجي)</option>
+                    <option value="workshop">مصاريف ورشة (خامات، صيانة، الخ)</option>
+                    <option value="products">مصاريف منتجات جاهزة (المخزن)</option>
                   </select>
                 </div>
               )}
