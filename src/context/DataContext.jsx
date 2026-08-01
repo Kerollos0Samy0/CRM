@@ -944,11 +944,12 @@ export const DataProvider = ({ children }) => {
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       lastSavedState.current = currentStateString;
-      updateDoc(mainRef, { orders, columns, archivedOrders }).catch(console.error);
+      const cleanData = JSON.parse(JSON.stringify({ orders, columns, archivedOrders }));
+      updateDoc(mainRef, cleanData).catch(console.error);
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
 
-  useEffect(() => { if (initialised.current) setDoc(tasksRef,    { tasks }).catch(console.error); }, [tasks]);       // eslint-disable-line
+  useEffect(() => { if (initialised.current) setDoc(tasksRef,    { tasks: JSON.parse(JSON.stringify(tasks)) }).catch(console.error); }, [tasks]);       // eslint-disable-line
   useEffect(() => { if (initialised.current) setDoc(clientsRef,  { clients },      { merge: true }).catch(console.error); }, [clients]);     // eslint-disable-line
   useEffect(() => { if (initialised.current) setDoc(productsRef, { products },     { merge: true }).catch(console.error); }, [products]);    // eslint-disable-line
   useEffect(() => { if (initialised.current) setDoc(ledgerRef,   { transactions }, { merge: true }).catch(console.error); }, [transactions]);// eslint-disable-line
@@ -994,7 +995,7 @@ export const DataProvider = ({ children }) => {
     setTasks(prev => ({ ...prev, [id]: newTask }));
   };
   const updateTaskStatus = (taskId, newStatus) => setTasks(prev => ({ ...prev, [taskId]: { ...prev[taskId], status: newStatus } }));
-  const deleteTask       = (taskId) => { const t = { ...tasks }; delete t[taskId]; setTasks(t); };
+  const deleteTask       = (taskId) => setTasks(prev => { const t = { ...prev }; delete t[taskId]; return t; });
 
   // ── CLIENTS ──────────────────────────────────────────────────────────────
   const addClient    = (data)            => setClients(prev => [...prev, { id: uuidv4(), ...data }]);
