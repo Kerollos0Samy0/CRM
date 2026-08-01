@@ -38,8 +38,12 @@ const OrderTransactions = () => {
 
   filteredOrders.forEach(order => {
     totalValue += (Number(order.totalAmount) || 0);
-    totalDeposit += (Number(order.paidAmount) || 0);
-    totalRemaining += (Number(order.remainingAmount) || 0);
+    if (order.isDepositPaid) {
+      totalDeposit += (Number(order.paidAmount) || 0);
+    }
+    if (order.isRestPaid) {
+      totalRemaining += (Number(order.remainingAmount) || 0);
+    }
 
     let orderCollected = 0;
     if (order.isDepositPaid) orderCollected += (Number(order.paidAmount) || 0);
@@ -110,8 +114,8 @@ const OrderTransactions = () => {
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>الديبوزت</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>المتبقي</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>دفع؟</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>تحويل كيرلس</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>دفع الباقي</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>تحويل كيرلس</th>
             </tr>
           </thead>
           <tbody>
@@ -157,16 +161,16 @@ const OrderTransactions = () => {
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <input 
                         type="checkbox" 
-                        checked={!!order.isTransferredToKirolos} 
-                        onChange={(e) => updateOrder(order.id, { isTransferredToKirolos: e.target.checked })} 
+                        checked={!!order.isRestPaid} 
+                        onChange={(e) => updateOrder(order.id, { isRestPaid: e.target.checked })} 
                         style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                       />
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <input 
                         type="checkbox" 
-                        checked={!!order.isRestPaid} 
-                        onChange={(e) => updateOrder(order.id, { isRestPaid: e.target.checked })} 
+                        checked={!!order.isTransferredToKirolos} 
+                        onChange={(e) => updateOrder(order.id, { isTransferredToKirolos: e.target.checked })} 
                         style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                       />
                     </td>
