@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Plus, Edit2, Check, Package, TrendingUp, Download, ClipboardList } from 'lucide-react';
+import { Plus, Edit2, Check, Package, TrendingUp, Download, ClipboardList, Printer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Inventory = () => {
@@ -8,6 +8,7 @@ const Inventory = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSupplyLogModalOpen, setIsSupplyLogModalOpen] = useState(false);
   const [isSupplyModalOpen, setIsSupplyModalOpen] = useState(false);
+  const [isShortageModalOpen, setIsShortageModalOpen] = useState(false);
   const [supplyForm, setSupplyForm] = useState({ productId: null, productName: '', quantity: 0, notes: '' });
   const [editingProductId, setEditingProductId] = useState(null);
   const [editForm, setEditForm] = useState({ buyPrice: 0, sellPrice: 0, stock: 0 });
@@ -89,6 +90,10 @@ const Inventory = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: '250px' }}
           />
+          <button className="btn btn-secondary" style={{ color: 'var(--color-marina)', borderColor: 'var(--color-marina)' }} onClick={() => setIsShortageModalOpen(true)}>
+            <Printer size={18} />
+            نواقص المطبعة
+          </button>
           <button className="btn btn-secondary" onClick={() => setIsSupplyLogModalOpen(true)}>
             <ClipboardList size={18} />
             سجل التوريدات
@@ -310,6 +315,67 @@ const Inventory = () => {
                 )}
               </tbody>
             </table>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Shortage Modal */}
+      {isShortageModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px'
+        }}>
+          <style>
+            {`
+              @media print {
+                body * { visibility: hidden; }
+                .print-area, .print-area * { visibility: visible; }
+                .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+                .no-print { display: none !important; }
+              }
+            `}
+          </style>
+          <motion.div className="card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: '700px', padding: '32px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="print-area">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 className="heading-md" style={{ color: 'var(--color-marina)' }}>جدول النواقص (المطبعة) - أقل من 10 قطع</h2>
+                <div className="no-print" style={{ display: 'flex', gap: '12px' }}>
+                  <button className="btn btn-secondary" onClick={() => setIsShortageModalOpen(false)}>إغلاق</button>
+                  <button className="btn btn-primary" onClick={() => window.print()}>
+                    <Printer size={18} />
+                    طباعة
+                  </button>
+                </div>
+              </div>
+              
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}>
+                    <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>المنتج</th>
+                    <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>الكمية الحالية</th>
+                    <th style={{ padding: '12px', color: 'var(--text-secondary)' }}>الكمية المطلوبة للطباعة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.filter(p => p.stock < 10).length > 0 ? (
+                    products.filter(p => p.stock < 10).map(product => (
+                      <tr key={product.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '12px', fontWeight: 600 }}>{product.name}</td>
+                        <td style={{ padding: '12px', color: 'var(--color-marina)', fontWeight: 'bold' }}>{product.stock}</td>
+                        <td style={{ padding: '12px', borderLeft: '1px dashed var(--border-color)', borderRight: '1px dashed var(--border-color)' }}></td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>لا توجد أي منتجات أقل من 10 قطع حالياً</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              <div style={{ marginTop: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                تاريخ الطباعة: {new Date().toLocaleDateString('ar-EG')}
+              </div>
+            </div>
           </motion.div>
         </div>
       )}
