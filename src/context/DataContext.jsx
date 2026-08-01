@@ -586,6 +586,12 @@ export const DataProvider = ({ children }) => {
   const [products,       setProducts]       = useState([]);
   const [transactions,   setTransactions]   = useState([]);
   const [supplies,       setSupplies]       = useState([]); // New state for Supply Log
+  const [profitShares,   setProfitShares]   = useState({ workshopDeductions: {}, withdrawals: {} });
+
+  const updateProfitShares = (newProfitShares) => {
+    setProfitShares(newProfitShares);
+    setDoc(doc(db, 'crm', 'ledger'), { profitShares: newProfitShares }, { merge: true }).catch(console.error);
+  };
 
   // track whether initial load from Firestore is done
   const initialised = useRef(false);
@@ -897,7 +903,12 @@ export const DataProvider = ({ children }) => {
         unsubTasks    = onSnapshot(tasksRef,    snap => { if (snap.exists() && initialised.current) setTasks(snap.data().tasks || {}); });
         unsubClients  = onSnapshot(clientsRef,  snap => { if (snap.exists() && initialised.current) setClients(snap.data().clients || []); });
         unsubProducts = onSnapshot(productsRef, snap => { if (snap.exists() && initialised.current) setProducts(snap.data().products || []); });
-        unsubLedger   = onSnapshot(ledgerRef,   snap => { if (snap.exists() && initialised.current) setTransactions(snap.data().transactions || []); });
+        unsubLedger   = onSnapshot(ledgerRef,   snap => { 
+          if (snap.exists() && initialised.current) {
+            setTransactions(snap.data().transactions || []);
+            setProfitShares(snap.data().profitShares || { workshopDeductions: {}, withdrawals: {} });
+          }
+        });
         unsubSupplies = onSnapshot(suppliesRef, snap => { if (snap.exists() && initialised.current) setSupplies(snap.data().supplies || []); });
 
       } catch (err) {
@@ -1116,6 +1127,7 @@ export const DataProvider = ({ children }) => {
       products, addProduct, updateProduct,
       transactions, addTransaction, deleteTransaction,
       supplies, addSupply,
+      profitShares, updateProfitShares,
       addOrder, updateOrder, deleteOrder, moveOrder, addNote, archiveOrder,
     }}>
       {children}
