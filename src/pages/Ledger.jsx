@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import { Plus, Trash2, ArrowUpRight, ArrowDownRight, Wallet, BarChart3, TrendingUp, ShoppingCart, Wrench, FileText } from 'lucide-react';
+import { Plus, Trash2, ArrowUpRight, ArrowDownRight, Wallet, BarChart3, TrendingUp, ShoppingCart, Wrench, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Ledger = () => {
-  const { transactions, addTransaction, deleteTransaction, orders, archivedOrders } = useData();
+  const { transactions, addTransaction, deleteTransaction, orders, archivedOrders, products } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [expandedMonth, setExpandedMonth] = useState(null);
   const [formData, setFormData] = useState({
     supplier: '',
     type: 'debt', // 'debt' (مديونية علينا), 'payment' (دفعة مسددة)
@@ -26,45 +27,72 @@ const Ledger = () => {
     const stats = {};
     const allOrders = [...Object.values(orders || {}), ...(archivedOrders || [])];
     
-    // Process Sales
+    const initMonth = (monthKey, d) => {
+      if (!stats[monthKey]) {
+        stats[monthKey] = { 
+          sales: 0, cogs: 0, products: 0, admin: 0, workshop: 0, other: 0, 
+          label: d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' }),
+          ordersList: [], transactionsList: []
+        };
+      }
+    };
+
+    // Process Sales & COGS
     allOrders.forEach(o => {
+      // Only delivered/arrived orders count towards sales
+      if (o.status !== 'delivered' && o.status !== 'arrived') return;
+      
       const date = o.createdAt || o.archivedAt;
       if (!date) return;
       const d = new Date(date);
       if (isNaN(d)) return;
       
       const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      if (!stats[monthKey]) {
-        stats[monthKey] = { sales: 0, products: 0, admin: 0, workshop: 0, other: 0, label: d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' }) };
-      }
+      initMonth(monthKey, d);
+      
       stats[monthKey].sales += Number(o.totalAmount || o.total || 0);
+      stats[monthKey].ordersList.push(o);
+
+      // Calculate COGS from products
+      if (o.items && Array.isArray(o.items)) {
+        o.items.forEach(item => {
+          const prodName = item.name || item.workshop;
+          if (prodName && products) {
+            const productMatch = products.find(p => p.name === prodName);
+            if (productMatch) {
+              const buyPrice = Number(productMatch.buyPrice) || 0;
+              stats[monthKey].cogs += (item.quantity * buyPrice);
+            }
+          }
+        });
+      }
     });
 
     // Process Expenses
     (transactions || []).forEach(t => {
-      if (t.type !== 'debt') return; 
-      
       const date = t.date;
       if (!date) return;
       const d = new Date(date);
       if (isNaN(d)) return;
       
       const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      if (!stats[monthKey]) {
-        stats[monthKey] = { sales: 0, products: 0, admin: 0, workshop: 0, other: 0, label: d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' }) };
-      }
-
-      const amount = Number(t.amount || 0);
-      const cat = t.category || 'products';
+      initMonth(monthKey, d);
       
-      if (cat === 'products') stats[monthKey].products += amount;
-      else if (cat === 'admin') stats[monthKey].admin += amount;
-      else if (cat === 'workshop') stats[monthKey].workshop += amount;
-      else stats[monthKey].other += amount;
+      stats[monthKey].transactionsList.push(t);
+
+      if (t.type === 'debt') {
+        const amount = Number(t.amount || 0);
+        const cat = t.category || 'products';
+        
+        if (cat === 'products') stats[monthKey].products += amount;
+        else if (cat === 'admin') stats[monthKey].admin += amount;
+        else if (cat === 'workshop') stats[monthKey].workshop += amount;
+        else stats[monthKey].other += amount;
+      }
     });
 
     return Object.entries(stats).sort((a, b) => b[0].localeCompare(a[0]));
-  }, [orders, archivedOrders, transactions]);
+  }, [orders, archivedOrders, transactions, products]);
 
   // Calculate balances per supplier
   const balances = useMemo(() => {
@@ -105,12 +133,23 @@ const Ledger = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {monthlyStats.map(([monthKey, data]) => {
-                const netProfit = data.sales - (data.products + data.admin + data.workshop + data.other);
+                const netProfit = data.sales - (data.cogs + data.products + data.admin + data.workshop + data.other);
+                const isExpanded = expandedMonth === monthKey;
+                
                 return (
                   <div key={monthKey} style={{ background: 'var(--bg-secondary)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '16px', color: 'var(--text-primary)' }}>{data.label}</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h4 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{data.label}</h4>
+                      <button 
+                        onClick={() => setExpandedMonth(isExpanded ? null : monthKey)}
+                        className="btn btn-secondary" 
+                        style={{ padding: '6px 12px', fontSize: '0.9rem' }}
+                      >
+                        {isExpanded ? <><ChevronUp size={16} /> إخفاء التفاصيل</> : <><ChevronDown size={16} /> عرض التفاصيل</>}
+                      </button>
+                    </div>
                     
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px', marginBottom: '16px' }}>
                       
                       <div style={{ background: '#ecfdf5', padding: '12px', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
                         <div style={{ color: '#059669', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><TrendingUp size={14}/> إجمالي المبيعات</div>
@@ -118,8 +157,13 @@ const Ledger = () => {
                       </div>
 
                       <div style={{ background: '#fef2f2', padding: '12px', borderRadius: '8px', border: '1px solid #fecaca' }}>
-                        <div style={{ color: '#dc2626', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><ShoppingCart size={14}/> مصاريف المنتجات</div>
-                        <div style={{ color: '#b91c1c', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.products.toLocaleString()} ج.م</div>
+                        <div style={{ color: '#dc2626', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><ShoppingCart size={14}/> تكلفة البضاعة (COGS)</div>
+                        <div style={{ color: '#b91c1c', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.cogs.toLocaleString()} ج.م</div>
+                      </div>
+
+                      <div style={{ background: '#fdf4ff', padding: '12px', borderRadius: '8px', border: '1px solid #fbcfe8' }}>
+                        <div style={{ color: '#c026d3', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><ShoppingCart size={14}/> مصاريف المنتجات</div>
+                        <div style={{ color: '#a21caf', fontWeight: 'bold', fontSize: '1.1rem' }}>{data.products.toLocaleString()} ج.م</div>
                       </div>
 
                       <div style={{ background: '#fffbeb', padding: '12px', borderRadius: '8px', border: '1px solid #fde68a' }}>
@@ -140,6 +184,86 @@ const Ledger = () => {
                         {netProfit.toLocaleString()} ج.م
                       </span>
                     </div>
+
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }} 
+                          animate={{ height: 'auto', opacity: 1 }} 
+                          exit={{ height: 0, opacity: 0 }}
+                          style={{ overflow: 'hidden' }}
+                        >
+                          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                              
+                              {/* Orders Table */}
+                              <div>
+                                <h5 style={{ fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-primary)' }}>الأوردرات التي تم تسليمها ({data.ordersList.length})</h5>
+                                <div style={{ maxHeight: '300px', overflowY: 'auto', background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                                  <table style={{ width: '100%', fontSize: '0.85rem', textAlign: 'right', borderCollapse: 'collapse' }}>
+                                    <thead style={{ background: 'var(--bg-secondary)', position: 'sticky', top: 0 }}>
+                                      <tr>
+                                        <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)' }}>العميل</th>
+                                        <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)' }}>الإجمالي</th>
+                                        <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)' }}>المنتجات</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {data.ordersList.map(o => (
+                                        <tr key={o.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                          <td style={{ padding: '8px' }}>{o.clientName}</td>
+                                          <td style={{ padding: '8px', fontWeight: 'bold' }}>{o.totalAmount || o.total || 0}</td>
+                                          <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>
+                                            {o.items?.map(i => `${i.name || i.workshop} (${i.quantity})`).join('، ')}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                      {data.ordersList.length === 0 && (
+                                        <tr><td colSpan="3" style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)' }}>لا يوجد</td></tr>
+                                      )}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+
+                              {/* Transactions Table */}
+                              <div>
+                                <h5 style={{ fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-primary)' }}>المعاملات المالية ({data.transactionsList.length})</h5>
+                                <div style={{ maxHeight: '300px', overflowY: 'auto', background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                                  <table style={{ width: '100%', fontSize: '0.85rem', textAlign: 'right', borderCollapse: 'collapse' }}>
+                                    <thead style={{ background: 'var(--bg-secondary)', position: 'sticky', top: 0 }}>
+                                      <tr>
+                                        <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)' }}>الجهة</th>
+                                        <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)' }}>النوع</th>
+                                        <th style={{ padding: '8px', borderBottom: '1px solid var(--border-color)' }}>المبلغ</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {data.transactionsList.map(t => (
+                                        <tr key={t.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                          <td style={{ padding: '8px' }}>{t.supplier}</td>
+                                          <td style={{ padding: '8px' }}>
+                                            {t.type === 'payment' ? 'دفعة' : (t.category === 'admin' ? 'إدارية' : t.category === 'workshop' ? 'ورشة' : 'منتجات')}
+                                          </td>
+                                          <td style={{ padding: '8px', fontWeight: 'bold', color: t.type === 'debt' ? '#ef4444' : '#22c55e' }}>
+                                            {t.amount}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                      {data.transactionsList.length === 0 && (
+                                        <tr><td colSpan="3" style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)' }}>لا يوجد</td></tr>
+                                      )}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                   </div>
                 );
               })}
