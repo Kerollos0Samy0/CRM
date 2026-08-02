@@ -22,24 +22,37 @@ const Ledger = () => {
     setFormData({ supplier: '', type: 'debt', category: 'admin', amount: '', description: '' });
   };
 
-  // Calculate monthly stats
+  // Filter starting from August 2026
+  const targetDate = new Date('2026-08-01T00:00:00Z');
+
+  const filteredTransactions = (transactions || []).filter(t => {
+    if (!t.date) return false;
+    return new Date(t.date) >= targetDate;
+  });
+
   // Calculate balances per supplier
   const balances = useMemo(() => {
     const acc = {};
-    (transactions || []).forEach(t => {
+    filteredTransactions.forEach(t => {
       if (!acc[t.supplier]) acc[t.supplier] = { debt: 0, payment: 0, total: 0 };
       if (t.type === 'debt') acc[t.supplier].debt += t.amount;
       if (t.type === 'payment') acc[t.supplier].payment += t.amount;
       acc[t.supplier].total = acc[t.supplier].debt - acc[t.supplier].payment;
     });
     return acc;
-  }, [transactions]);
+  }, [filteredTransactions]);
 
   const totalDebt = Object.values(balances).reduce((sum, b) => sum + b.total, 0);
 
   let totalTransferredToKirolos = 0;
   let totalMarinaCustody = 0;
-  Object.values(orders || {}).forEach(order => {
+
+  const filteredOrders = Object.values(orders || {}).filter(order => {
+    if (!order.createdAt) return false;
+    return new Date(order.createdAt) >= targetDate;
+  });
+
+  filteredOrders.forEach(order => {
     if (order.isDepositPaid && !order.isDepositTransferred) {
       totalMarinaCustody += (Number(order.paidAmount) || 0);
     }
@@ -55,7 +68,7 @@ const Ledger = () => {
     }
   });
 
-  const totalPaymentsMade = (transactions || []).reduce((sum, t) => t.type === 'payment' ? sum + Number(t.amount) : sum, 0);
+  const totalPaymentsMade = filteredTransactions.reduce((sum, t) => t.type === 'payment' ? sum + Number(t.amount) : sum, 0);
   const kirolosBalance = totalTransferredToKirolos - totalPaymentsMade;
 
   return (
@@ -162,7 +175,7 @@ const Ledger = () => {
           </thead>
           <tbody>
             <AnimatePresence>
-              {[...transactions].reverse().map(t => (
+              {[...filteredTransactions].reverse().map(t => (
                 <motion.tr 
                   key={t.id}
                   initial={{ opacity: 0 }}
@@ -200,9 +213,9 @@ const Ledger = () => {
                 </motion.tr>
               ))}
             </AnimatePresence>
-            {transactions.length === 0 && (
+            {filteredTransactions.length === 0 && (
               <tr>
-                <td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>لا توجد معاملات بعد</td>
+                <td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>لا توجد معاملات مسجلة في هذه الفترة</td>
               </tr>
             )}
           </tbody>
