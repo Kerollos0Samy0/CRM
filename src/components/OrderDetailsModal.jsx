@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
-import { X, MessageCircle, Send, Phone, MapPin, Hash, Calendar, Trash2, Printer, Package } from 'lucide-react';
+import { X, MessageCircle, Send, Phone, MapPin, Hash, Calendar, Trash2, Printer, Package, Edit } from 'lucide-react';
 import { motion } from 'framer-motion';
+import OrderModal from './OrderModal';
 
 const OrderDetailsModal = ({ order, isDelivered, onClose }) => {
   const { addNote, deleteOrder, updateOrder, archiveOrder } = useData();
   const { users } = useAuth();
   const [noteText, setNoteText] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+
+  if (isEditing) {
+    return <OrderModal orderToEdit={order} onClose={() => { setIsEditing(false); onClose(); }} />;
+  }
 
   const handleAddNote = (e) => {
     e.preventDefault();
@@ -195,6 +201,13 @@ const OrderDetailsModal = ({ order, isDelivered, onClose }) => {
                 أرشفة الأوردر
               </button>
             )}
+            <button 
+              onClick={() => setIsEditing(true)}
+              className="btn btn-secondary"
+              style={{ color: 'var(--accent-primary)', borderColor: 'var(--border-color)' }}
+            >
+              <Edit size={18} />
+            </button>
             <button 
               onClick={handleDelete}
               className="btn btn-secondary"

@@ -155,21 +155,26 @@ const CustomAutocomplete = ({ value, onChange, options, placeholder, onSelect })
   );
 };
 
-const OrderModal = ({ onClose }) => {
-  const { addOrder, clients, products, addClient } = useData();
+const OrderModal = ({ onClose, orderToEdit }) => {
+  const { addOrder, updateOrder, clients, products, addClient } = useData();
   const defaultDeadline = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-  const [formData, setFormData] = useState({
-    name: '',
-    church: '',
-    mobile: '',
-    governorate: '',
-    address: '',
-    items: [{ workshop: '', quantity: 1, unitPrice: 0, status: 'new' }],
-    deadline: defaultDeadline,
-    orderNotes: '',
-    discount: 0,
-    paidAmount: 0
+  const [formData, setFormData] = useState(() => {
+    if (orderToEdit) {
+      return { ...orderToEdit };
+    }
+    return {
+      name: '',
+      church: '',
+      mobile: '',
+      governorate: '',
+      address: '',
+      items: [{ workshop: '', quantity: 1, unitPrice: 0, status: 'new' }],
+      deadline: defaultDeadline,
+      orderNotes: '',
+      discount: 0,
+      paidAmount: 0
+    };
   });
 
   const calculateTotal = () => {
@@ -326,11 +331,20 @@ const OrderModal = ({ onClose }) => {
         church: formData.church
       });
     }
-    addOrder({
-      ...formData,
-      totalAmount,
-      remainingAmount
-    });
+
+    if (orderToEdit) {
+      updateOrder(orderToEdit.id, {
+        ...formData,
+        totalAmount,
+        remainingAmount
+      });
+    } else {
+      addOrder({
+        ...formData,
+        totalAmount,
+        remainingAmount
+      });
+    }
     onClose();
   };
 
@@ -358,7 +372,7 @@ const OrderModal = ({ onClose }) => {
           <X size={24} />
         </button>
 
-        <h2 className="heading-md" style={{ marginBottom: '24px' }}>أوردر جديد</h2>
+        <h2 className="heading-md" style={{ marginBottom: '24px' }}>{orderToEdit ? 'تعديل الأوردر' : 'أوردر جديد'}</h2>
 
         <div style={{ marginBottom: '24px', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px dashed var(--border-color)' }}>
           <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-marina)', fontWeight: 600 }}>✨ لصق ذكي (Smart Paste)</label>
