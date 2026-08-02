@@ -117,10 +117,10 @@ const Analytics = () => {
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontWeight: 800, color: 'var(--text-muted)', fontSize: '1.2rem', width: '24px' }}>#{index + 1}</span>
-              <span style={{ fontWeight: 600 }}>{name}</span>
-            </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontWeight: 800, color: color, fontSize: '1.2rem', width: '32px', opacity: 0.8 }}>#{index + 1}</span>
+                <span style={{ fontWeight: 600 }}>{name}</span>
+              </div>
             <div className="tag" style={{ background: color, color: 'white' }}>
               {valueFormat(value)} {valueSuffix}
             </div>
