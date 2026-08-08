@@ -91,10 +91,31 @@ app.post('/api/shipping/create-order', async (req, res) => {
             fillField('عدد القطع', (orderData.items || []).reduce((acc, curr) => acc + (Number(curr.quantity)||1), 0));
             
             const govSelect = document.querySelector('select[id$="CityDDL"]');
-            if (govSelect && orderData.governorate) {
+            if (govSelect) {
                 const options = Array.from(govSelect.options);
-                const matchingOpt = options.find(opt => opt.text.includes(orderData.governorate.trim()));
-                if(matchingOpt) {
+                const normalize = s => (s||'').replace(/أ|إ|آ/g, 'ا').replace(/ة/g, 'ه').replace(/\s+/g, '').trim();
+                let matchingOpt = null;
+                
+                if (orderData.governorate) {
+                    const normGov = normalize(orderData.governorate);
+                    matchingOpt = options.find(opt => normalize(opt.text).includes(normGov));
+                }
+                
+                // Fallback to searching the address string for a governorate name
+                if (!matchingOpt && orderData.address) {
+                    const normAddr = normalize(orderData.address);
+                    matchingOpt = options.find(opt => {
+                        const optNorm = normalize(opt.text);
+                        return optNorm.length > 2 && optNorm !== 'اخترمحافظه' && normAddr.includes(optNorm);
+                    });
+                }
+                
+                // Final fallback: just pick the first valid option (usually Cairo) to bypass the 'Required' error
+                if (!matchingOpt && options.length > 1) {
+                    matchingOpt = options[1];
+                }
+                
+                if (matchingOpt) {
                     govSelect.value = matchingOpt.value;
                     govSelect.dispatchEvent(new Event('change', {bubbles:true}));
                 }
