@@ -982,7 +982,21 @@ export const DataProvider = ({ children }) => {
     saveTimer.current = setTimeout(() => {
       lastSavedState.current = currentStateString;
       const cleanData = JSON.parse(JSON.stringify({ orders, columns, archivedOrders }));
+      // 1. Update main document
       updateDoc(mainRef, cleanData).catch(console.error);
+
+      // 2. Automatic Hourly Backup (creates one snapshot per hour)
+      try {
+        const d = new Date();
+        const dateStr = d.toISOString().split('T')[0]; // YYYY-MM-DD
+        const hourStr = d.getHours().toString().padStart(2, '0');
+        const backupId = `backup_${dateStr}_${hourStr}`;
+        const backupRef = doc(db, 'crm_backups', backupId);
+        // We use setDoc to create/overwrite the hourly snapshot
+        setDoc(backupRef, cleanData).catch(e => console.error('Backup failed:', e));
+      } catch (err) {
+        console.error('Backup error:', err);
+      }
     }, 800);
   }, [orders, columns, archivedOrders]); // eslint-disable-line
 
