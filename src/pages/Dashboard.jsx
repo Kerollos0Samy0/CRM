@@ -5,11 +5,12 @@ import { useData } from '../context/DataContext';
 import { Plus, MessageCircle, MapPin, Calendar, Hash, Download, List, LayoutGrid, Search } from 'lucide-react';
 import OrderModal from '../components/OrderModal';
 import OrderDetailsModal from '../components/OrderDetailsModal';
-
+import PrintReportModal from '../components/PrintReportModal';
 const Dashboard = () => {
   const { users } = useAuth();
   const { orders, columns, columnOrder, moveOrder } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'list'
   const [searchQuery, setSearchQuery] = useState('');
@@ -284,6 +285,13 @@ const Dashboard = () => {
           </button>
           <button 
             className="btn btn-primary" 
+            onClick={() => setIsPrintModalOpen(true)}
+            style={{ backgroundColor: '#10b981', color: 'white', border: 'none' }}
+          >
+            🖨️ طلبات المطبعة
+          </button>
+          <button 
+            className="btn btn-primary" 
             onClick={() => setIsAddModalOpen(true)}
           >
             <Plus size={18} />
@@ -393,6 +401,7 @@ const Dashboard = () => {
 
 
       {isAddModalOpen && <OrderModal onClose={() => setIsAddModalOpen(false)} />}
+      {isPrintModalOpen && <PrintReportModal isOpen={isPrintModalOpen} onClose={() => setIsPrintModalOpen(false)} />}
       {selectedOrder && (
         <OrderDetailsModal 
           order={selectedOrder} 
