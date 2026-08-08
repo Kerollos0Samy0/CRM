@@ -107,7 +107,7 @@ app.post('/api/shipping/create-order', async (req, res) => {
         // Now select the City/District to avoid the "مطلوب" (Required) validation error
         await page.evaluate(() => {
             const selects = Array.from(document.querySelectorAll('select'));
-            let citySelect = selects.find(s => s.id && !s.id.includes('CityDDL') && s.options.length > 1);
+            let citySelect = selects.find(s => s.id && !s.id.includes('CityDDL') && s.options && s.options.length > 1);
             if (!citySelect) {
                 const labels = Array.from(document.querySelectorAll('label, span')).filter(el => el.innerText && el.innerText.includes('المدينة'));
                 for (let labelEl of labels) {
@@ -115,13 +115,13 @@ app.post('/api/shipping/create-order', async (req, res) => {
                         citySelect = document.querySelector('[id$="' + labelEl.getAttribute('for') + '"]');
                         if (citySelect) break;
                     }
-                    if (labelEl.previousElementSibling && labelEl.previousElementSibling.tagName.toLowerCase() === 'select') {
+                    if (labelEl.previousElementSibling && labelEl.previousElementSibling.tagName && labelEl.previousElementSibling.tagName.toLowerCase() === 'select') {
                         citySelect = labelEl.previousElementSibling;
                         break;
                     }
                 }
             }
-            if (citySelect && citySelect.options.length > 1) {
+            if (citySelect && citySelect.options && citySelect.options.length > 1) {
                 citySelect.value = citySelect.options[1].value;
                 citySelect.dispatchEvent(new Event('change', {bubbles:true}));
             }
