@@ -51,26 +51,20 @@ app.post('/api/shipping/create-order', async (req, res) => {
         // The AddOrder page form filling (Based on the provided screenshot structure)
         
         await page.evaluate((orderData) => {
-            // Helper to find input by its previous or parent label text
-            const findInputByLabel = (labelText) => {
-                const labels = Array.from(document.querySelectorAll('label, div, span, p'));
-                const label = labels.find(l => l.innerText && l.innerText.includes(labelText));
-                if (label) {
-                    const parent = label.parentElement;
-                    const input = parent.querySelector('input[type="text"], textarea');
-                    if (input) return input;
-                    let next = label.nextElementSibling;
-                    while (next) {
-                        const inNode = next.tagName === 'INPUT' || next.tagName === 'TEXTAREA' ? next : next.querySelector('input[type="text"], textarea');
-                        if (inNode) return inNode;
-                        next = next.nextElementSibling;
+            const fillField = (label, value) => {
+                const labels = Array.from(document.querySelectorAll('label, span')).filter(el => el.innerText && el.innerText.includes(label));
+                let input = null;
+                for (let labelEl of labels) {
+                    if (labelEl.hasAttribute('for')) {
+                        const forAttr = labelEl.getAttribute('for');
+                        input = document.querySelector('[id$="' + forAttr + '"]');
+                        if (input) break;
+                    }
+                    if (labelEl.previousElementSibling && ['input', 'textarea', 'select'].includes(labelEl.previousElementSibling.tagName.toLowerCase())) {
+                        input = labelEl.previousElementSibling;
+                        break;
                     }
                 }
-                return null;
-            };
-
-            const fillField = (label, value) => {
-                const input = findInputByLabel(label);
                 if (input && value) {
                     input.value = value;
                     input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -81,23 +75,18 @@ app.post('/api/shipping/create-order', async (req, res) => {
             fillField('المرسل إليه', orderData.name || orderData.clientName);
             fillField('التليفون', orderData.mobile || orderData.phone);
             fillField('العنوان', orderData.address);
-            
             fillField('محتوى الأوردر', (orderData.items || []).map(i => `${i.workshop || i.name} (${i.quantity})`).join(', '));
             fillField('ملحوظة', orderData.orderNotes || (orderData.notes ? orderData.notes.map(n => n.text).join(' - ') : ''));
-            
-            fillField('إجمالي الأوردر', orderData.totalAmount);
+            fillField('اجمالى الأوردر', orderData.totalAmount);
             fillField('عدد القطع', (orderData.items || []).reduce((acc, curr) => acc + (Number(curr.quantity)||1), 0));
             
-            const govLabel = Array.from(document.querySelectorAll('*')).find(el => el.innerText && el.innerText.includes('المحافظة'));
-            if(govLabel) {
-                const select = govLabel.parentElement.querySelector('select');
-                if(select) {
-                    const options = Array.from(select.options);
-                    const matchingOpt = options.find(opt => opt.text.includes(orderData.governorate) || (orderData.governorate && opt.text.includes(orderData.governorate.trim())));
-                    if(matchingOpt) {
-                        select.value = matchingOpt.value;
-                        select.dispatchEvent(new Event('change', {bubbles:true}));
-                    }
+            const govSelect = document.querySelector('select[id$="CityDDL"]');
+            if (govSelect && orderData.governorate) {
+                const options = Array.from(govSelect.options);
+                const matchingOpt = options.find(opt => opt.text.includes(orderData.governorate.trim()));
+                if(matchingOpt) {
+                    govSelect.value = matchingOpt.value;
+                    govSelect.dispatchEvent(new Event('change', {bubbles:true}));
                 }
             }
         }, order);
