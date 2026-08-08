@@ -1145,10 +1145,31 @@ export const DataProvider = ({ children }) => {
       
       setOrders(prev => ({ ...prev, [orderId]: { ...prev[orderId], status: destinationColId } }));
 
-      if (destinationColId === 'designing' && sourceColId !== 'designing') {
+            if (destinationColId === 'designing' && sourceColId !== 'designing') {
       const movedOrder = orders[orderId];
       if (movedOrder) addTask({ title: `تصميم أوردر: ${movedOrder.name}`, description: `برجاء عمل التصميم الخاص بأوردر العميل (${movedOrder.name}) - كنيسة: ${movedOrder.church}`, assigneeId: 'kirolos' });
     }
+
+    if (destinationColId === 'ready' && sourceColId !== 'ready') {
+      const movedOrder = orders[orderId];
+      if (movedOrder) {
+        fetch('http://localhost:3001/api/shipping/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(movedOrder)
+        }).then(res => res.json()).then(data => {
+          if (data.success) {
+            alert('تم تسجيل الأوردر بنجاح في شركة الشحن!');
+          } else {
+            alert('فشل تسجيل الأوردر في شركة الشحن: ' + (data.error || 'خطأ مجهول'));
+          }
+        }).catch(err => {
+          console.error('Error sending order to shipping system:', err);
+          alert('حدث خطأ أثناء الاتصال بسيرفر الشحن. يرجى التأكد من تشغيله.');
+        });
+      }
+    }
+
     setColumns(prev => ({ ...prev, [start.id]: { ...start, orderIds: startIds }, [finish.id]: { ...finish, orderIds: finishIds } }));
   };
 
