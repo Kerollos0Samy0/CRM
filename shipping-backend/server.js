@@ -105,14 +105,34 @@ app.post('/api/shipping/create-order', async (req, res) => {
         console.log('Form filled. Clicking save button...');
         
         await page.evaluate(() => {
-            // Find the save button - usually "حفظ الفاتورة" or similar
             const btns = Array.from(document.querySelectorAll('button, input[type="submit"], input[type="button"], a.btn'));
-            const saveBtn = btns.find(el => el.innerText.includes('حفظ الفاتورة') || el.value.includes('حفظ הפاتورة') || el.value.includes('حفظ'));
+            const saveBtn = btns.find(el => el.innerText.includes('حفظ الفاتورة') || el.value.includes('حفظ الفاتورة') || el.value.includes('حفظ'));
             if(saveBtn) saveBtn.click();
         });
 
-        // Wait for the page to navigate or show success
-        await new Promise(r => setTimeout(r, 8000));
+        // Wait for page to navigate or show validation errors
+        await new Promise(r => setTimeout(r, 4000));
+        
+        // Check if we are still on the same page and if there are errors
+        const pageErrors = await page.evaluate(() => {
+            if(window.location.href.toLowerCase().includes('addorder')) {
+                const errorElements = Array.from(document.querySelectorAll('.text-danger, .alert-danger, span[style*="color: red"], span[style*="color:red"], .error'));
+                const errTexts = errorElements.map(el => el.innerText.trim()).filter(t => t.length > 0);
+                if(errTexts.length > 0) return errTexts.join(' | ');
+                
+                // Sometimes it's a SweetAlert
+                const swal = document.querySelector('.swal-text, .swal2-html-container');
+                if(swal) return swal.innerText;
+                
+                return "لم يتم الانتقال من الصفحة بعد الحفظ. قد يكون هناك حقل إجباري ناقص (مثل المحافظة أو المدينة).";
+            }
+            return null;
+        });
+
+        if (pageErrors) {
+            throw new Error('خطأ من موقع شركة الشحن: ' + pageErrors);
+        }
+
         await browser.close();
 
         res.json({ success: true, message: 'Order created in shipping system successfully.' });
