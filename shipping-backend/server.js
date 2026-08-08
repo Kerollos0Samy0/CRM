@@ -44,6 +44,16 @@ app.post('/api/shipping/create-order', async (req, res) => {
                 page.click('input[type="submit"], button[type="submit"], .btn-login, button.btn.btn-primary'),
                 page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {}), // catch timeout just in case
             ]);
+            
+            // Navigate explicitly to the AddOrder page to ensure we are not left on the dashboard
+            console.log('Login submitted, navigating to AddOrder page explicitly...');
+            await page.goto(LOGIN_URL, { waitUntil: 'networkidle2' });
+        }
+        
+        console.log('Checking current URL after login/navigation:', page.url());
+        if (!page.url().toLowerCase().includes('addorder')) {
+            console.log('Warning: Not on AddOrder page, trying goto one more time...');
+            await page.goto(LOGIN_URL, { waitUntil: 'networkidle2' });
         }
         
         console.log('Navigated to AddOrder page');
@@ -91,13 +101,30 @@ app.post('/api/shipping/create-order', async (req, res) => {
             }
         }, order);
 
+        // Wait for any AJAX postback triggered by dropdown changes (like Governorate -> City)
+        await page.waitForNetworkIdle({ idleTime: 1000, timeout: 5000 }).catch(() => {});
+
         console.log('Form filled. Clicking save button...');
         
-        await page.evaluate(() => {
+        const btnClicked = await page.evaluate(() => {
             const btns = Array.from(document.querySelectorAll('button, input[type="submit"], input[type="button"], a.btn'));
-            const saveBtn = btns.find(el => el.innerText.includes('حفظ الفاتورة') || el.value.includes('حفظ الفاتورة') || el.value.includes('حفظ'));
-            if(saveBtn) saveBtn.click();
+            const saveBtn = btns.find(el => (el.innerText || '').includes('حفظ الفاتورة') || (el.value || '').includes('حفظ الفاتورة') || (el.value || '').includes('حفظ'));
+            if(saveBtn) { 
+                saveBtn.id = 'puppeteer-save-btn'; 
+                return true; 
+            }
+            return false;
         });
+        
+        if (!btnClicked) {
+            throw new Error('لم يتم العثور على زر الحفظ. الصفحة الحالية: ' + page.url());
+        }
+
+        // Click outside evaluate to prevent "Execution context was destroyed" error if it navigates instantly
+        await Promise.all([
+            page.click('#puppeteer-save-btn'),
+            page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 10000 }).catch(() => {}) // wait for navigation or timeout
+        ]);
 
         // Wait for page to navigate or show validation errors
         await new Promise(r => setTimeout(r, 4000));
