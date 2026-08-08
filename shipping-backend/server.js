@@ -83,12 +83,13 @@ app.post('/api/shipping/create-order', async (req, res) => {
             };
             
             fillField('المرسل إليه', orderData.name || orderData.clientName);
-            fillField('التليفون', orderData.mobile || orderData.phone);
+            const cleanPhone = (val) => (val || '').toString().replace(/[^\d]/g, '');
+            fillField('التليفون', cleanPhone(orderData.mobile || orderData.phone));
             fillField('العنوان', orderData.address);
             fillField('محتوى الأوردر', (orderData.items || []).map(i => `${i.workshop || i.name} (${i.quantity})`).join(', '));
             fillField('ملحوظة', orderData.orderNotes || (orderData.notes ? orderData.notes.map(n => n.text).join(' - ') : ''));
-            fillField('اجمالى الأوردر', orderData.totalAmount);
-            fillField('عدد القطع', (orderData.items || []).reduce((acc, curr) => acc + (Number(curr.quantity)||1), 0));
+            fillField('اجمالى الأوردر', orderData.totalAmount || 0);
+            fillField('عدد القطع', (orderData.items || []).reduce((acc, curr) => acc + (Number(curr.quantity)||1), 0) || 1);
             
             const govSelect = document.querySelector('select[id$="CityDDL"]');
             if (govSelect) {
