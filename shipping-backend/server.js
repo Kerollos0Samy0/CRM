@@ -107,11 +107,8 @@ app.post('/api/shipping/create-order', async (req, res) => {
         // Now select the City/District to avoid the "مطلوب" (Required) validation error
         await page.evaluate(() => {
             const selects = Array.from(document.querySelectorAll('select'));
-            // Find the city select: it's typically the one that is NOT the governorate (CityDDL) and has options
             let citySelect = selects.find(s => s.id && !s.id.includes('CityDDL') && s.options.length > 1);
-            
             if (!citySelect) {
-                // fallback: look for label containing "المدينة"
                 const labels = Array.from(document.querySelectorAll('label, span')).filter(el => el.innerText && el.innerText.includes('المدينة'));
                 for (let labelEl of labels) {
                     if (labelEl.hasAttribute('for')) {
@@ -124,35 +121,39 @@ app.post('/api/shipping/create-order', async (req, res) => {
                     }
                 }
             }
-            
             if (citySelect && citySelect.options.length > 1) {
-                // Select the first actual option (index 1) to bypass validation, index 0 is usually "Choose..."
                 citySelect.value = citySelect.options[1].value;
                 citySelect.dispatchEvent(new Event('change', {bubbles:true}));
             }
         });
 
+        // Wait again in case selecting the city also triggers an AutoPostBack
+        await page.waitForNetworkIdle({ idleTime: 1000, timeout: 5000 }).catch(() => {});
+
         console.log('Form filled. Clicking save button...');
         
-        const btnClicked = await page.evaluate(() => {
-            const btns = Array.from(document.querySelectorAll('button, input[type="submit"], input[type="button"], a.btn'));
-            const saveBtn = btns.find(el => (el.innerText || '').includes('حفظ الفاتورة') || (el.value || '').includes('حفظ الفاتورة') || (el.value || '').includes('حفظ'));
-            if(saveBtn) { 
-                saveBtn.id = 'puppeteer-save-btn'; 
-                return true; 
+        try {
+            const btnClicked = await page.evaluate(() => {
+                const btns = Array.from(document.querySelectorAll('button, input[type="submit"], input[type="button"], a.btn'));
+                const saveBtn = btns.find(el => (el.innerText || '').includes('حفظ الفاتورة') || (el.value || '').includes('حفظ الفاتورة') || (el.value || '').includes('حفظ'));
+                if(saveBtn) { 
+                    saveBtn.click(); 
+                    return true; 
+                }
+                return false;
+            });
+            
+            if (!btnClicked) {
+                throw new Error('لم يتم العثور على زر الحفظ. الصفحة الحالية: ' + page.url());
             }
-            return false;
-        });
-        
-        if (!btnClicked) {
-            throw new Error('لم يتم العثور على زر الحفظ. الصفحة الحالية: ' + page.url());
+        } catch (e) {
+            // If the click triggered a navigation instantly, evaluate will throw 'Execution context was destroyed'.
+            // This is actually a sign of success because the form submitted.
+            if (!e.message.includes('Execution context was destroyed') && !e.message.includes('Cannot find context with specified id')) {
+                throw e;
+            }
+            console.log('Context destroyed during click - ignoring as it indicates successful form submission navigation.');
         }
-
-        // Click outside evaluate to prevent "Execution context was destroyed" error if it navigates instantly
-        await Promise.all([
-            page.click('#puppeteer-save-btn'),
-            page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 10000 }).catch(() => {}) // wait for navigation or timeout
-        ]);
 
         // Wait for page to navigate or show validation errors
         await new Promise(r => setTimeout(r, 4000));
