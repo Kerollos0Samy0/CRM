@@ -102,9 +102,17 @@ app.post('/api/shipping/create-order', async (req, res) => {
             }
         }, order);
 
-        console.log('Form filled. Assuming success and closing for safety.');
+        console.log('Form filled. Clicking save button...');
         
-        await new Promise(r => setTimeout(r, 5000));
+        await page.evaluate(() => {
+            // Find the save button - usually "حفظ الفاتورة" or similar
+            const btns = Array.from(document.querySelectorAll('button, input[type="submit"], input[type="button"], a.btn'));
+            const saveBtn = btns.find(el => el.innerText.includes('حفظ الفاتورة') || el.value.includes('حفظ הפاتورة') || el.value.includes('حفظ'));
+            if(saveBtn) saveBtn.click();
+        });
+
+        // Wait for the page to navigate or show success
+        await new Promise(r => setTimeout(r, 8000));
         await browser.close();
 
         res.json({ success: true, message: 'Order created in shipping system successfully.' });
