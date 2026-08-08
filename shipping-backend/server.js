@@ -104,6 +104,34 @@ app.post('/api/shipping/create-order', async (req, res) => {
         // Wait for any AJAX postback triggered by dropdown changes (like Governorate -> City)
         await page.waitForNetworkIdle({ idleTime: 1000, timeout: 5000 }).catch(() => {});
 
+        // Now select the City/District to avoid the "مطلوب" (Required) validation error
+        await page.evaluate(() => {
+            const selects = Array.from(document.querySelectorAll('select'));
+            // Find the city select: it's typically the one that is NOT the governorate (CityDDL) and has options
+            let citySelect = selects.find(s => s.id && !s.id.includes('CityDDL') && s.options.length > 1);
+            
+            if (!citySelect) {
+                // fallback: look for label containing "المدينة"
+                const labels = Array.from(document.querySelectorAll('label, span')).filter(el => el.innerText && el.innerText.includes('المدينة'));
+                for (let labelEl of labels) {
+                    if (labelEl.hasAttribute('for')) {
+                        citySelect = document.querySelector('[id$="' + labelEl.getAttribute('for') + '"]');
+                        if (citySelect) break;
+                    }
+                    if (labelEl.previousElementSibling && labelEl.previousElementSibling.tagName.toLowerCase() === 'select') {
+                        citySelect = labelEl.previousElementSibling;
+                        break;
+                    }
+                }
+            }
+            
+            if (citySelect && citySelect.options.length > 1) {
+                // Select the first actual option (index 1) to bypass validation, index 0 is usually "Choose..."
+                citySelect.value = citySelect.options[1].value;
+                citySelect.dispatchEvent(new Event('change', {bubbles:true}));
+            }
+        });
+
         console.log('Form filled. Clicking save button...');
         
         const btnClicked = await page.evaluate(() => {
